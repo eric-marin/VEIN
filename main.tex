@@ -1,0 +1,47 @@
+\documentclass[12pt,a4paper,twoside]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{cite}
+\usepackage[colorlinks=true, linkcolor=black, citecolor=black, urlcolor=black]{hyperref}
+\usepackage[nameinlink]{cleveref}
+\usepackage{xspace}
+\usepackage[colorinlistoftodos]{todonotes}
+% \usepackage[scaled=.83]{beramono} 
+\usepackage{lineno}
+
+\title{VEIN: VErification via Interaction Nets for Neural Networks}
+\author{Eric Marin}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+	Summary
+\end{abstract}
+
+\tableofcontents
+
+% Introduction: Context -> Problem -> Solution -> Validation -> Outline
+\input{chapters/01-introduction}
+
+% Background: Concepts and notions
+\input{chapters/02-background}
+
+% Core: The main work
+\input{chapters/03-core}
+
+% Related Work: At the end, before conclusions
+\input{chapters/04-related-work}
+
+% Conclusion
+\input{chapters/05-conclusion}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
