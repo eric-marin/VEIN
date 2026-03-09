@@ -1,0 +1,71 @@
+// Agents
+
+Any >< Optimize(out) =>
+	out ~ Any;
+
+// Rules
+
+// Optimizer interacts with Const
+Const(k) >< Optimize(out) =>
+	out ~ Const(k);
+
+
+// Optimizer interacts with Add
+Add(a, b) >< Optimize(out) =>
+	a ~ Optimize(a_opt),
+	a_opt ~ Add_CheckLeft(out, b);
+
+// CHECK LEFT
+Const(int k) >< Add_CheckLeft(out, b)
+	| k == 0 => b ~ Optimize(b_opt), out ~ b_opt
+	| _ => b ~ Optimize(b_opt), b_opt ~ Add_CheckRight_WithConst(out, k);
+a_opt >< Add_CheckLeft(out, b) =>
+	b ~ Optimize(b_opt),
+	b_opt ~ Add_CheckRight_WithAny(out, (*L)a_opt);
+
+// CHECK RIGHT
+Const(int j) >< Add_CheckRight_WithConst(out, int k) =>
+	out ~ Const(k + j);
+b_opt >< Add_CheckRight_WithConst(out, int k) =>
+	out ~ Add(Const(k), (*L)b_opt);
+Const(int j) >< Add_CheckRight_WithAny(out, a_opt)
+	| j == 0 => out ~ a_opt
+	| _ => out ~ Add(a_opt, Const(j));
+b_opt >< Add_CheckRight_WithAny(out, a_opt) =>
+	out ~ Add(a_opt, (*L)b_opt);
+
+
+// Optimizer interacts with Mul
+Mul(a, b) >< Optimize(out) =>
+	a ~ Optimize(a_opt),
+	a_opt ~ Mul_CheckLeft(out, b);
+
+// Check LEFT
+Const(int k) >< Mul_CheckLeft(out, b)
+	| k == 0 => b ~ Eraser, out ~ Const(0)
+	| k == 1 => b ~ Optimize(b_opt), out ~ b_opt
+	| _ => b ~ Optimize(b_opt), b_opt ~ Mul_CheckRight_WithConst(out, k);
+a_opt >< Mul_CheckLeft(out, b) =>
+	b ~ Optimize(b_opt),
+	b_opt ~ Mul_CheckRight_WithAny(out, (*L)a_opt);
+
+// Check RIGHT
+Const(int j) >< Mul_CheckRight_WithConst(out, int k) =>
+	out ~ Const(k * j);
+b_opt >< Mul_CheckRight_WithConst(out, int k) =>
+	out ~ Mul(Const(k), (*L)b_opt);
+Const(int j) >< Mul_CheckRight_WithAny(out, a_opt)
+	| j == 0 => Eraser ~ a_opt, out ~ Const(0)
+	| j == 1 => out ~ a_opt
+	| _ => out ~ Mul(a_opt, Const(j));
+b_opt >< Mul_CheckRight_WithAny(out, a_opt) =>
+	out ~ Mul(a_opt, (*L)b_opt);
+
+
+// Net
+Mul(Const(1), Add(Any, Mul(Const(0), Add(Any, Any)))) ~ Optimize(out);
+out;
+
+free out;
+Mul(Const(0), Add(Any, Any)) ~ Optimize(out);
+out;
