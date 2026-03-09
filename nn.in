@@ -1,79 +1,88 @@
 // Rules
-Symbolic(id) >< Add(out, b) => b ~ AddCheck(out, (*L)Symbolic(id));
+Linear(x, int q, int r) >< Add(out, b) => b ~ AddCheckLinear(out, x, q, r);
+
 Concrete(int k) >< Add(out, b)
 	| k == 0 => out ~ b
 	| _ => b ~ AddCheckConcrete(out, k);
-other >< Add(out, b) => out ~ Add((*L)other, b);
 
-Symbolic(id) >< AddCheck(out, a) => out ~ Add(a, (*L)Symbolic(id));
-Concrete(int j) >< AddCheck(out, a)
-	| j == 0 => out ~ a
-	| _ => out ~ Add(a, (*L)Concrete(j));
-other >< AddCheck(out, a) => out ~ Add(a, (*L)other);
+Linear(y, int s, int t) >< AddCheckLinear(out, x, int q, int r)
+	| q == 0 && r == 0 && s == 0 && t == 0 => out ~ Concrete(0), x ~ Eraser, y ~ Eraser
+	| s == 0 && t == 0 => Linear(x, q, r) ~ Materialize(out), y ~ Eraser
+	| q == 0 && r == 0 => (*L)Linear(y, s, t) ~ Materialize(out), x ~ Eraser
+	| _ => Linear(x, q, r) ~ Materialize(out_x), (*L)Linear(y, s, r) ~ Materialize(out_y), out ~ TermAdd(out_x, out_y);
 
-Symbolic(id) >< AddCheckConcrete(out, int k) => out ~ Add(Concrete(k), (*L) Symbolic(id));
+Concrete(int j) >< AddCheckLinear(out, x, int q, int r) => out ~ Linear(x, q, r + j);
+
+Linear(y, int s, int t) >< AddCheckConcrete(out, int k) => out ~ Linear(y, s, t + k);
+
 Concrete(int j) >< AddCheckConcrete(out, int k)
 	| j == 0 => out ~ Concrete(k)
 	| _ => out ~ Concrete(k + j);
-other >< AddCheckConcrete(out, int k) => out ~ Add(Concrete(k), (*L)other);
 
-Symbolic(id) >< Mul(out, b) => b ~ MulCheck(out, (*L)Symbolic(id));
+Linear(x, int q, int r) >< Mul(out, b) => b ~ MulCheck(out, x, q, r);
+
 Concrete(int k) >< Mul(out, b)
 	| k == 0 => b ~ Eraser, out ~ (*L)Concrete(0)
 	| k == 1 => out ~ b
 	| _ => b ~ MulCheckConcrete(out, k);
-other >< Mul(out, b) => out ~ Mul((*L)other, b);
 
-Symbolic(id) >< MulCheck(out, a) => out ~ Mul(a, (*L)Symbolic(id));
-Concrete(int j) >< MulCheck(out, a)
-  | j == 0 => a ~ Eraser, out ~ (*L)Concrete(0)
-	| j == 1 => out ~ a
-	| _ => out ~ Mul(a, (*L)Concrete(j));
-other >< MulCheck(out, a) => out ~ Mul(a, (*L)other);
+Linear(y, int s, int t) >< MulCheck(out, x, int q, int r)
+	| q == 0 && r == 0 && s == 0 && t == 0 => out ~ Concrete(0), x ~ Eraser, y ~ Eraser
+	| s == 0 && t == 0 => Linear(x, q, r) ~ Materialize(out), y ~ Eraser
+	| q == 0 && r == 0 => (*L)Linear(y, s, t) ~ Materialize(out), x ~ Eraser
+	| _ => Linear(x, q, r) ~ Materialize(out_x), (*L)Linear(y, s, r) ~ Materialize(out_y), out ~ TermMul(out_x, out_y);
 
-Symbolic(id) >< MulCheckConcrete(out, int k) => out ~ Mul(Concrete(k), (*L)Symbolic(id));
+Concrete(int j) >< MulCheck(out, x, int q, int r) => out ~ Linear(x, q * j, r * j);
+
+Linear(y, int s, int t) >< MulCheckConcrete(out, int k) => out ~ Linear(y, s * k, t * k);
+
 Concrete(int j) >< MulCheckConcrete(out, int k)
-  | j == 0 => out ~ Concrete(0)
+	| j == 0 => out ~ Concrete(0)
 	| j == 1 => out ~ Concrete(k)
 	| _ => out ~ Concrete(k * j);
-other >< MulCheckConcrete(out, int k) => out ~ Mul(Concrete(k), (*L)other);
 
-Symbolic(id) >< ReLU(out) => out ~ ReLU((*L)Symbolic(id));
+Linear(x, int q, int r) >< ReLU(out) => (*L)Linear(x, q, r) ~ Materialize(out_x), out ~ TermReLU(out_x);
 Concrete(int k) >< ReLU(out)
 	| k > 0 => out ~ (*L)Concrete(k)
 	| _ => out ~ Concrete(0);
-other >< ReLU(out) => out ~ ReLU((*L)other);
+
+Linear(x, int q, int r) >< Materialize(out)
+	| ? => out ~ Concrete(r), x ~ Eraser
+	| ? => out ~ Symbolic(x)
+	| ? => out ~ TermAdd(x, Concrete(r))
+	| ? => out ~ TermMul(Concrete(q), x)
+	| _ => out ~ TermAdd(TermMul(Concrete(q), x), Concrete(r));
 
 // Net
-Symbolic(X) ~ Add(out, b);
-Concrete(0) ~ Mul(b, Symbolic(Y));
-out;
+Linear(X, 1, 0) ~ Add(a, b);
+Concrete(0) ~ Mul(b, Linear(Y, 1, 0));
+a ~ Materialize(out);
+out; // Symbolic(X) 
+free out a b;
 
-free out;
-Symbolic(X) ~ Mul(out, Concrete(0));
-out;
+Linear(X, 1, 0) ~ Mul(a, Concrete(0));
+a ~ Materialize(out);
+out; // Concrete(0)
+free out a;
 
-free out;
-Symbolic(X) ~ Mul(out, b);
-Symbolic(Y) ~ Add(b, Concrete(1));
-out;
+Linear(X, 1, 0) ~ Mul(a, b);
+Linear(Y, 1, 0) ~ Add(b, Concrete(1));
+out; // Mul(Symbolic(X),Add(Symbolic(Y),Concrete(1)))
+free out a b;
 
-free out;
 Concrete(1) ~ Add(out, b);
 Concrete(2) ~ Add(b, c);
 Concrete(3) ~ Mul(c, Concrete(2));
-out;
+out; // Concrete(9)
+free out a b c;
 
-free out;
-Symbolic(X) ~ Mul(a, Symbolic(W1));
-Symbolic(Y) ~ Mul(b, Symbolic(W2));
-b ~ Add(c, Symbolic(B));
+Linear(X, 1, 0) ~ Mul(a, Linear(W1, 1, 0));
+Linear(Y, 1, 0) ~ Mul(b, Linear(W2, 1, 0));
+b ~ Add(c, Linear(B, 1, 0));
 a ~ Add(d, c);
 d ~ ReLU(out);
-out;
+out; // ReLU(Add(Mul(Symbolic(X),Symbolic(W1)),Add(Mul(Symbolic(Y),Symbolic(W2)),Symbolic(B))))
+free out a b c d;
 
-free out;
-Symbolic(X) ~ Dup(a, b);
-a ~ Add(c, Concrete(1));
-b ~ Mul(out, c);
+Linear(X, 2, 10) ~ Materialize(out);
 out;

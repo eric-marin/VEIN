@@ -1,0 +1,7 @@
+(declare-const x_0 Real)
+(declare-const x_1 Real)
+(define-fun net_a () Real (+ (* x_0 2) 3))
+(define-fun net_b () Real (+ 3 (* 2 x_0)))
+(assert (> (abs (- net_a net_b)) 0.0000100000))
+(check-sat)
+(get-model)
