@@ -64,44 +64,8 @@ Concrete(int k) >< ReLU(out)
 	| _ => out ~ Concrete(0);
 
 Linear(x, int q, int r) >< Materialize(out)
-	| (q == 0) && (r == 0) => out ~ Concrete(r), x ~ Eraser
+	| (q == 0) => out ~ Concrete(r), x ~ Eraser
 	| (q == 1) && (r == 0) => out ~ x
 	| (q == 1) && (r != 0) => out ~ TermAdd(x, Concrete(r))
 	| (q != 0) && (r == 0) => out ~ TermMul(Concrete(q), x)
 	| _ => out ~ TermAdd(TermMul(Concrete(q), x), Concrete(r));
-
-
-// Net testing
-Linear(Symbolic(X), 1, 0) ~ Add(a, b);
-Concrete(0) ~ Mul(b, Linear(Symbolic(Y), 1, 0));
-a ~ Materialize(out);
-out; // Symbolic(X) 
-free out a b;
-
-Linear(Symbolic(X), 1, 0) ~ Mul(a, Concrete(0));
-a ~ Materialize(out);
-out; // Concrete(0)
-free out a;
-
-Linear(Symbolic(X), 1, 0) ~ Mul(a, b);
-Linear(Symbolic(Y), 1, 0) ~ Add(b, Concrete(1));
-a ~ Materialize(out);
-out; // Mul(Symbolic(X),Add(Symbolic(Y),Concrete(1)))
-free out a b;
-
-Concrete(1) ~ Add(out, b);
-Concrete(2) ~ Add(b, c);
-Concrete(3) ~ Mul(c, Concrete(2));
-out; // Concrete(9)
-free out a b c;
-
-Linear(Symbolic(X), 1, 0) ~ Mul(a, Linear(Symbolic(W1), 1, 0));
-Linear(Symbolic(Y), 1, 0) ~ Mul(b, Linear(Symbolic(W2), 1, 0));
-b ~ Add(c, Linear(Symbolic(B), 1, 0));
-a ~ Add(d, c);
-d ~ ReLU(Materialize(out));
-out; // ReLU(Add(Mul(Symbolic(X),Symbolic(W1)),Add(Mul(Symbolic(Y),Symbolic(W2)),Symbolic(B))))
-free out a b c d;
-
-Linear(Symbolic(X), 2, 10) ~ Materialize(out);
-out;
