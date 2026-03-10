@@ -144,7 +144,7 @@ def train_model(name: str):
         loss = loss_fn(out, Y)
         loss.backward()
         optimizer.step()
-        if (epoch+1) % 500 == 0:
+        if (epoch+1) % 100 == 0:
             print(f"  Epoch {epoch+1}, Loss: {loss.item():.4f}")
     return net
 
