@@ -1,0 +1,93 @@
+@document.meta
+title: Neural Network Equivalence
+description: WIP tool to prove NNEQ using Interaction Nets as pre-processor
+authors: ericmarin
+categories: research
+created: 2026-03-14T09:21:24
+updated: 2026-03-14T18:34:04
+version: 1.1.1
+@end
+
+* TODO
+	- (?) Scalability %Maybe done? I have increased the limits of Inpla, but I have yet to test%
+	- ( ) Soundness of translated NN
+	~~ Define the semantic of the Agents (give a mathematical definition)
+	~~ Prove that a Layer L and the Inpla translation represent the same function
+	~~ Prove that each Interaction Rules preserve the mathematical semantic of the output
+	- ( ) Compatibility with other types of NN
+	- ( ) Comparison with other tool ({https://github.com/NeuralNetworkVerification/Marabou}[Marabou], {https://github.com/guykatzz/ReluplexCav2017}[Reluplex])
+	- ( ) Add Range agent to enable ReLU optimization
+
+* Agents
+** Built-in
+	 - Eraser: delete other agents recursively
+	 - Dup: duplicates other agents recursively
+
+** Implemented
+	 - Linear(x, float q, float r): represent "q*x + r"
+	 - Concrete(float k): represent a concrete value k
+	 - Symbolic(id): represent the variable id
+	 - Add(out, b): represent the addition (has various steps AddCheckLinear/AddCheckConcrete)
+	 - Mul(out, b): represent the multiplication (has various steps MulCheckLinear/MulCheckConcrete)
+	 - ReLU(out): represent "if x > 0 ? x ; 0"
+	 - Materialize(out): transforms a Linear packet into a final representation of TermAdd/TermMul
+
+* Rules
+** Add
+	 Linear(x, float q, float r) >< Add(out, b) => b ~ AddCheckLinear(out, x, q, r);
+
+	 Concrete(float k) >< Add(out, b)
+	 | k == 0 => out ~ b
+	 | _ => b ~ AddCheckConcrete(out, k);
+
+	 Linear(y, float s, float t) >< AddCheckLinear(out, x, float q, float r)
+	 | (q == 0) && (r == 0) && (s == 0) && (t == 0) => out ~ Concrete(0), x ~ Eraser, y ~ Eraser
+	 | (s == 0) && (t == 0) => out ~ Linear(x, q, r), y ~ Eraser
+	 | (q == 0) && (r == 0) => out ~ (*L)Linear(y, s, t), x ~ Eraser
+	 | _ => Linear(x, q, r) ~ Materialize(out_x), (*L)Linear(y, s, t) ~ Materialize(out_y), out ~ Linear(TermAdd(out_x, out_y), 1, 0);
+
+	 Concrete(float j) >< AddCheckLinear(out, x, float q, float r) => out ~ Linear(x, q, r + j);
+
+	 Linear(y, float s, float t) >< AddCheckConcrete(out, float k) => out ~ Linear(y, s, t + k);
+
+	 Concrete(float j) >< AddCheckConcrete(out, float k)
+	 | j == 0 => out ~ Concrete(k)
+	 | _ => out ~ Concrete(k + j);
+
+** Mul
+	 Linear(x, float q, float r) >< Mul(out, b) => b ~ MulCheckLinear(out, x, q, r);
+
+	 Concrete(float k) >< Mul(out, b)
+	 | k == 0 => b ~ Eraser, out ~ (*L)Concrete(0)
+	 | k == 1 => out ~ b
+	 | _ => b ~ MulCheckConcrete(out, k);
+
+	 Linear(y, float s, float t) >< MulCheckLinear(out, x, float q, float r)
+	 | ((q == 0) && (r == 0)) || ((s == 0) && (t == 0)) => out ~ Concrete(0), x ~ Eraser, y ~ Eraser
+	 | _ => Linear(x, q, r) ~ Materialize(out_x), (*L)Linear(y, s, t) ~ Materialize(out_y), out ~ Linear(TermMul(out_x, out_y), 1, 0);
+
+	 Concrete(float j) >< MulCheckLinear(out, x, float q, float r) => out ~ Linear(x, q * j, r * j);
+
+	 Linear(y, float s, float t) >< MulCheckConcrete(out, float k) => out ~ Linear(y, s * k, t * k);
+
+	 Concrete(float j) >< MulCheckConcrete(out, float k)
+	 | j == 0 => out ~ Concrete(0)
+	 | j == 1 => out ~ Concrete(k)
+	 | _ => out ~ Concrete(k * j);
+
+** ReLU
+	 Linear(x, float q, float r) >< ReLU(out) => (*L)Linear(x, q, r) ~ Materialize(out_x), out ~ Linear(TermReLU(out_x), 1, 0);
+
+	 Concrete(float k) >< ReLU(out)
+	 | k > 0 => out ~ (*L)Concrete(k)
+	 | _ => out ~ Concrete(0);
+
+** Materialize
+	 Linear(x, float q, float r) >< Materialize(out)
+	 | (q == 0) => out ~ Concrete(r), x ~ Eraser
+	 | (q == 1) && (r == 0) => out ~ x
+	 | (q == 1) && (r != 0) => out ~ TermAdd(x, Concrete(r))
+	 | (q != 0) && (r == 0) => out ~ TermMul(Concrete(q), x)
+	 | _ => out ~ TermAdd(TermMul(Concrete(q), x), Concrete(r));
+
+	 Concrete(float k) >< Materialize(out) => out ~ (*L)Concrete(k);
