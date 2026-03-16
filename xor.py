@@ -1,9 +1,10 @@
 import torch
 import torch.nn as nn
+import torch.onnx
 import nneq
 
 class xor_mlp(nn.Module):
-    def __init__(self, hidden_dim=4):
+    def __init__(self, hidden_dim=8):
         super().__init__()
         self.layers = nn.Sequential(
             nn.Linear(2, hidden_dim),
@@ -13,13 +14,13 @@ class xor_mlp(nn.Module):
     def forward(self, x):
         return self.layers(x)
 
-def train_model(name: str):
+def train_model(name: str, dim):
     X = torch.tensor([[0,0], [0,1], [1,0], [1,1]], dtype=torch.float32)
     Y = torch.tensor([[0], [1], [1], [0]], dtype=torch.float32)
 
-    net = xor_mlp()
+    net = xor_mlp(hidden_dim=dim)
     loss_fn = nn.MSELoss()
-    optimizer = torch.optim.Adam(net.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(net.parameters(), lr=0.1)
 
     print(f"Training {name}...")
     for epoch in range(1000):
@@ -33,16 +34,18 @@ def train_model(name: str):
     return net
 
 if __name__ == "__main__":
-    net_a = train_model("Network A")
-    net_b = train_model("Network B")
+    torch_net_a = train_model("Network A", 8).eval()
+    torch_net_b = train_model("Network B", 16).eval()
 
-    z3_net_a = nneq.net(net_a, (2,))
-    z3_net_b = nneq.net(net_b, (2,))
-    
+    onnx_net_a = torch.onnx.export(torch_net_a, (torch.randn(1, 2),), verbose=False, dynamo=True).model_proto # type: ignore
+    onnx_net_b = torch.onnx.export(torch_net_b, (torch.randn(1, 2),), verbose=False, dynamo=True).model_proto # type: ignore
+
+    z3_net_a = nneq.net(onnx_net_a)
+    z3_net_b = nneq.net(onnx_net_b)
+
     print("")
     nneq.strict_equivalence(z3_net_a, z3_net_b)
     print("")
     nneq.epsilon_equivalence(z3_net_a, z3_net_b, 0.1)
     print("")
     nneq.argmax_equivalence(z3_net_a, z3_net_b)
-

@@ -1,19 +1,16 @@
 @document.meta
 title: Neural Network Equivalence
-description: WIP tool to prove NNEQ using Interaction Nets as pre-processor
+description: WIP tool to prove NNEQ using Interaction Nets as pre-processor fo my Batchelor's Thesis
 authors: ericmarin
 categories: research
 created: 2026-03-14T09:21:24
-updated: 2026-03-14T18:34:04
+updated: 2026-03-17T11:18:11
 version: 1.1.1
 @end
 
 * TODO
 	- (?) Scalability %Maybe done? I have increased the limits of Inpla, but I have yet to test%
-	- ( ) Soundness of translated NN
-	~~ Define the semantic of the Agents (give a mathematical definition)
-	~~ Prove that a Layer L and the Inpla translation represent the same function
-	~~ Prove that each Interaction Rules preserve the mathematical semantic of the output
+	- (x) Soundness of translated NN
 	- ( ) Compatibility with other types of NN
 	- ( ) Comparison with other tool ({https://github.com/NeuralNetworkVerification/Marabou}[Marabou], {https://github.com/guykatzz/ReluplexCav2017}[Reluplex])
 	- ( ) Add Range agent to enable ReLU optimization
