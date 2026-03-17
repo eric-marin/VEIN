@@ -135,7 +135,6 @@ def inpla_export(model: onnx.ModelProto) -> inpla_str:
     return "\n".join(input_script + list(reversed(node_script)) + result_lines)
 
 def inpla_run(model: inpla_str) -> z3_str:
-    print(model)
     return subprocess.run(["./inpla"], input=f"{rules}\n{model}", capture_output=True, text=True).stdout
 
 syms = {}

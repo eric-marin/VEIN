@@ -4,13 +4,13 @@ description: WIP tool to prove NNEQ using Interaction Nets as pre-processor fo m
 authors: ericmarin
 categories: research
 created: 2026-03-14T09:21:24
-updated: 2026-03-17T11:18:11
+updated: 2026-03-18T13:18:15
 version: 1.1.1
 @end
 
 * TODO
 	- (?) Scalability %Maybe done? I have increased the limits of Inpla, but I have yet to test%
-	- (x) Soundness of translated NN
+	- (x) Soundness of translated NN: {:proof.norg:}[PROOF]
 	- ( ) Compatibility with other types of NN
 	- ( ) Comparison with other tool ({https://github.com/NeuralNetworkVerification/Marabou}[Marabou], {https://github.com/guykatzz/ReluplexCav2017}[Reluplex])
 	- ( ) Add Range agent to enable ReLU optimization
@@ -26,7 +26,7 @@ version: 1.1.1
 	 - Symbolic(id): represent the variable id
 	 - Add(out, b): represent the addition (has various steps AddCheckLinear/AddCheckConcrete)
 	 - Mul(out, b): represent the multiplication (has various steps MulCheckLinear/MulCheckConcrete)
-	 - ReLU(out): represent "if x > 0 ? x ; 0"
+	 - ReLU(out): represent "IF x > 0 THEN x ELSE 0"
 	 - Materialize(out): transforms a Linear packet into a final representation of TermAdd/TermMul
 
 * Rules
