@@ -46,7 +46,6 @@ version: 1.1.1
 	 By grouping the operations we get:
 	 /Y = alpha * A * B + beta * C/
 
-
 * Proof for the Interaction Rules
 ** Materialize
 	 The Materialize agent transforms a Linear agent into a tree of explicit mathematical operations

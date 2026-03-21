@@ -4,14 +4,14 @@ description: WIP tool to prove NNEQ using Interaction Nets as pre-processor fo m
 authors: ericmarin
 categories: research
 created: 2026-03-14T09:21:24
-updated: 2026-03-18T17:46:56
+updated: 2026-03-21T11:53:27
 version: 1.1.1
 @end
 
 * TODO
-	- (!) Scalability: %Impossible with Inpla, I would need to implement my own engine%
+	- (?) Scalability: Added cache for already processed NN. Inpla is the bottleneck but now I removed most of the limits.
 	- (x) Soundness of translated NN: {:proof.norg:}[PROOF]
-	- ( ) Compatibility with other types of NN
+	- (x) Compatibility with other types of NN: Added support for ONNX format. For now only GEMM and ReLU operations are implemented.
 	- ( ) Comparison with other tool ({https://github.com/NeuralNetworkVerification/Marabou}[Marabou], {https://github.com/guykatzz/ReluplexCav2017}[Reluplex])
 	- ( ) Add Range agent to enable ReLU optimization
 

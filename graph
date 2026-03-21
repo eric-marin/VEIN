@@ -1,8 +1,0 @@
-Dup(Dup(Mul(v4, Concrete(-0.5899816751480103)), Mul(v6, Concrete(-0.6716732978820801))), Dup(Mul(v8, Concrete(1.088428258895874)), Mul(v10, Concrete(-1.7469627857208252)))) ~ Linear(Symbolic(X_0), 1.0, 0.0);
-Dup(Dup(Mul(v5, Concrete(-0.6210991740226746)), Mul(v7, Concrete(0.5620369911193848))), Dup(Mul(v9, Concrete(-1.8472174406051636)), Mul(v11, Concrete(1.2568973302841187)))) ~ Linear(Symbolic(X_1), 1.0, 0.0);
-Add(Add(ReLU(Mul(v3, Concrete(1.032384991645813))), v10), v11) ~ Concrete(-0.2882664203643799);
-Add(Add(ReLU(Mul(v2, Concrete(1.596307396888733))), v8), v9) ~ Concrete(-0.46198248863220215);
-Add(Add(ReLU(Mul(v1, Concrete(0.19464343786239624))), v6), v7) ~ Concrete(-0.5869930386543274);
-Add(Add(ReLU(Mul(v0, Concrete(0.5202669501304626))), v4), v5) ~ Concrete(-0.599494457244873);
-Add(Add(Add(Add(Materialize(result0), v0), v1), v2), v3) ~ Concrete(-6.825084134731065e-24);
-result0;
