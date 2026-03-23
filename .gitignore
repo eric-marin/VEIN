@@ -1,1 +1,16 @@
-/nneq/__pycache__
+/inpla
+*/__pycache__
+/vnncomp2025_benchmarks/
+/fashion_mnist/FashionMNIST/raw
+/fashion_mnist/fashion_mnist_a.onnx
+/fashion_mnist/fashion_mnist_a.onnx.data
+/fashion_mnist/fashion_mnist_b.onnx
+/fashion_mnist/fashion_mnist_b.onnx.data
+/fashion_mnist/script_argmax.fish
+/fashion_mnist/script_epsilon.fish
+/fashion_mnist/script_strict.fish
+/xor/xor_a.onnx
+/xor/xor_a.onnx.data
+/xor/xor_b.onnx
+/xor/xor_b.onnx.data
+/fashion_mnist/FashionMNIST/raw

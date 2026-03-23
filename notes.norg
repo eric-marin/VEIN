@@ -4,16 +4,37 @@ description: WIP tool to prove NNEQ using Interaction Nets as pre-processor fo m
 authors: ericmarin
 categories: research
 created: 2026-03-14T09:21:24
-updated: 2026-03-21T11:53:27
+updated: 2026-03-25T09:32:43
 version: 1.1.1
 @end
 
 * TODO
-	- (?) Scalability: Added cache for already processed NN. Inpla is the bottleneck but now I removed most of the limits.
-	- (x) Soundness of translated NN: {:proof.norg:}[PROOF]
-	- (x) Compatibility with other types of NN: Added support for ONNX format. For now only GEMM and ReLU operations are implemented.
-	- ( ) Comparison with other tool ({https://github.com/NeuralNetworkVerification/Marabou}[Marabou], {https://github.com/guykatzz/ReluplexCav2017}[Reluplex])
-	- ( ) Add Range agent to enable ReLU optimization
+	- (!) Scalability: 
+			 Added cache for already processed NN.
+			 Removed limits from Inpla, but it runs slow on big NN because of parsing overhead.
+			 *I should write a Reduction Engine in Rust with a Work Stealing Queue to be more flexible.*
+
+	- (x) Soundness of translated NN:
+			 Translation from NN to IN and the Interaction Rules are proved {:proof.norg:}[here].
+
+	- (x) Compatibility with other types of NN:
+			 Added support for ONNX format.
+			 Operations: Gemm, ReLU, Flatten, Reshape, Matmul.
+
+	- (+) Comparison with other tool ({https://github.com/NeuralNetworkVerification/Marabou}[Marabou], {https://github.com/guykatzz/ReluplexCav2017}[Reluplex]):
+			 My tool is just a pre-processor that takes an NN, optimizes it using IN and converts in a format for SMT solvers.
+			 Marabou and Reluplex are solvers and this tool could be used WITH them.
+			 DeePoly/Marabou-Preprocessor: numeric bound tightening, lossy and heuristic.
+			 ONNX-Simplifier: just folds constants.
+			 Neurify: symbolic bound tightening (similar to the Range agent). Doesn't use a solver
+
+	- (!) Add Range agent to enable ReLU optimization:
+
+	- ( ) Merging Linear packets of the same variable when Adding:
+
+	~ Completare passo induttivo dimostrazione
+	~ 2 Reti uguali NOTE
+	~ 1 Rete grande NOTE
 
 * Agents
 ** Built-in

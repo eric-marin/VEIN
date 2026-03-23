@@ -2,21 +2,21 @@
 title: proof
 description: 
 authors: ericmarin
-categories: 
+categories: research
 created: 2026-03-16T11:34:52
-updated: 2026-03-17T18:59:09
+updated: 2026-03-25T08:18:04
 version: 1.1.1
 @end
 
 * Mathematical Definitions
-	- Linear(x, q, r) ~ out => out = q*x + r %with q,r Real%
-	- Concrete(k) ~ out => out = k %with k Real%
+	- Linear(x, q, r) ~ out => out = q*x + r
+	- Concrete(k) ~ out => out = k
 	- Add(out, b) ~ a => out = a + b
-	- AddCheckLinear(out, x, q, r) ~ b => out = q*x + (r + b) %with q,r Real%
-	- AddCheckConcrete(out, k) ~ b => out = k + b %with k Real%
+	- AddCheckLinear(out, x, q, r) ~ b => out = q*x + (r + b)
+	- AddCheckConcrete(out, k) ~ b => out = k + b
 	- Mul(out, b) ~ a => out = a * b
-	- MulCheckLinear(out, x, q, r) ~ b => out = q*b*x + r*b %with q,r Real%
-	- MulCheckConcrete(out, k) ~ b => out = k*b %with k Real%
+	- MulCheckLinear(out, x, q, r) ~ b => out = q*b*x + r*b
+	- MulCheckConcrete(out, k) ~ b => out = k*b
 	- ReLU(out) ~ x => out = IF (x > 0) THEN x ELSE 0
 	- Materialize(out) ~ x => out = x
 
@@ -47,10 +47,13 @@ version: 1.1.1
 	 /Y = alpha * A * B + beta * C/
 
 ** Flatten
-	 Just identity mapping
+	 Just identity mapping.
 
 ** MatMul
-	 Equal to Gemm with alpha=1 and beta=0
+	 Equal to Gemm with alpha=1 and beta=0.
+
+** Reshape
+	 Just identity mapping.
 
 * Proof for the Interaction Rules
 ** Materialize

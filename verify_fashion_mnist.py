@@ -27,6 +27,6 @@ def check_property(onnx_a, onnx_b, vnnlib):
     print("")
 
 if __name__ == "__main__":
-    check_property("./xor/xor_a.onnx", "./xor/xor_b.onnx", "./xor/xor_strict.vnnlib")
-    check_property("./xor/xor_a.onnx", "./xor/xor_b.onnx", "./xor/xor_epsilon.vnnlib")
-    check_property("./xor/xor_a.onnx", "./xor/xor_b.onnx", "./xor/xor_argmax.vnnlib")
+    check_property("./fashion_mnist/fashion_mnist_a.onnx", "./fashion_mnist/fashion_mnist_b.onnx", "./fashion_mnist/fashion_mnist_strict.vnnlib")
+    check_property("./fashion_mnist/fashion_mnist_a.onnx", "./fashion_mnist/fashion_mnist_b.onnx", "./fashion_mnist/fashion_mnist_epsilon.vnnlib")
+    check_property("./fashion_mnist/fashion_mnist_a.onnx", "./fashion_mnist/fashion_mnist_b.onnx", "./fashion_mnist/fashion_mnist_argmax.vnnlib")

@@ -164,6 +164,9 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
             interactions[in_name] = interactions[out_name]
         yield from []
 
+    def op_reshape(node):
+        return op_flatten(node)
+
     graph, initializers = model.graph, get_initializers(model.graph)
     var_gen, wire_gen = NameGen("v"), NameGen("w")
     interactions: Dict[str, List[List[str]]] = {}
@@ -172,6 +175,7 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
         "Gemm": op_gemm,
         "Relu": op_relu,
         "Flatten": op_flatten,
+        "Reshape": op_reshape,
         "MatMul": op_matmul
     }
 
@@ -258,7 +262,7 @@ def z3_evaluate(model: str, X):
 
 def net(model: onnx.ModelProto, X, bounds: Optional[Dict[str, List[float]]] = None):
     model_hash = hashlib.sha256(model.SerializeToString()).hexdigest()
-    bounds_key = tuple(sorted(bounds.items())) if bounds else None
+    bounds_key = tuple(sorted((k, tuple(v)) for k, v in bounds.items())) if bounds else None
     cache_key = (model_hash, bounds_key)
 
     if cache_key not in _INPLA_CACHE:
