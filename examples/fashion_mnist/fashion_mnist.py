@@ -8,22 +8,14 @@ class FashionMNIST_MLP(nn.Module):
         super().__init__()
         self.layers = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(6 * 6, hidden_dim),
+            nn.Linear(28 * 28, hidden_dim),
             nn.ReLU(),
-            nn.Linear(hidden_dim, 2)
+            nn.Linear(hidden_dim, 10),
         )
     def forward(self, x):
         return self.layers(x)
 
-transform = transforms.Compose([
-    transforms.Resize((6, 6)),
-    transforms.ToTensor(),
-])
-
-train_dataset = FashionMNIST('./', download=True, transform=transform, train=True)
-tshirts_trousers = [id for id, data in enumerate(train_dataset.targets) if data.item() == 0 or data.item() == 1]
-train_dataset = torch.utils.data.Subset(train_dataset, tshirts_trousers)
-
+train_dataset = FashionMNIST('./', download=True, transform=transforms.ToTensor(), train=True)
 trainloader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 
 def train_model(name: str, dim):
@@ -32,7 +24,7 @@ def train_model(name: str, dim):
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-4)
 
     print(f"Training {name}...")
-    for epoch in range(100):
+    for epoch in range(10):
         global loss
         for data in trainloader:
             inputs, targets = data
@@ -41,13 +33,13 @@ def train_model(name: str, dim):
             loss = loss_fn(outputs, targets)
             loss.backward()
             optimizer.step()
-        if (epoch + 1) % 10 == 0:
+        if (epoch + 1) % 1 == 0:
             print(f"  Epoch {epoch+1}, Loss: {loss.item():.4f}")
     return net
 
 if __name__ == "__main__":
-    torch_net_a = train_model("Network A", 6).eval()
-    torch_net_b = train_model("Network B", 12).eval()
+    torch_net_a = train_model("Network A", 28).eval()
+    torch_net_b = train_model("Network B", 56).eval()
 
-    torch.onnx.export(torch_net_a, (torch.randn(1, 1, 6, 6),), "fashion_mnist_a.onnx")
-    torch.onnx.export(torch_net_b, (torch.randn(1, 1, 6, 6),), "fashion_mnist_b.onnx")
+    torch.onnx.export(torch_net_a, (torch.randn(1, 28, 28),), "fashion_mnist_a.onnx")
+    torch.onnx.export(torch_net_b, (torch.randn(1, 28, 28),), "fashion_mnist_b.onnx")
