@@ -46,6 +46,34 @@ Equal to Gemm with ![alpha=1](https://latex.codecogs.com/svg.image?\inline&space
 ### Reshape
 Just identity mapping.
 
+### Add
+ONNX Add node is defined as:
+![C = A + B](https://latex.codecogs.com/svg.image?&space;C=A&plus;B)
+
+The translation defines the interactions:
+![Add(c_i, b_i) ~ a_i](https://latex.codecogs.com/svg.image?Add(c_i,b_i)\sim&space;a_i)
+
+By definition this interaction is equal to:
+![c_i = a_i + b_i](https://latex.codecogs.com/svg.image?c_i=a_i&plus;b_i)
+
+By grouping the operations we get:
+![C = A + B](https://latex.codecogs.com/svg.image?C=A&plus;B)
+
+### Sub
+ONNX Sub node is defined as:
+![C = A - B](https://latex.codecogs.com/svg.image?C=A-B)
+
+The translation defines the interactions:
+![Add(c_i, neg_b_i) ~ a_i](https://latex.codecogs.com/svg.image?Add(c_i,neg_i)\sim&space;a_i)
+![Mul(neg_b_i, Concrete(-1)) ~ b_i](https://latex.codecogs.com/svg.image?Mul(neg_i,Concrete(-1))\sim&space;b_i)
+
+By definition this interaction is equal to:
+![c_i = a_i + neg_b_i](https://latex.codecogs.com/svg.image?c_i=a_i&plus;neg_i)
+![neg_b_i = -1 * b_i](https://latex.codecogs.com/svg.image?neg_i=-1*b_i)
+
+By grouping the operations we get:
+![C = A - B](https://latex.codecogs.com/svg.image?C=A-B)
+
 ## Soundness of Interaction Rules
 ### Materialize
 The Materialize agent transforms a Linear agent into a tree of explicit mathematical operations

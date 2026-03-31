@@ -56,6 +56,34 @@ version: 1.1.1
 *** Reshape
 		Just identity mapping.
 
+*** Add
+		ONNX Add node is defined as:
+		$C = A + B$
+
+		The translation defines the interactions:
+		$Add(c_i, b_i) ~ a_i$
+
+		By definition this interaction is equal to:
+		$c_i = a_i + b_i$
+
+		By grouping the operations we get:
+		$C = A + B$
+
+*** Sub
+		ONNX Sub node is defined as:
+		$C = A - B$
+
+		The translation defines the interactions:
+		$Add(c_i, neg_b_i) ~ a_i$
+		$Mul(neg_b_i, Concrete(-1)) ~ b_i$
+
+		By definition this interaction is equal to:
+		$c_i = a_i + neg_b_i$
+		$neg_b_i = -1 * b_i$
+
+		By grouping the operations we get:
+		$C = A - B$
+
 ** Soundness of Interaction Rules
 *** Materialize
 		The Materialize agent transforms a Linear agent into a tree of explicit mathematical operations
