@@ -38,13 +38,15 @@ By grouping the operations we get:
 ![Y = alpha * A * B + beta * C](https://latex.codecogs.com/svg.image?Y=\alpha\cdot&space;A\cdot&space;B&plus;\beta\cdot&space;C&space;)
 
 ### Flatten
-Just identity mapping.
+Just identity mapping because the wires are always Flatten.
+![out_i ~ in_i](https://latex.codecogs.com/svg.image?out_i\sim&space;in_i)
 
 ### MatMul
-Equal to Gemm with ![alpha=1](https://latex.codecogs.com/svg.image?\inline&space;\alpha=1) and ![beta=0](https://latex.codecogs.com/svg.image?\inline&space;\beta=0).
+Equal to Gemm with ![alpha=1](https://latex.codecogs.com/svg.image?\inline&space;\alpha=1), ![beta=0](https://latex.codecogs.com/svg.image?\inline&space;\beta=0) and ![C=0](https://latex.codecogs.com/svg.image?\inline&space;&space;C=0).
 
 ### Reshape
-Just identity mapping.
+Just identity mapping because the wires always Flatten.
+![out_i ~ iin_i](https://latex.codecogs.com/svg.image?out_i\sim&space;in_i)
 
 ### Add
 ONNX Add node is defined as:
@@ -553,8 +555,8 @@ Otherwise, there exists an active pair ![A](https://latex.codecogs.com/svg.image
 By the [Soundness of Interaction Rules](#soundness-of-interaction-rules), the mathematical definition is preserved after any reduction step,
 it follows that ![[IN_{n+1}] = [IN_n]](https://latex.codecogs.com/svg.image?\inline&space;[\mathrm{IN_{n&plus;1}}]=[\mathrm{IN_n}]). By the inductive hypothesis, ![[IN_{n+1}] = [NN]](https://latex.codecogs.com/svg.image?\inline&space;[\mathrm{IN_{n&plus;1}}]=[\mathrm{NN}]).
 
-  By the principle of mathematical induction, the Interaction Net remains semantically equivalent to the original 
-  Neural Network at every step of the reduction process.
+By the principle of mathematical induction, the Interaction Net remains semantically equivalent to the original 
+Neural Network at every step of the reduction process.
 
 Since Interaction Nets are confluent, the reduced mathematical expression is unique regardless
 of order in which rules are applied.

@@ -1,6 +1,5 @@
 /inpla
-*/__pycache__
-/vnncomp2025_benchmarks/
+/__pycache__/
 /examples/fashion_mnist/FashionMNIST/raw
 /examples/fashion_mnist/fashion_mnist_a.onnx
 /examples/fashion_mnist/fashion_mnist_a.onnx.data
@@ -15,3 +14,10 @@
 /examples/xor/xor_b.onnx.data
 /examples/fashion_mnist/FashionMNIST/raw
 /notes.norg
+/examples/ACASXU/script_argmax.fish
+/examples/ACASXU/script_epsilon.fish
+/examples/ACASXU/script_strict.fish
+/examples/iris/iris_b.onnx
+/examples/iris/iris_b.onnx.data
+/examples/iris/iris_a.onnx.data
+/examples/iris/iris_a.onnx

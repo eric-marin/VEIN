@@ -1,0 +1,63 @@
+import torch
+import torch.nn as nn
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+from torch.utils.data import DataLoader, TensorDataset
+
+class Iris_MLP(nn.Module):
+    def __init__(self, hidden_dim):
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(4, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, 3),
+        )
+    def forward(self, x):
+        return self.layers(x)
+
+iris = load_iris()
+scaler = StandardScaler()
+X = scaler.fit_transform(iris.data).astype('float32') # pyright: ignore
+y = iris.target.astype('int64') # pyright: ignore
+
+dataset = TensorDataset(torch.from_numpy(X), torch.from_numpy(y))
+trainloader = DataLoader(dataset, batch_size=16, shuffle=True)
+
+def train_model(name: str, dim):
+    net = Iris_MLP(hidden_dim=dim)
+    loss_fn = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(net.parameters(), lr=1e-2)
+
+    print(f"Training {name} ({dim} neurons)...")
+    for epoch in range(200):
+        global loss
+        for data in trainloader:
+            inputs, targets = data
+            optimizer.zero_grad()
+            outputs = net(inputs)
+            loss = loss_fn(outputs, targets)
+            loss.backward()
+            optimizer.step()
+        if (epoch + 1) % 100 == 0:
+            print(f"  Epoch {epoch+1}, Loss: {loss.item():.4f}")
+    return net
+
+if __name__ == "__main__":
+    torch_net_a = train_model("Network A", 10).eval()
+    torch_net_b = Iris_MLP(hidden_dim=20).eval()
+
+    with torch.no_grad():
+        torch_net_b.layers[0].weight[:10].copy_(torch_net_a.layers[0].weight) # pyright: ignore
+        torch_net_b.layers[0].bias[:10].copy_(torch_net_a.layers[0].bias) # pyright: ignore
+        torch_net_b.layers[0].weight[10:].copy_(torch_net_a.layers[0].weight) # pyright: ignore
+        torch_net_b.layers[0].bias[10:].copy_(torch_net_a.layers[0].bias) # pyright: ignore
+
+        half_weights = torch_net_a.layers[2].weight / 2.0 # pyright: ignore
+        
+        torch_net_b.layers[2].weight[:, :10].copy_(half_weights) # pyright: ignore
+        torch_net_b.layers[2].weight[:, 10:].copy_(half_weights) # pyright: ignore
+        
+        torch_net_b.layers[2].bias.copy_(torch_net_a.layers[2].bias) # pyright: ignore
+
+    torch.onnx.export(torch_net_a, (torch.randn(1, 4),), "iris_a.onnx")
+    torch.onnx.export(torch_net_b, (torch.randn(1, 4),), "iris_b.onnx")

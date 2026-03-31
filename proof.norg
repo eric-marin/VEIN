@@ -48,13 +48,15 @@ version: 1.1.1
 		$Y = alpha * A * B + beta * C$
 
 *** Flatten
-		Just identity mapping.
+		Just identity mapping because the wires are always Flatten.
+		$o_i ~ i_i$
 
 *** MatMul
-		Equal to Gemm with $alpha=1$ and $beta=0$.
+		Equal to Gemm with $alpha=1$, $beta=0$ and $C=0$.
 
 *** Reshape
-		Just identity mapping.
+		Just identity mapping because the wires always Flatten.
+		$o_i ~ i_i$
 
 *** Add
 		ONNX Add node is defined as:
@@ -491,7 +493,7 @@ version: 1.1.1
 		 $IF false THEN k ELSE 0 = 0 => 0 = 0$
 		 $$
 
-** Soundness of Reduction 
+** Soundness of Reduction
 	 Let $IN_0$ be the Interaction Net translated from a Neural Network $NN$. Let $IN_n$ be the state of the net
 	 after $n$ reduction steps. Then $\forall n \in N$, $[IN_n] = [NN]$.
 

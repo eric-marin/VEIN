@@ -23,7 +23,7 @@ def train_model(name: str, dim):
     loss_fn = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(net.parameters(), lr=1e-4)
 
-    print(f"Training {name}...")
+    print(f"Training {name} ({dim} neurons)...")
     for epoch in range(10):
         global loss
         for data in trainloader:

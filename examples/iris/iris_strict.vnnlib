@@ -1,0 +1,30 @@
+; Strict Equivalence for Iris
+
+; Constant declaration
+(declare-const X_0 Real)
+(declare-const X_1 Real)
+(declare-const X_2 Real)
+(declare-const X_3 Real)
+(declare-const Y_0 Real)
+(declare-const Y_1 Real)
+(declare-const Y_2 Real)
+(declare-const Y_3 Real)
+(declare-const Y_4 Real)
+(declare-const Y_5 Real)
+
+; Bounded inputs: X must be within [0, 1]
+(assert (>= X_0 0.0))
+(assert (<= X_0 1.0))
+(assert (>= X_1 0.0))
+(assert (<= X_1 1.0))
+(assert (>= X_2 0.0))
+(assert (<= X_2 1.0))
+(assert (>= X_3 0.0))
+(assert (<= X_3 1.0))
+
+; Violation of strict equivalence
+(assert (or
+	(not (= Y_0 Y_3))
+	(not (= Y_1 Y_4))
+	(not (= Y_2 Y_5))
+))
