@@ -8,7 +8,7 @@
 ![Mul(out, b) ~ a => out = a * b](https://latex.codecogs.com/svg.image?Mul(out,b)\sim&space;a\Rightarrow&space;out=a*b&space;)
 ![MulCheckLinear(out, x, q, r) ~ b => out = q*b*x + r*b](https://latex.codecogs.com/svg.image?MulCheckLinear(out,x,q,r)\sim&space;b\Rightarrow&space;out=q*b*x&plus;r*b&space;)
 ![MulCheckConcrete(out, k) ~ b => out = k*b](https://latex.codecogs.com/svg.image?MulCheckConcrete(out,k)\sim&space;b\Rightarrow&space;out=k*b&space;)
-![ReLU(out) ~ x => out = IF (x > 0) THEN x ELSE 0](https://latex.codecogs.com/svg.image?ReLU(out)\sim&space;x\Rightarrow&space;out=IF\;(x>0)\;THEN\;x\;ELSE\;0&space;)
+![ReLU(out) ~ x => out = IF (x > 0) THEN x ELSE 0](https://latex.codecogs.com/svg.image?ReLU(out)\sim&space;x\Rightarrow&space;out=\text{IF}\;(x>0)\;\text{THEN}\;x\;\text{ELSE}\;0)
 ![Materialize(out) ~ x => out = x](https://latex.codecogs.com/svg.image?Materialize(out)\sim&space;x\Rightarrow&space;out=x&space;)
 
 ## Soundness of Translation
@@ -20,7 +20,7 @@ The translation defines the interactions:
 ![x_i ~ ReLU(y_i)](https://latex.codecogs.com/svg.image?x_i\sim&space;ReLU(y_i))
 
 By definition this interaction is equal to:
-![y_i = IF (x_i > 0) THEN x_i ELSE 0](https://latex.codecogs.com/svg.image?y_i=IF\;(x_i>0)\;THEN\;x_i\;ELSE\;0&space;)
+![y_i = IF (x_i > 0) THEN x_i ELSE 0](https://latex.codecogs.com/svg.image?y_i=\text{IF}\;(x_i>0)\;\text{THEN}\;x_i\;\text{ELSE}\;0)
 
 ### Gemm
 ONNX Gemm node is defined as:
@@ -498,8 +498,8 @@ LHS:
 ![Linear(x, q, r) ~ wire](https://latex.codecogs.com/svg.image?Linear(x,q,r)\sim&space;wire)
 ![ReLU(out) ~ wire](https://latex.codecogs.com/svg.image?ReLU(out)\sim&space;wire)
 ![q*x + r = wire](https://latex.codecogs.com/svg.image?q*x&plus;r=wire)
-![out = IF wire > 0 THEN wire ELSE 0](https://latex.codecogs.com/svg.image?out=IF\;wire>0\;THEN\;wire\;ELSE\;0)
-![out = IF (q*x + r) > 0 THEN (q*x + r) ELSE 0](https://latex.codecogs.com/svg.image?out=IF\;(q*x&plus;r)>0\;THEN\;(q*x&plus;r)\;ELSE\;0)
+![out = IF wire > 0 THEN wire ELSE 0](https://latex.codecogs.com/svg.image?out=\text{IF}\;wire>0\;\text{THEN}\;wire\;\text{ELSE}\;0)
+![out = IF (q*x + r) > 0 THEN (q*x + r) ELSE 0](https://latex.codecogs.com/svg.image?out=\text{IF}\;(q*x&plus;r)>0\;\text{THEN}\;(q*x&plus;r)\;\text{ELSE}\;0)
 
 RHS:
 ![Linear(x, q, r) ~ wire](https://latex.codecogs.com/svg.image?Linear(x,q,r)\sim&space;wire)
@@ -508,11 +508,11 @@ RHS:
 ![out_x = wire](https://latex.codecogs.com/svg.image?out_x=wire)
 ![out = 1*TermReLU(out_x) + 0](https://latex.codecogs.com/svg.image?out=1*TermReLU(out_x)&plus;0)
 Because `TermReLU(x)` is defined as `z3.If(x > 0, x, 0)`:
-![out = 1*(IF (q*x + r) > 0 THEN (q*x + r) ELSE 0) + 0](https://latex.codecogs.com/svg.image?out=1*(IF\;(q*x&plus;r)>0\;THEN\;(q*x&plus;r)\;ELSE\;0)&plus;0)
+![out = 1*(IF (q*x + r) > 0 THEN (q*x + r) ELSE 0) + 0](https://latex.codecogs.com/svg.image?out=1*(\text{IF}\;(q*x&plus;r)>0\;\text{THEN}\;(q*x&plus;r)\;\text{ELSE}\;0)&plus;0)
 
 EQUIVALENCE:
 ![IF (q*x + r) > 0 THEN (q*x + r) ELSE 0 = 1*(IF (q*x + r) > 0 THEN (q*x + r) ELSE 0) + 0 =>
-IF (q*x + r) > 0 THEN (q*x + r) ELSE 0 = IF (q*x + r) > 0 THEN (q*x + r) ELSE 0](https://latex.codecogs.com/svg.image?IF\;(q*x&plus;r)>0\;THEN\;(q*x&plus;r)\;ELSE\;0=1*(IF\;(q*x&plus;r)>0\;THEN\;(q*x&plus;r)\;ELSE\;0)&plus;0\Rightarrow&space;IF\;(q*x&plus;r)>0\;THEN\;(q*x&plus;r)\;ELSE\;0=IF\;(q*x&plus;r)>0\;THEN\;(q*x&plus;r)\;ELSE\;0)
+IF (q*x + r) > 0 THEN (q*x + r) ELSE 0 = IF (q*x + r) > 0 THEN (q*x + r) ELSE 0](https://latex.codecogs.com/svg.image?\text{IF}\;(q*x&plus;r)>0\;\text{THEN}\;(q*x&plus;r)\;\text{ELSE}\;0=1*(\text{IF}\;(q*x&plus;r)>0\;\text{THEN}\;(q*x&plus;r)\;\text{ELSE}\;0)&plus;0\Rightarrow\text{IF}\;(q*x&plus;r)>0\;\text{THEN}\;(q*x&plus;r)\;\text{ELSE}\;0=\text{IF}\;(q*x&plus;r)>0\;\text{THEN}\;(q*x&plus;r)\;\text{ELSE}\;0)
 
 
 #### Concrete >< ReLU
@@ -522,8 +522,8 @@ LHS:
 ![Concrete(k) ~ wire](https://latex.codecogs.com/svg.image?Concrete(k)\sim&space;wire)
 ![ReLU(out) ~ wire](https://latex.codecogs.com/svg.image?ReLU(out)\sim&space;wire)
 ![k = wire](https://latex.codecogs.com/svg.image?k=wire)
-![out = IF wire > 0 THEN wire ELSE 0](https://latex.codecogs.com/svg.image?out=IF\;wire>0\;THEN\;wire\;ELSE\;0)
-![out = IF k > 0 THEN k ELSE 0](https://latex.codecogs.com/svg.image?out=IF\;k>0\;THEN\;k\;ELSE\;0)
+![out = IF wire > 0 THEN wire ELSE 0](https://latex.codecogs.com/svg.image?out=\text{IF}\;wire>0\;\text{THEN}\;wire\;\text{ELSE}\;0)
+![out = IF k > 0 THEN k ELSE 0](https://latex.codecogs.com/svg.image?out=\text{IF}\;k>0\;\text{THEN}\;k\;\text{ELSE}\;0)
 
 ##### Case 1:
 ![k > 0 => out ~ Concrete(k)](https://latex.codecogs.com/svg.image?k>0\Rightarrow&space;out\sim&space;Concrete(k))
@@ -532,7 +532,7 @@ RHS:
 ![out = k](https://latex.codecogs.com/svg.image?out=k)
 
 EQUIVALENCE:
-![IF true THEN k ELSE 0 = k => k = k](https://latex.codecogs.com/svg.image?IF\;true\;THEN\;k\;ELSE\;0=k\Rightarrow&space;k=k)
+![IF true THEN k ELSE 0 = k => k = k](https://latex.codecogs.com/svg.image?\text{IF}\;true\;\text{THEN}\;k\;\text{ELSE}\;0=k\Rightarrow&space;k=k)
 
 ##### Case 2:
 ![k <= 0 => out ~ Concrete(0)](https://latex.codecogs.com/svg.image?k\leq&space;0\Rightarrow&space;out\sim&space;Concrete(0))
@@ -541,7 +541,7 @@ RHS:
 ![out = 0](https://latex.codecogs.com/svg.image?out=0)
 
 EQUIVALENCE:
-![IF false THEN k ELSE 0 = 0 => 0 = 0](https://latex.codecogs.com/svg.image?IF\;false\;THEN\;k\;ELSE\;0=0\Rightarrow&space;0=0)
+![IF false THEN k ELSE 0 = 0 => 0 = 0](https://latex.codecogs.com/svg.image?\text{IF}\;false\;\text{THEN}\;k\;\text{ELSE}\;0=0\Rightarrow&space;0=0)
 
 ## Soundness of Reduction 
 Let ![IN_0](https://latex.codecogs.com/svg.image?\mathrm{IN_0}) be the Interaction Net translated from a Neural Network ![NN](https://latex.codecogs.com/svg.image?\inline&space;\mathrm{NN}). Let ![IN_n](https://latex.codecogs.com/svg.image?\inline&space;\mathrm{IN_n}) be the state of the net
