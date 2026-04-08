@@ -1,12 +1,12 @@
-# Neural Network Equivalence (NNEQ)
+# VEIN: VErification via Interaction Nets
 
 Requires my [fork of Inpla](https://github.com/eric-marin/inpla).
 
 - Clone the fork
 - **make** the executable
-- Copy the **inpla** executable in NNEQ/
+- Copy the **inpla** executable in **vein/**
 
-[Soundness proof](./proof.md)
+[Soundness proof](./docs/proof.md)
 
 ## License
 

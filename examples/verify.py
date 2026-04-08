@@ -2,10 +2,10 @@ import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import z3
-import nneq
+import vein
 
 def check_property(onnx_a, onnx_b, vnnlib):
-    solver = nneq.Solver()
+    solver = vein.Solver()
 
     print(f"--- Checking {vnnlib} ---")
 

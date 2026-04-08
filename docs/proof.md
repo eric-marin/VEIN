@@ -46,7 +46,7 @@ Equal to Gemm with ![alpha=1](https://latex.codecogs.com/svg.image?\inline&space
 
 ### Reshape
 Just identity mapping because the wires always Flatten.
-![out_i ~ iin_i](https://latex.codecogs.com/svg.image?out_i\sim&space;in_i)
+![out_i ~ in_i](https://latex.codecogs.com/svg.image?out_i\sim&space;in_i)
 
 ### Add
 ONNX Add node is defined as:
