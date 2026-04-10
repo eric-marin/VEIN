@@ -1,4 +1,4 @@
-; Strict Equivalence for Double Integrator
+; Epsilon Equivalence for Double Integrator
 
 ; Constant declaration
 (declare-const X_0 Real)

@@ -1,4 +1,4 @@
-; Strict Equivalence for Iris
+; Epsilon Equivalence for Iris
 
 ; Constant declaration
 (declare-const X_0 Real)

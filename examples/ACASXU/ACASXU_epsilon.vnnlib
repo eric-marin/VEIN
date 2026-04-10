@@ -1,4 +1,4 @@
-; Strict Equivalence for ACASXU
+; Epsilon Equivalence for ACASXU
 
 ; Constant declaration
 (declare-const X_0 Real)

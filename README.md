@@ -1,4 +1,4 @@
-# VEIN: VErification via Interaction Nets
+# VEIN: VErification via Interaction Nets</p>
 
 Requires my [fork of Inpla](https://github.com/eric-marin/inpla).
 

@@ -1,10 +1,10 @@
 /inpla
 /__pycache__/
-/examples/fashion_mnist/FashionMNIST/raw
-/examples/fashion_mnist/fashion_mnist_a.onnx
-/examples/fashion_mnist/fashion_mnist_a.onnx.data
-/examples/fashion_mnist/fashion_mnist_b.onnx
-/examples/fashion_mnist/fashion_mnist_b.onnx.data
+/examples/mnist/MNIST/raw
+/examples/mnist/mnist_a.onnx
+/examples/mnist/mnist_a.onnx.data
+/examples/mnist/mnist_b.onnx
+/examples/mnist/mnist_b.onnx.data
 /examples/xor/xor_a.onnx
 /examples/xor/xor_a.onnx.data
 /examples/xor/xor_b.onnx

@@ -1,4 +1,4 @@
-; Strict Equivalence for Pendulum
+; Epsilon Equivalence for Pendulum
 
 ; Constant declaration
 (declare-const X_0 Real)
