@@ -37,16 +37,12 @@ By definition this interaction is equal to:
 By grouping the operations we get:
 ![Y = alpha * A * B + beta * C](https://latex.codecogs.com/svg.image?Y=\alpha\cdot&space;A\cdot&space;B&plus;\beta\cdot&space;C&space;)
 
-### Flatten
-Just identity mapping because the wires are always Flatten.
+### Identiry / Flatten / Reshape / Squeeze / Unsqueeze
+Just identity mapping because wires represent a single element and they are not structured as Tensors.
 ![out_i ~ in_i](https://latex.codecogs.com/svg.image?out_i\sim&space;in_i)
 
 ### MatMul
 Equal to Gemm with ![alpha=1](https://latex.codecogs.com/svg.image?\inline&space;\alpha=1), ![beta=0](https://latex.codecogs.com/svg.image?\inline&space;\beta=0) and ![C=0](https://latex.codecogs.com/svg.image?\inline&space;&space;C=0).
-
-### Reshape
-Just identity mapping because the wires always Flatten.
-![out_i ~ in_i](https://latex.codecogs.com/svg.image?out_i\sim&space;in_i)
 
 ### Add
 ONNX Add node is defined as:
@@ -75,6 +71,13 @@ By definition this interaction is equal to:
 
 By grouping the operations we get:
 ![C = A - B](https://latex.codecogs.com/svg.image?C=A-B)
+
+### Slice
+ONNX Slice is defined as:
+![out_j = in_{start + (j * step)}](https://latex.codecogs.com/svg.image?&space;out_j=in_{start&plus;(j*step)})
+
+The translations creates a wiring analog to the above definition:
+![out_j ~ in_{start + (j * step)}](https://latex.codecogs.com/svg.image?&space;out_j\sim&space;in_{start&plus;(j*step)})
 
 ## Soundness of Interaction Rules
 ### Materialize

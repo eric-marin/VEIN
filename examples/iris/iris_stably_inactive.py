@@ -43,7 +43,15 @@ def train_model(name: str, dim):
 
 if __name__ == "__main__":
     torch_net_a = train_model("Network A", 10).eval()
-    torch_net_b = train_model("Network B", 20).eval()
-
+    
+    with torch.no_grad():
+        torch_net_a.layers[0].weight[9] = -1.0 # pyright: ignore
+        torch_net_a.layers[0].bias[9] = -10.0 # pyright: ignore
+        
+        torch_net_b = Iris_MLP(10).eval()
+        torch_net_b.load_state_dict(torch_net_a.state_dict())
+        
+        torch_net_b.layers[2].weight[:, 9] = 0.0 # pyright: ignore
+        
     torch.onnx.export(torch_net_a, (torch.randn(1, 4),), "iris_a.onnx")
     torch.onnx.export(torch_net_b, (torch.randn(1, 4),), "iris_b.onnx")

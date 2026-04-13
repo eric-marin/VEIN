@@ -37,8 +37,16 @@ def train_model(name: str, dim):
     return net
 
 if __name__ == "__main__":
-    torch_net_a = train_model("Network A", 6).eval()
-    torch_net_b = train_model("Network B", 12).eval()
-
+    torch_net_a = train_model("Base Network", 6).eval()
+    
+    with torch.no_grad():
+        torch_net_a.layers[1].weight[5] = -1.0 # pyright: ignore
+        torch_net_a.layers[1].bias[5] = -1.0 # pyright: ignore
+        
+        torch_net_b = MNIST_MLP(6).eval()
+        torch_net_b.load_state_dict(torch_net_a.state_dict())
+        
+        torch_net_b.layers[3].weight[:, 5] = 0.0 # pyright: ignore
+        
     torch.onnx.export(torch_net_a, (torch.randn(1, 28, 28),), "mnist_a.onnx")
     torch.onnx.export(torch_net_b, (torch.randn(1, 28, 28),), "mnist_b.onnx")

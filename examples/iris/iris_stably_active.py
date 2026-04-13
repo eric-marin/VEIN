@@ -14,6 +14,15 @@ class Iris_MLP(nn.Module):
     def forward(self, x):
         return self.layers(x)
 
+class Iris_Linear(nn.Module):
+    def __init__(self, weight, bias):
+        super().__init__()
+        self.fc = nn.Linear(4, 3)
+        self.fc.weight.data = weight
+        self.fc.bias.data = bias
+    def forward(self, x):
+        return self.fc(x)
+
 iris = load_iris()
 scaler = StandardScaler()
 X = scaler.fit_transform(iris.data).astype('float32') # pyright: ignore
@@ -42,8 +51,21 @@ def train_model(name: str, dim):
     return net
 
 if __name__ == "__main__":
-    torch_net_a = train_model("Network A", 10).eval()
-    torch_net_b = train_model("Network B", 20).eval()
+    torch_net_a = train_model("Base Network", 10).eval()
+
+    with torch.no_grad():
+        torch_net_a.layers[0].weight.fill_(0.1) # pyright: ignore
+        torch_net_a.layers[0].bias.fill_(10.0) # pyright: ignore
+
+        W1 = torch_net_a.layers[0].weight.data
+        b1 = torch_net_a.layers[0].bias.data
+        W2 = torch_net_a.layers[2].weight.data
+        b2 = torch_net_a.layers[2].bias.data
+
+        W_collapsed = torch.matmul(W2, W1) # pyright: ignore
+        b_collapsed = torch.matmul(W2, b1) + b2 # pyright: ignore
+
+        torch_net_b = Iris_Linear(W_collapsed, b_collapsed).eval()
 
     torch.onnx.export(torch_net_a, (torch.randn(1, 4),), "iris_a.onnx")
     torch.onnx.export(torch_net_b, (torch.randn(1, 4),), "iris_b.onnx")
