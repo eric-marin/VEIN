@@ -1,21 +1,56 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
-This chapter provides an overview of the thesis...
+This chapter provides an overview of the thesis.
 
-% This gives the reader useful information to understand the problem
-Verification of neural networks is very important...
+% Context
+Artificial Intelligence systems made significant advancements in the last few years and enabled us to
+enter a new age of computing. Most of the credit goes to deep neural networks and their exceptional
+capacity of representing non-linear functions. But they don't come without drawbacks: neural
+networks are ``black boxes'' that lack transparency. To take advantage of these powerful tools in
+critical system guarantees need to be provided.
 
-% This tells the reader the problem your solution addresses
-However, larger networks can be hard to process...
+% Problem
+Neural networks can be viewed as mathematical functions and SMT solvers are used to check properties,
+like equivalence, against them. Running a solver against a complex function is computationally
+expensive, it is important to make sure that the function is simplified as much as possible to take
+away useless burden from the solver.
 
-% This tells the reader what you did
-We show a simple method to simplify big networks...
+% Solution
+We present VEIN, a framework that leverages the computational properties of interaction nets to
+perform symbolic simplification of neural networks prior to formal verification.
+The system is composed of two primary modules: a modified version of Inpla and the Z3 SMT solver for
+property validation.
+The tool is divided into three steps:
+\begin{itemize}
+	\item \textbf{Translation}: a neural network in ONNX format is translated into an interaction net using
+		the Inpla string representation;
+	\item \textbf{Reduction}: the interaction net gets reduced to its normal form by Inpla;
+	\item \textbf{Evaluation}: the normal form gets processed along with the property to verify by Z3.
+\end{itemize}
+Z3 is not optimized for ReLU splitting, but it was chosen for it's mature Python package.
+In any case a specialized solver like Marabou can be integrated to improve performance.
+Our contributions are:
+\begin{itemize}
+	\item \textbf{Interaction Rules}: we designed a set of interaction rules to enable symbolic constant
+		folding;
+	\item \textbf{ONNX-Interaction Net Translation}: we developed a translation procedure for ONNX models to
+		interaction net;
+	\item \textbf{Soundness Analysis}: we provided a formal proof that the interaction net reduction preserves
+		the mathematical properties of the neural network;
+	\item \textbf{Experimental Evaluation}: we conducted an extensive benchmarking on widely known datasets and
+		common VNN-COMP datasets of varying complexity.
+\end{itemize}
 
-% This tells the reader why what you did is correct
-We show that our simplification is sound...
+% Validation
+Our interaction nets pipeline soundness is proven by induction on the number of interaction steps,
+demonstrating that the ONNX translation and each interaction rule preserves the semantic meaning of
+the original neural network. Furthermore, interaction nets are deterministic and strongly confluent,
+meaning they will always reduce to the same normal form because interactions are local and linear. 
+In addition to this formal analysis, we conducted several benchmarks on checking equivalence between
+a neural network trained on a dataset and a transformation.
 
-% This tells the reader the organisation of the thesis, namely what sections are there and what they contain
+% Outline
 \section{Outline}
 \label{sec:outline}
 This section outlines the organization of the thesis:
