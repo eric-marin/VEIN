@@ -1,4 +1,826 @@
 \subsection{Interaction Rules}
 \label{sec:interaction-rules}
 
-% This subsection talks about the interaction rules that implement the symbolic simplification
+This subsection contains the definition of the agents and the interaction rules that implement the symbolic simplification.
+
+The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into three groups:
+\begin{itemize}
+	\item
+		\textbf{Carriers}: Agents that contain float attributes.
+		\begin{itemize}
+			\item \textbf{Linear}: Represents the linear transformation $f(x) = q \cdot x + r$.
+			\item \textbf{Concrete}: Represents a constant value $k$.
+		\end{itemize}
+	\item
+		\textbf{Operators}: Agents that perform some kind of operation on the carrier agents.
+		\begin{itemize}
+			\item \textbf{Add}: Binary operator for addition.
+			\item \textbf{Mul}: Binary operator for multiplication.
+			\item \textbf{ReLU}: Unary operator for rectified linear unit.
+			\item \textbf{Eraser}: Built-in Inpla unary operator to delete other agents.
+			\item \textbf{Duplicator}: Built-in Inpla unary operator to duplicate other agents.
+		\end{itemize}
+	\item
+		\textbf{Intermediates}: Agents needed to perform each step of the operators.
+		\begin{itemize}
+			\item \textbf{AddCheckLinear}: Intermediate agent that memorizes the other Linear operand that needs to be added.
+			\item \textbf{AddCheckConcrete}: Intermediate agent that memorizes the other Concrete operand that needs to be added.
+			\item \textbf{MulCheckLinear}: Intermediate agent that memorizes the other Linear operand that needs to be multiplied.
+			\item \textbf{MulCheckConcrete}: Intermediate agent that memorizes the other Concrete operand that needs to be multiplied.
+			\item \textbf{Materialize}: Converts a Linear agent into an explicit representation for the SMT solver.
+		\end{itemize}
+	\item
+		\textbf{Inerts}: Agents that will compose the normal form.
+		\begin{itemize}
+			\item \textbf{TermAdd}: This agent that will be parsed as addition for the SMT solver.
+			\item \textbf{TermMul}: This agent that will be parsed as multiplication for the SMT solver.
+			\item \textbf{TermReLU}: This agent that will be parsed as rectified linear unit for the SMT solver.
+			\item \textbf{Symbolic}: This agent that will be parsed as specific variable for the SMT solver.
+		\end{itemize}
+\end{itemize}
+
+\begin{figure}[ht]
+	\centering
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{cccc}
+			% Linear
+			\begin{tikzpicture}
+				\agentLinear{L}{q}{r}
+				\inetwirefree(L.pal) \inetwirefree(L.pax)
+				\node[below] at (L.above pal) {$\mathit{out}$};
+				\node[above] at (L.above pax) {$\mathit{x}$};
+			\end{tikzpicture} &
+			% Concrete
+			\begin{tikzpicture}
+				\agentConcrete{C}{k}
+				\inetwirefree(C.pal)
+				\node[below] at (C.above pal) {$\mathit{out}$};
+			\end{tikzpicture} &
+			% Add
+			\begin{tikzpicture}
+				\agentAdd{A}
+				\inetwirefree(A.pal) \inetwirefree(A.pax 1) \inetwirefree(A.pax 2)
+				\node[below] at (A.above pal) {$\mathit{a}$};
+				\node[above] at (A.above pax 1) {$\mathit{out}$};
+				\node[above] at (A.above pax 2) {$\mathit{b}$};
+			\end{tikzpicture} &
+			% Mul
+			\begin{tikzpicture}
+				\agentMul{M}
+				\inetwirefree(M.pal) \inetwirefree(M.pax 1) \inetwirefree(M.pax 2)
+				\node[below] at (M.above pal) {$\mathit{a}$};
+				\node[above] at (M.above pax 1) {$\mathit{out}$};
+				\node[above] at (M.above pax 2) {$\mathit{b}$};
+			\end{tikzpicture} \\
+			(a) $\mathit{Linear}$ & (b) $\mathit{Concrete}$ & (c) $\mathit{Add}$ & (d) $\mathit{Mul}$ \\[0.5cm]
+
+			% ReLU
+			\begin{tikzpicture}
+				\agentReLU{R}
+				\inetwirefree(R.pal) \inetwirefree(R.pax)
+				\node[below] at (R.above pal) {$\mathit{x}$};
+				\node[above] at (R.above pax) {$\mathit{out}$};
+			\end{tikzpicture} &
+			% Materialize
+			\begin{tikzpicture}
+				\agentMaterialize{MAT}
+				\inetwirefree(MAT.pal) \inetwirefree(MAT.pax)
+				\node[below] at (MAT.above pal) {$\mathit{x}$};
+				\node[above] at (MAT.above pax) {$\mathit{out}$};
+			\end{tikzpicture} &
+			% Eraser
+			\begin{tikzpicture}
+				\agentEraser{E}
+				\inetwirefree(E.pal)
+				\node[below] at (E.above pal) {$\mathit{x}$};
+			\end{tikzpicture} &
+			% Duplicator
+			\begin{tikzpicture}
+				\agentDuplicator{D}
+				\inetwirefree(D.pal) \inetwirefree(D.pax 1) \inetwirefree(D.pax 2)
+				\node[below] at (D.above pal) {$\mathit{x}$};
+				\node[above] at (D.above pax 1) {$\mathit{d_{1}}$};
+				\node[above] at (D.above pax 2) {$\mathit{d_{2}}$};
+			\end{tikzpicture} \\
+			(e) $\mathit{ReLU}$ & (f) $\mathit{Materialize}$ & (g) $\mathit{Eraser}$ & (h) $\mathit{Duplicator}$ \\[0.5cm]
+
+			% AddCheckLinear
+			\begin{tikzpicture}
+				\agentAddCheckLinear{AL}{q}{r}
+				\inetwirefree(AL.pal) \inetwirefree(AL.pax 1) \inetwirefree(AL.pax 2)
+				\node[below] at (AL.above pal) {$\mathit{b}$};
+				\node[above] at (AL.above pax 1) {$\mathit{out}$};
+				\node[above] at (AL.above pax 2) {$\mathit{x}$};
+			\end{tikzpicture} &
+			% MulCheckLinear
+			\begin{tikzpicture}
+				\agentMulCheckLinear{ML}{q}{r}
+				\inetwirefree(ML.pal) \inetwirefree(ML.pax 1) \inetwirefree(ML.pax 2)
+				\node[below] at (ML.above pal) {$\mathit{b}$};
+				\node[above] at (ML.above pax 1) {$\mathit{out}$};
+				\node[above] at (ML.above pax 2) {$\mathit{x}$};
+			\end{tikzpicture} &
+			% AddCheckConcrete
+			\begin{tikzpicture}
+				\agentAddCheckConcrete{AC}{k}
+				\inetwirefree(AC.pal) \inetwirefree(AC.pax)
+				\node[below] at (AC.above pal) {$\mathit{b}$};
+				\node[above] at (AC.above pax) {$\mathit{out}$};
+			\end{tikzpicture} &
+			% MulCheckConcrete
+			\begin{tikzpicture}
+				\agentMulCheckConcrete{MC}{k}
+				\inetwirefree(MC.pal) \inetwirefree(MC.pax)
+				\node[below] at (MC.above pal) {$\mathit{b}$};
+				\node[above] at (MC.above pax) {$\mathit{out}$};
+			\end{tikzpicture} \\
+			(i) $\mathit{AddCheckLinear}$ & (j) $\mathit{MulCheckLinear}$ & (k) $\mathit{AddCheckConcrete}$ & (l) $\mathit{MulCheckConcrete}$ \\[0.5cm]
+
+			% TermAdd
+			\begin{tikzpicture}
+				\agentTermAdd{TA}
+				\inetwirefree(TA.pal) \inetwirefree(TA.pax 1) \inetwirefree(TA.pax 2)
+				\node[below] at (TA.above pal) {$\mathit{out}$};
+				\node[above] at (TA.above pax 1) {$\mathit{a}$};
+				\node[above] at (TA.above pax 2) {$\mathit{b}$};
+			\end{tikzpicture} &
+			% TermMul
+			\begin{tikzpicture}
+				\agentTermMul{TM}
+				\inetwirefree(TM.pal) \inetwirefree(TM.pax 1) \inetwirefree(TM.pax 2)
+				\node[below] at (TM.above pal) {$\mathit{out}$};
+				\node[above] at (TM.above pax 1) {$\mathit{a}$};
+				\node[above] at (TM.above pax 2) {$\mathit{b}$};
+			\end{tikzpicture} &
+			% TermReLU
+			\begin{tikzpicture}
+				\agentTermReLU{TR}
+				\inetwirefree(TR.pal) \inetwirefree(TR.pax)
+				\node[below] at (TR.above pal) {$\mathit{out}$};
+				\node[above] at (TR.above pax) {$\mathit{x}$};
+			\end{tikzpicture} &
+			% Symbolic
+			\begin{tikzpicture}
+				\agentSymbolic{S}{id}
+				\inetwirefree(S.pal)
+				\node[below] at (S.above pal) {$\mathit{out}$};
+			\end{tikzpicture} \\
+			(m) $\mathit{TermAdd}$ & (n) $\mathit{TermMul}$ & (o) $\mathit{TermReLU}$ & (p) $\mathit{Symbolic}$ \\[0.5cm]
+		\end{tabular}
+	}
+	\caption{Agents used in VEIN.}
+	\label{fig:agents}
+\end{figure}
+
+The \textit{Linear} carrier agent interacts directly with the \textit{Add} and \textit{Mul} operators agents as illustrated in
+\textbf{\Cref{fig:rule-linear-add}} and \textbf{\Cref{fig:rule-linear-mul}}. Because interactions are local, the binary
+operators need to check one operator at the time. For this reason \textit{Add} and \textit{Mul} gets replaced by
+\textit{AddCheckLinear} and \textit{MulCheckLinear} intermediate agents that carry the attributes $q$ and $r$ and their
+principal port is faced toward the other operand.
+
+% Linear >< Add
+\begin{figure}[ht]
+	\centering
+	\interactionrule{
+		\agentLinear{L}{q}{r}[90]
+		\agentAdd[right=of L.pal]{A}[-90]
+		\inetwire(L.pal)(A.pal)
+		\inetwirefree(L.pax) \inetwirefree(A.pax 1) \inetwirefree(A.pax 2)
+		\node[left] at (L.above pax) {$\mathit{x}$};
+		\node[right] at (A.above pax 1) {$\mathit{out}$};
+		\node[right] at (A.above pax 2) {$\mathit{b}$};
+	}{
+		\agentAddCheckLinear{AL}{q}{r}[90]
+		\inetwirefree(AL.pal) \inetwirefree(AL.pax 1) \inetwirefree(AL.pax 2)
+		\node[right] at (AL.above pal) {$\mathit{b}$};
+		\node[left] at (AL.above pax 1) {$\mathit{out}$};
+		\node[left] at (AL.above pax 2) {$\mathit{x}$};
+	}
+	\caption{Interaction rule for $\mathit{Linear}$ and $\mathit{Add}$.}
+	\label{fig:rule-linear-add}
+\end{figure}
+
+% Linear >< Mul
+\begin{figure}[ht]
+	\centering
+	\interactionrule{
+		\agentLinear{L}{q}{r}[90]
+		\agentMul[right=of L.pal]{M}[-90]
+		\inetwire(L.pal)(M.pal)
+		\inetwirefree(L.pax) \inetwirefree(M.pax 1) \inetwirefree(M.pax 2)
+		\node[left] at (L.above pax) {$\mathit{x}$};
+		\node[right] at (M.above pax 1) {$\mathit{out}$};
+		\node[right] at (M.above pax 2) {$\mathit{b}$};
+	}{
+		\agentMulCheckLinear{ML}{q}{r}[90]
+		\inetwirefree(ML.pal) \inetwirefree(ML.pax 1) \inetwirefree(ML.pax 2)
+		\node[right] at (ML.above pal) {$\mathit{b}$};
+		\node[left] at (ML.above pax 1) {$\mathit{out}$};
+		\node[left] at (ML.above pax 2) {$\mathit{x}$};
+	}
+	\caption{Interaction rule for $\mathit{Linear}$ and $\mathit{Mul}$.}
+	\label{fig:rule-linear-mul}
+\end{figure}
+
+The same logic is applied to the \textit{Concrete} carrier agent, but here analyzing the attribute $k$
+enables short-circuiting. In \textbf{\Cref{fig:rule-concrete-add}} we can see that when summing a \textit{Concrete}
+with $k=0$ we do not need to check the other operand and we simply wire it to the output.
+This rewiring is also implemented when multiplying a \textit{Concrete} with $k=1$, as shown in
+\textbf{\Cref{fig:rule-concrete-mul}}, with the addition that when $k=0$ the other operand is deleted
+before the SMT solver is even invoked.
+
+% Concrete >< Add
+\begin{figure}[ht]
+	\centering
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{c}
+			% otherwise
+			\interactionrule{
+				\agentConcrete{C}{k}[90]
+				\agentAdd[right=of C.pal]{A}[-90]
+				\inetwire(C.pal)(A.pal)
+				\inetwirefree(A.pax 1) \inetwirefree(A.pax 2)
+				\node[right] at (A.above pax 1) {$\mathit{out}$};
+				\node[right] at (A.above pax 2) {$\mathit{b}$};
+			}
+			{
+				\agentAddCheckConcrete{AC}{k}[90]
+				\inetwirefree(AC.pal) \inetwirefree(AC.pax)
+				\node[right] at (AC.above pal) {$\mathit{b}$};
+				\node[left] at (AC.above pax) {$\mathit{out}$};
+			} \\
+			% k == 0
+			\interactionrule[$k=0$]{
+				\agentConcrete{C}{0}[90]
+				\agentAdd[right=of C.pal]{A}[-90]
+				\inetwire(C.pal)(A.pal)
+				\inetwirefree(A.pax 1) \inetwirefree(A.pax 2)
+				\node[right] at (A.above pax 1) {$\mathit{out}$};
+				\node[right] at (A.above pax 2) {$\mathit{b}$};
+			}{
+				\node(out) at (-1,0) {$\mathit{out}$};
+				\node(b) at (1, 0) {$\mathit{b}$};
+				\draw[\inetwirestyle] (b) -- (out);
+			} \\
+		\end{tabular}
+	}
+	\caption{Interaction rules for $\mathit{Concrete}$ and $\mathit{Add}$.}
+	\label{fig:rule-concrete-add}
+\end{figure}
+
+% Concrete >< Mul
+\begin{figure}[ht]
+	\centering
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{c}
+			% otherwise
+			\interactionrule{
+				\agentConcrete{C}{k}[90]
+				\agentMul[right=of C.pal]{M}[-90]
+				\inetwire(C.pal)(M.pal)
+				\inetwirefree(M.pax 1) \inetwirefree(M.pax 2)
+				\node[right] at (M.above pax 1) {$\mathit{out}$};
+				\node[right] at (M.above pax 2) {$\mathit{b}$};
+			}
+			{
+				\agentMulCheckConcrete{MC}{k}[90]
+				\inetwirefree(MC.pal) \inetwirefree(MC.pax)
+				\node[right] at (MC.above pal) {$\mathit{b}$};
+				\node[left] at (MC.above pax) {$\mathit{out}$};
+			} \\
+			% k == 0
+			\interactionrule[$k=0$]{
+				\agentConcrete{C}{0}[90]
+				\agentMul[right=of C.pal]{M}[-90]
+				\inetwire(C.pal)(M.pal)
+				\inetwirefree(M.pax 1) \inetwirefree(M.pax 2)
+				\node[right] at (M.above pax 1) {$\mathit{out}$};
+				\node[right] at (M.above pax 2) {$\mathit{b}$};
+			}{
+				\agentConcrete{C}{0}[90]
+				\agentEraser[below=of C]{E}[90]
+				\inetwirefree(C.pal) \inetwirefree(E.pal)
+				\node[right] at (C.above pal) {$\mathit{out}$};
+				\node[right] at (E.above pal) {$\mathit{b}$};
+			} \\
+			% k == 1
+			\interactionrule[$k=1$]{
+				\agentConcrete{C}{1}[90]
+				\agentMul[right=of C.pal]{M}[-90]
+				\inetwire(C.pal)(M.pal)
+				\inetwirefree(M.pax 1) \inetwirefree(M.pax 2)
+				\node[right] at (M.above pax 1) {$\mathit{out}$};
+				\node[right] at (M.above pax 2) {$\mathit{b}$};
+			}{
+				\node(out) at (-1,0) {$\mathit{out}$};
+				\node(b) at (1, 0) {$\mathit{b}$};
+				\draw[\inetwirestyle] (b) -- (out);
+			} \\
+		\end{tabular}
+	}
+	\caption{Interaction rules for $\mathit{Concrete}$ and $\mathit{Mul}$.}
+	\label{fig:rule-concrete-mul}
+\end{figure}
+
+If both operands are \textit{Linear} agents they need to be materialized before being wrapped in another
+\textit{Linear} to allow further simplification. This is done because multiplying two linear packets
+gives a non-linear result.
+While adding two linear packets gives a linear result, it depends on two free variables and the \textit{Linear} agent
+only supports one. A solution to this could be storing a dictionay of variables instead of a single one.
+This is illustrated in \textbf{\Cref{fig:rule-linear-addchecklinear}}
+and \textbf{\Cref{fig:rule-linear-mulchecklinear}} where the result of the materialization is passed
+to a TermAdd or TermMul, for Add and Mul respectively, and then to a \textit{Linear} with attributes
+$q=1,r=0$.
+
+% Linear >< AddCheckLinear
+\begin{figure}[ht]
+	\centering
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{c}
+			% otherwise
+			\interactionrule{
+				\agentLinear{L}{s}{t}[90]
+				\agentAddCheckLinear[right=of L.pal]{AL}{q}{r}[-90]
+				\inetwire(L.pal)(AL.pal)
+				\inetwirefree(L.pax) \inetwirefree(AL.pax 1) \inetwirefree(AL.pax 2)
+				\node[left] at (L.above pax) {$\mathit{y}$};
+				\node[right] at (AL.above pax 1) {$\mathit{out}$};
+				\node[right] at (AL.above pax 2) {$\mathit{x}$};
+			}{
+				\agentLinear{L1}{q}{r}[90]
+				\agentLinear[below=1.5cm of L1]{L2}{s}{t}[90]
+				\agentMaterialize[right=of L1.pal]{MAT1}[-90]
+				\agentMaterialize[right=of L2.pal]{MAT2}[-90]
+				\agentTermAdd[at=($(MAT1.pax)!0.5!(MAT2.pax)$), xshift=1cm]{TA}[90]
+				\agentLinear[right=of TA]{L3}{1}{0}[90]
+				\inetwire(L1.pal)(MAT1.pal) \inetwire(L2.pal)(MAT2.pal) \inetwire(MAT1.pax)(TA.pax 1) \inetwire(MAT2.pax)(TA.pax 2) \inetwire(TA.pal)(L3.pax)
+				\inetwirefree(L1.pax) \inetwirefree(L2.pax) \inetwirefree(L3.pal)
+				\node[left] at (L1.above pax) {$\mathit{x}$};
+				\node[left] at (L2.above pax) {$\mathit{y}$};
+				\node[right] at (L3.above pal) {$\mathit{out}$};
+			} \\
+			% (s == 0) && (t == 0)
+			\interactionrule[$(s=0)\land(t=0)$]{
+				\agentLinear{L}{0}{0}[90]
+				\agentAddCheckLinear[right=of L.pal]{AL}{q}{r}[-90]
+				\inetwire(L.pal)(AL.pal)
+				\inetwirefree(L.pax) \inetwirefree(AL.pax 1) \inetwirefree(AL.pax 2)
+				\node[left] at (L.above pax) {$\mathit{y}$};
+				\node[right] at (AL.above pax 1) {$\mathit{out}$};
+				\node[right] at (AL.above pax 2) {$\mathit{x}$};
+			}{
+				\agentLinear{L}{q}{r}[90]
+				\agentEraser[below=of L]{E}[90]
+				\inetwirefree(L.pal) \inetwirefree(L.pax) \inetwirefree(E.pal)
+				\node[left] at (L.above pax) {$\mathit{x}$};
+				\node[right] at (L.above pal) {$\mathit{out}$};
+				\node[right] at (E.above pal) {$\mathit{y}$};
+			} \\
+			% (q == 0) && (r == 0)
+			\interactionrule[$(q=0)\land(r=0)$]{
+				\agentLinear{L}{s}{t}[90]
+				\agentAddCheckLinear[right=of L.pal]{AL}{0}{0}[-90]
+				\inetwire(L.pal)(AL.pal)
+				\inetwirefree(L.pax) \inetwirefree(AL.pax 1) \inetwirefree(AL.pax 2)
+				\node[left] at (L.above pax) {$\mathit{y}$};
+				\node[right] at (AL.above pax 1) {$\mathit{out}$};
+				\node[right] at (AL.above pax 2) {$\mathit{x}$};
+			}{
+				\agentLinear{L}{s}{t}[90]
+				\agentEraser[below=of L]{E}[90]
+				\inetwirefree(L.pal) \inetwirefree(L.pax) \inetwirefree(E.pal)
+				\node[left] at (L.above pax) {$\mathit{y}$};
+				\node[right] at (L.above pal) {$\mathit{out}$};
+				\node[right] at (E.above pal) {$\mathit{x}$};
+			} \\
+			% (q == 0) && (r == 0) && (s == 0) && (t == 0)
+			\interactionrule[$(q=0)\land(r=0)\land(s=0)\land(t=0)$]{
+				\agentLinear{L}{0}{0}[90]
+				\agentAddCheckLinear[right=of L.pal]{AL}{0}{0}[-90]
+				\inetwire(L.pal)(AL.pal)
+				\inetwirefree(L.pax) \inetwirefree(AL.pax 1) \inetwirefree(AL.pax 2)
+				\node[left] at (L.above pax) {$\mathit{y}$};
+				\node[right] at (AL.above pax 1) {$\mathit{out}$};
+				\node[right] at (AL.above pax 2) {$\mathit{x}$};
+			}{
+				\agentConcrete{C}{0}[90]
+				\agentEraser[below=of C]{E1}[90]
+				\agentEraser[below=of E1]{E2}[90]
+				\inetwirefree(E1.pal) \inetwirefree(E2.pal) \inetwirefree(C.pal)
+				\node[right] at (E1.above pal) {$\mathit{x}$};
+				\node[right] at (E2.above pal) {$\mathit{y}$};
+				\node[right] at (C.above pal) {$\mathit{out}$};
+			} \\
+		\end{tabular}
+	}
+	\caption{Interaction rules for $\mathit{Linear}$ and $\mathit{AddCheckLinear}$.}
+	\label{fig:rule-linear-addchecklinear}
+\end{figure}
+
+% Linear >< MulCheckLinear
+\begin{figure}[ht]
+	\centering
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{c}
+			% otherwise
+			\interactionrule{
+				\agentLinear{L}{s}{t}[90]
+				\agentMulCheckLinear[right=of L.pal]{ML}{q}{r}[-90]
+				\inetwire(L.pal)(ML.pal)
+				\inetwirefree(L.pax) \inetwirefree(ML.pax 1) \inetwirefree(ML.pax 2)
+				\node[left] at (L.above pax) {$\mathit{y}$};
+				\node[right] at (ML.above pax 1) {$\mathit{out}$};
+				\node[right] at (ML.above pax 2) {$\mathit{x}$};
+			}{
+				\agentLinear{L1}{q}{r}[90]
+				\agentLinear[below=1.5cm of L1]{L2}{s}{t}[90]
+				\agentMaterialize[right=of L1.pal]{MAT1}[-90]
+				\agentMaterialize[right=of L2.pal]{MAT2}[-90]
+				\agentTermMul[at=($(MAT1.pax)!0.5!(MAT2.pax)$), xshift=1cm]{TM}[90]
+				\agentLinear[right=of TM]{L3}{1}{0}[90]
+				\inetwire(L1.pal)(MAT1.pal) \inetwire(L2.pal)(MAT2.pal) \inetwire(MAT1.pax)(TM.pax 1) \inetwire(MAT2.pax)(TM.pax 2) \inetwire(TM.pal)(L3.pax)
+				\inetwirefree(L1.pax) \inetwirefree(L2.pax) \inetwirefree(L3.pal)
+				\node[left] at (L1.above pax) {$\mathit{x}$};
+				\node[left] at (L2.above pax) {$\mathit{y}$};
+				\node[right] at (L3.above pal) {$\mathit{out}$};
+			} \\
+			% ((q == 0) && (r == 0)) || ((s == 0) && (t == 0))
+			\interactionrule[$((q=0)\land(r=0))\lor((s=0)\land(t=0))$]{
+				\agentLinear{L}{s}{t}[90]
+				\agentMulCheckLinear[right=of L.pal]{ML}{q}{r}[-90]
+				\inetwire(L.pal)(ML.pal)
+				\inetwirefree(L.pax) \inetwirefree(ML.pax 1) \inetwirefree(ML.pax 2)
+				\node[left] at (L.above pax) {$\mathit{y}$};
+				\node[right] at (ML.above pax 1) {$\mathit{out}$};
+				\node[right] at (ML.above pax 2) {$\mathit{x}$};
+			}{
+				\agentConcrete{C}{0}[90]
+				\agentEraser[below=of C]{E1}[90]
+				\agentEraser[below=of E1]{E2}[90]
+				\inetwirefree(E1.pal) \inetwirefree(E2.pal) \inetwirefree(C.pal)
+				\node[right] at (E1.above pal) {$\mathit{x}$};
+				\node[right] at (E2.above pal) {$\mathit{y}$};
+				\node[right] at (C.above pal) {$\mathit{out}$};
+			} \\
+		\end{tabular}
+	}
+	\caption{Interaction rules for $\mathit{Linear}$ and $\mathit{MulCheckLinear}$.}
+	\label{fig:rule-linear-mulchecklinear}
+\end{figure}
+
+Instead if the first operand is a \textit{Linear} agents and the second is a \textit{Concrete} agent different rules are applied.
+In the case of addition (\textbf{\Cref{fig:rule-concrete-addchecklinear}}) we add the attribute of the \textit{Concrete}
+agent to the attribute that represents the constant of the \textit{Linear} agent.
+For multiplication (\textbf{\Cref{fig:rule-concrete-mulchecklinear}}) we multiply the attribute of
+the \textit{Concrete} agent to both the attributes of the \textit{Linear}
+
+% Concrete >< AddCheckLinear
+\begin{figure}[ht]
+	\centering
+	\interactionrule{
+		\agentConcrete{C}{j}[90]
+		\agentAddCheckLinear[right=of C.pal]{AL}{q}{r}[-90]
+		\inetwire(C.pal)(AL.pal)
+		\inetwirefree(AL.pax 1) \inetwirefree(AL.pax 2)
+		\node[right] at (AL.above pax 1) {$\mathit{out}$};
+		\node[right] at (AL.above pax 2) {$\mathit{x}$};
+	}{
+		\agentLinear{L}{q}{r + j}[90]
+		\inetwirefree(L.pal) \inetwirefree(L.pax)
+		\node[right] at (L.above pal) {$\mathit{out}$};
+		\node[left] at (L.above pax) {$\mathit{x}$};
+	}
+	\caption{Interaction rule for $\mathit{Concrete}$ and $\mathit{AddCheckLinear}$.}
+	\label{fig:rule-concrete-addchecklinear}
+\end{figure}
+
+% Concrete >< MulCheckLinear
+\begin{figure}[ht]
+	\centering
+	\interactionrule{
+		\agentConcrete{C}{j}[90]
+		\agentMulCheckLinear[right=of C.pal]{ML}{q}{r}[-90]
+		\inetwire(C.pal)(ML.pal)
+		\inetwirefree(ML.pax 1) \inetwirefree(ML.pax 2)
+		\node[right] at (ML.above pax 1) {$\mathit{out}$};
+		\node[right] at (ML.above pax 2) {$\mathit{x}$};
+	}{
+		\agentLinear{L}{q * j}{r * j}[90]
+		\inetwirefree(L.pal) \inetwirefree(L.pax)
+		\node[right] at (L.above pal) {$\mathit{out}$};
+		\node[left] at (L.above pax) {$\mathit{x}$};
+	}
+	\caption{Interaction rule for $\mathit{Concrete}$ and $\mathit{MulCheckLinear}$.}
+	\label{fig:rule-concrete-mulchecklinear}
+\end{figure}
+
+In the rules shown in \textbf{\Cref{fig:rule-linear-addcheckconcrete}} and \textbf{\Cref{fig:rule-linear-mulcheckconcrete}}
+we follow the exact same logic except the first operand is a \textit{Concrete} and the second is a \textit{Linear}.
+
+% Linear >< AddCheckConcrete
+\begin{figure}[ht]
+	\centering
+	\interactionrule{
+		\agentLinear{L}{s}{t}[90]
+		\agentAddCheckConcrete[right=of L.pal]{AC}{k}[-90]
+		\inetwire(L.pal)(AC.pal)
+		\inetwirefree(L.pax) \inetwirefree(AC.pax)
+		\node[left] at (L.above pax) {$\mathit{y}$};
+		\node[right] at (AC.above pax) {$\mathit{out}$};
+	}{
+		\agentLinear{L}{s}{t + k}[90]
+		\inetwirefree(L.pal) \inetwirefree(L.pax)
+		\node[right] at (L.above pal) {$\mathit{out}$};
+		\node[left] at (L.above pax) {$\mathit{y}$};
+	}
+	\caption{Interaction rule for $\mathit{Linear}$ and $\mathit{AddCheckConcrete}$.}
+	\label{fig:rule-linear-addcheckconcrete}
+\end{figure}
+
+% Linear >< MulCheckConcrete
+\begin{figure}[ht]
+	\centering
+	\interactionrule{
+		\agentLinear{L}{s}{t}[90]
+		\agentMulCheckConcrete[right=of L.pal]{MC}{k}[-90]
+		\inetwire(L.pal)(MC.pal)
+		\inetwirefree(L.pax) \inetwirefree(MC.pax)
+		\node[left] at (L.above pax) {$\mathit{y}$};
+		\node[right] at (MC.above pax) {$\mathit{out}$};
+	}{
+		\agentLinear{L}{s * k}{t * k}[90]
+		\inetwirefree(L.pal) \inetwirefree(L.pax)
+		\node[right] at (L.above pal) {$\mathit{out}$};
+		\node[left] at (L.above pax) {$\mathit{y}$};
+	}
+	\caption{Interaction rule for $\mathit{Linear}$ and $\mathit{MulCheckConcrete}$.}
+	\label{fig:rule-linear-mulcheckconcrete}
+\end{figure}
+
+Finally if both operands are \textit{Concrete} agents they are either merged into a single \textit{Concrete}
+or short-circuited as illustrated in \textbf{\Cref{fig:rule-concrete-addcheckconcrete}} and
+\textbf{\Cref{fig:rule-concrete-mulcheckconcrete}} following a similar logic to the previous rules.
+
+% Concrete >< AddCheckConcrete
+\begin{figure}[ht]
+	\centering
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{c}
+			% otherwise
+			\interactionrule{
+				\agentConcrete{C}{j}[90]
+				\agentAddCheckConcrete[right=of C.pal]{AC}{k}[-90]
+				\inetwire(C.pal)(AC.pal)
+				\inetwirefree(AC.pax)
+				\node[right] at (AC.above pax) {$\mathit{out}$};
+			}{
+				\agentConcrete{C}{k + j}[90]
+				\inetwirefree(C.pal)
+				\node[right] at (C.above pal) {$\mathit{out}$};
+			} \\
+			% j == 0
+			\interactionrule[$j=0$]{
+				\agentConcrete{C}{0}[90]
+				\agentAddCheckConcrete[right=of C.pal]{AC}{k}[-90]
+				\inetwire(C.pal)(AC.pal)
+				\inetwirefree(AC.pax)
+				\node[right] at (AC.above pax) {$\mathit{out}$};
+			}{
+				\agentConcrete{C}{k}[90]
+				\inetwirefree(C.pal)
+				\node[right] at (C.above pal) {$\mathit{out}$};
+			} \\
+		\end{tabular}
+	}
+	\caption{Interaction rules for $\mathit{Concrete}$ and $\mathit{AddCheckConcrete}$.}
+	\label{fig:rule-concrete-addcheckconcrete}
+\end{figure}
+
+% Concrete >< MulCheckConcrete
+\begin{figure}[ht]
+	\centering
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{c}
+			% otherwise
+			\interactionrule{
+				\agentConcrete{C}{j}[90]
+				\agentMulCheckConcrete[right=of C.pal]{MC}{k}[-90]
+				\inetwire(C.pal)(MC.pal)
+				\inetwirefree(MC.pax)
+				\node[right] at (MC.above pax) {$\mathit{out}$};
+			}{
+				\agentConcrete{C}{k * j}[90]
+				\inetwirefree(C.pal)
+				\node[right] at (C.above pal) {$\mathit{out}$};
+			} \\
+			% j == 0
+			\interactionrule[$j = 0$]{
+				\agentConcrete{C}{0}[90]
+				\agentMulCheckConcrete[right=of C.pal]{MC}{k}[-90]
+				\inetwire(C.pal)(MC.pal)
+				\inetwirefree(MC.pax)
+				\node[right] at (MC.above pax) {$\mathit{out}$};
+			}{
+				\agentConcrete{C}{0}[90]
+				\inetwirefree(C.pal)
+				\node[right] at (C.above pal) {$\mathit{out}$};
+			} \\
+			% j == 1
+			\interactionrule[$j = 1$]{
+				\agentConcrete{C}{1}[90]
+				\agentMulCheckConcrete[right=of C.pal]{MC}{k}[-90]
+				\inetwire(C.pal)(MC.pal)
+				\inetwirefree(MC.pax)
+				\node[right] at (MC.above pax) {$\mathit{out}$};
+			}{
+				\agentConcrete{C}{k}[90]
+				\inetwirefree(C.pal)
+				\node[right] at (C.above pal) {$\mathit{out}$};
+			} \\
+		\end{tabular}
+	}
+	\caption{Interaction rules for $\mathit{Concrete}$ and $\mathit{MulCheckConcrete}$.}
+	\label{fig:rule-concrete-mulcheckconcrete}
+\end{figure}
+
+When the \textit{Linear} carrier agent interacts with the \textit{ReLU} operator agents there is no
+enough informations to perform any simplification so, as shown in \textbf{\Cref{fig:rule-linear-relu}},
+the agent is just materialized, passed to a \textit{TermReLU} and then wrapped in a \textit{Linear}.
+In \textbf{\Cref{fig:rule-concrete-relu}} is illustrated that when the \textit{Concrete} carrier agent
+meets the \textit{ReLU} agent, a \textit{Concrete} is wired to the output either with attribute $k$
+if $k>0$ or with attribute equal $0$ otherwise.
+
+% Linear >< ReLU
+\begin{figure}[ht]
+	\centering
+	\resizebox{\textwidth}{!}{
+		\interactionrule{
+			\agentLinear{L}{q}{r}[90]
+			\agentReLU[right=of L.pal]{R}[-90]
+			\inetwire(L.pal)(R.pal)
+			\inetwirefree(L.pax) \inetwirefree(R.pax)
+			\node[left] at (L.above pax) {$\mathit{x}$};
+			\node[right] at (R.above pax) {$\mathit{out}$};
+		}{
+			\agentLinear{L1}{q}{r}[90]
+			\agentMaterialize[right=of L1.pal]{MAT}[-90]
+			\agentTermReLU[right=of MAT]{TR}[90]
+			\agentLinear[right=of TR]{L2}{1}{0}[90]
+			\inetwire(L1.pal)(MAT.pal) \inetwire(MAT.pax)(TR.pax) \inetwire(TR.pal)(L2.pax)
+			\inetwirefree(L1.pax) \inetwirefree(L2.pal)
+			\node[left] at (L1.above pax) {$\mathit{x}$};
+			\node[right] at (L2.above pal) {$\mathit{out}$};
+		}
+	}
+	\caption{Interaction rule for $\mathit{Linear}$ and $\mathit{ReLU}$.}
+	\label{fig:rule-linear-relu}
+\end{figure}
+
+% Concrete >< ReLU
+\begin{figure}[ht]
+	\centering
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{c}
+			% otherwise
+			\interactionrule[$k <= 0$]{
+				\agentConcrete{C}{k}[90]
+				\agentReLU[right=of C.pal]{R}[-90]
+				\inetwire(C.pal)(R.pal)
+				\inetwirefree(R.pax)
+				\node[right] at (R.above pax) {$\mathit{out}$};
+			}{
+				\agentConcrete{C}{0}[90]
+				\inetwirefree(C.pal)
+				\node[right] at (C.above pal) {$\mathit{out}$};
+			} \\
+			% k > 0
+			\interactionrule[$k > 0$]{
+				\agentConcrete{C}{k}[90]
+				\agentReLU[right=of C.pal]{R}[-90]
+				\inetwire(C.pal)(R.pal)
+				\inetwirefree(R.pax)
+				\node[right] at (R.above pax) {$\mathit{out}$};
+			}{
+				\agentConcrete{C}{k}[90]
+				\inetwirefree(C.pal)
+				\node[right] at (C.above pal) {$\mathit{out}$};
+			} \\
+		\end{tabular}
+	}
+	\caption{Interaction rules for $\mathit{Concrete}$ and $\mathit{ReLU}$.}
+	\label{fig:rule-concrete-relu}
+\end{figure}
+
+When a \textit{Linear} is materialized it will explicitly build an AST using \textit{TermAdd} and \textit{TermMul}
+to recreate $q*x+r$ as shown in \textbf{\Cref{fig:rule-linear-materialize}}.
+When a \textit{Concrete} needs to be materialized nothing needs to be done and it is directly wired to output
+\textbf{\Cref{fig:rule-concrete-materialize}}.
+
+% Linear >< Materialize
+\begin{figure}[ht]
+	\centering
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}{c}
+			% otherwise
+			\interactionrule{
+				\agentLinear{L}{q}{r}[90]
+				\agentMaterialize[right=of L.pal]{MAT}[-90]
+				\inetwire(L.pal)(MAT.pal)
+				\inetwirefree(L.pax) \inetwirefree(MAT.pax)
+				\node [left] at (L.above pax) {$\mathit{x}$};
+				\node [right] at (MAT.above pax) {$\mathit{out}$};
+			}{
+				\agentTermAdd{TA}[90]
+				\agentTermMul[left=of TA.pax 1]{TM}[90]
+				\agentConcrete[left=of TA.pax 2, below=of TM]{C1}{r}[90]
+				\agentConcrete[left=of TM.pax 1]{C2}{q}[90]
+				\inetwire(TA.pax 1)(TM.pal) \inetwire(TA.pax 2)(C1.pal) \inetwire(TM.pax 1)(C2.pal)
+				\inetwirefree(TA.pal) \inetwirefree(TM.pax 2)
+				\node [left] at (TM.above pax 2) {$\mathit{x}$};
+				\node [right] at (TA.above pal) {$\mathit{out}$};
+			} \\
+			% q == 0
+			\interactionrule[$q=0$]{
+				\agentLinear{L}{0}{r}[90]
+				\agentMaterialize[right=of L.pal]{MAT}[-90]
+				\inetwire(L.pal)(MAT.pal)
+				\inetwirefree(L.pax) \inetwirefree(MAT.pax)
+				\node [left] at (L.above pax) {$\mathit{x}$};
+				\node [right] at (MAT.above pax) {$\mathit{out}$};
+			}{
+				\agentConcrete{C}{r}[90]
+				\agentEraser[below=of C]{E}[90]
+				\inetwirefree(C.pal) \inetwirefree(E.pal)
+				\node [right] at (C.above pal) {$\mathit{out}$};
+				\node [right] at (E.above pal) {$\mathit{x}$};
+			} \\
+			% (q == 1) && (r == 0)
+			\interactionrule[$(q=1)\land(r=0)$]{
+				\agentLinear{L}{1}{0}[90]
+				\agentMaterialize[right=of L.pal]{MAT}[-90]
+				\inetwire(L.pal)(MAT.pal)
+				\inetwirefree(L.pax) \inetwirefree(MAT.pax)
+				\node [left] at (L.above pax) {$\mathit{x}$};
+				\node [right] at (MAT.above pax) {$\mathit{out}$};
+			}{
+				\node(out) at (-1,0) {$\mathit{out}$};
+				\node(x) at (1, 0) {$\mathit{x}$};
+				\draw[\inetwirestyle] (x) -- (out);
+			} \\
+			% (q == 1) && (r != 0)
+			\interactionrule[$(q=1)\land(r\neq0)$]{
+				\agentLinear{L}{1}{r}[90]
+				\agentMaterialize[right=of L.pal]{MAT}[-90]
+				\inetwire(L.pal)(MAT.pal)
+				\inetwirefree(L.pax) \inetwirefree(MAT.pax)
+				\node [left] at (L.above pax) {$\mathit{x}$};
+				\node [right] at (MAT.above pax) {$\mathit{out}$};
+			}{
+				\agentTermAdd{TA}[90]
+				\agentConcrete[left=of TA.right pax]{C}{r}[90]
+				\inetwire(C.pal)(TA.pax 2)
+				\inetwirefree(TA.pax 1) \inetwirefree(TA.pal)
+				\node [left] at (TA.above pax 1) {$\mathit{x}$};
+				\node [right] at (TA.above pal) {$\mathit{out}$};
+			} \\
+			% (q != 0) && (r == 0)
+			\interactionrule[$(q\neq0)\land(r=0)$]{
+				\agentLinear{L}{q}{0}[90]
+				\agentMaterialize[right=of L.pal]{MAT}[-90]
+				\inetwire(L.pal)(MAT.pal)
+				\inetwirefree(L.pax) \inetwirefree(MAT.pax)
+				\node [left] at (L.above pax) {$\mathit{x}$};
+				\node [right] at (MAT.above pax) {$\mathit{out}$};
+			}{
+				\agentTermMul{TM}[90]
+				\agentConcrete[left=of TM.left pax]{C}{q}[90]
+				\inetwire(C.pal)(TM.pax 1)
+				\inetwirefree(TM.pax 2) \inetwirefree(TM.pal)
+				\node [left] at (TM.above pax 2) {$\mathit{x}$};
+				\node [right] at (TM.above pal) {$\mathit{out}$};
+			} \\
+		\end{tabular}
+	}
+	\caption{Interaction rules for $\mathit{Linear}$ and $\mathit{Materialize}$.}
+	\label{fig:rule-linear-materialize}
+\end{figure}
+
+% Concrete >< Materialize
+\begin{figure}[ht]
+	\centering
+	\resizebox{\textwidth}{!}{
+		\interactionrule{
+			\agentConcrete{C}{k}[90]
+			\agentMaterialize[right=of C.pal]{MAT}[-90]
+			\inetwire(C.pal)(MAT.pal)
+			\inetwirefree(MAT.pax)
+			\node [right] at (MAT.above pax) {$\mathit{out}$};
+		}{
+			\agentConcrete{C}{k}[90]
+			\inetwirefree(C.pal)
+			\node [right] at (C.above pal) {$\mathit{out}$};
+		}
+	}
+	\caption{Interaction rule for $\mathit{Concrete}$ and $\mathit{Materialize}$.}
+	\label{fig:rule-concrete-materialize}
+\end{figure}

@@ -1,0 +1,85 @@
+% Linear
+\newcommand{\agentLinear}[4][]{% [#1=options, #2=name, #3=q, #4=r]
+	\inetcell[arity=1, #1](#2){$\mathit{L}_{#3,#4}$}
+}
+% Concrete
+\newcommand{\agentConcrete}[3][]{% [#1=options, #2=name, #3=k]
+	\inetcell[arity=0, #1](#2){$\mathit{C}_{#3}$}
+}
+% Add
+\newcommand{\agentAdd}[2][]{% [#1=options, #2=name]
+	\inetcell[arity=2, #1](#2){$\mathit{A}$}
+}
+% Mul
+\newcommand{\agentMul}[2][]{% [#1=options, #2=name]
+	\inetcell[arity=2, #1](#2){$\mathit{M}$}
+}
+% ReLU
+\newcommand{\agentReLU}[2][]{% [#1=options, #2=name]
+	\inetcell[arity=1, #1](#2){$\mathit{R}$} 
+}
+% AddCheckLinear
+\newcommand{\agentAddCheckLinear}[4][]{% [#1=options, #2=name, #3=q, #4=r]
+	\inetcell[arity=2, #1](#2){$\mathit{AL}_{#3,#4}$}
+}
+% MulCheckLinear
+\newcommand{\agentMulCheckLinear}[4][]{% [#1=options, #2=name, #3=q, #4=r
+	\inetcell[arity=2, #1](#2){$\mathit{ML}_{#3,#4}$}
+}
+% AddCheckConcrete
+\newcommand{\agentAddCheckConcrete}[3][]{% [#1=options, #2=name, #3=k]
+	\inetcell[arity=1, #1](#2){$\mathit{AC}_{#3}$}
+}
+% MulCheckConcrete
+\newcommand{\agentMulCheckConcrete}[3][]{% [#1=options, #2=name, #3=k]
+	\inetcell[arity=1, #1](#2){$\mathit{MC}_{#3}$}
+}
+% Materialize
+\newcommand{\agentMaterialize}[2][]{% [#1=options, #2=name]
+	\inetcell[arity=1, #1](#2){$\mathit{MAT}$}
+}
+% Eraser
+\newcommand{\agentEraser}[2][]{% [#1=options, #2=name]
+	\inetcell[arity=0, #1](#2){$\epsilon$}
+}
+% Duplicator
+\newcommand{\agentDuplicator}[2][]{% [#1=options, #2=name]
+	\inetcell[arity=2, #1](#2){$\delta$}
+}
+% TermAdd
+\newcommand{\agentTermAdd}[2][]{% [#1=options, #2=name]
+	\inetcell[arity=2, #1](#2){$\mathit{TA}$}
+}
+% TermMul
+\newcommand{\agentTermMul}[2][]{% [#1=options, #2=name]
+	\inetcell[arity=2, #1](#2){$\mathit{TM}$}
+}
+% TermReLU
+\newcommand{\agentTermReLU}[2][]{% [#1=options, #2=name]
+	\inetcell[arity=1, #1](#2){$\mathit{TR}$}
+}
+% Symbolic
+\newcommand{\agentSymbolic}[3][]{% [#1=options, #2=name, #3=symbol]
+	\inetcell[arity=0, #1](#2){$\mathit{S_{#3}}$}
+}
+% Interaction Rule
+\newcommand{\interactionrule}[3][]{
+	\begin{tikzpicture}
+		\node(arrow) at (0,0){
+			\begin{tikzpicture}
+				\node (arrow) at (0,0) {$\longrightarrow$};
+				\if\relax\detokenize{#1}\relax\else
+					\node[above=0.1cm of arrow, font=\scriptsize\itshape] {#1};
+				\fi
+			\end{tikzpicture}
+		};
+		% LHS
+		\node(LHS)[left=of arrow]{
+			\begin{tikzpicture} #2 \end{tikzpicture}
+		};
+		% RHS
+		\node(RHS)[right=of arrow]{
+			\begin{tikzpicture} #3 \end{tikzpicture}
+		};
+	\end{tikzpicture}
+}
