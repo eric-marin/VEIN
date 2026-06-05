@@ -1,67 +1,106 @@
 \chapter{Introduction}
 \label{ch:introduction}
 
-This chapter provides an overview of the thesis.
-
 % Context
-Artificial Intelligence systems made significant advancements in the last few years and enabled us to
-enter a new age of computing. Most of the credit goes to deep neural networks and their exceptional
-capacity of representing non-linear functions. But they don't come without drawbacks: neural
-networks are ``black boxes'' that lack transparency. To take advantage of these powerful tools in
-critical system guarantees need to be provided.
+Artificial Intelligence systems have made significant advancements in the last few years and enabled
+us to enter a new age of computing. Most of the credit goes to deep neural networks, and to their
+exceptional capacity for representing non-linear functions. But they do not come without drawbacks:
+neural networks are ``black boxes'' that lack transparency. To take advantage of these powerful
+tools in critical systems such as medicine and aerospace, we need to provide formal guarantees to
+ensure their safety and trustworthiness.
 
 % Problem
-Neural networks can be viewed as mathematical functions and SMT solvers are used to check properties,
-like equivalence, against them. Running a solver against a complex function is computationally
-expensive, it is important to make sure that the function is simplified as much as possible to take
-away useless burden from the solver.
+In the field of neural network verification, a verification problem is composed of: a trained neural
+network and a set of specifications. Then a verification algorithm checks whether the specifications
+either hold or are violated. The kind of properties that can be verified are two:
+\begin{itemize}
+	\item \textbf{Single-Network}: we check if a single neural network satisfies a given property.
+	\item \textbf{Multi-Network}: we check if multiple neural networks satisfy a given relation.
+\end{itemize}
+An example of a Multi-Network property is equivalence between different neural networks; this
+verification is crucial if we want to replace a neural network with a smaller, equivalent one.
+Techniques based on specialized \textit{Satisfiability Modulo Theories} (SMT) solvers may be used in
+the verification algorithm, however, as networks grow in depth and width, the number of non-linear
+components, most notably the \textit{Rectified Linear Unit}\footnote{Defined as $f(x)=\max(0, x)$, where $x$ is
+the input to the neuron.} (ReLU) activation function, creates an exponential search space for the
+solver. Because of this issue, running a solver against a raw, unoptimized network is often
+computationally prohibitive.
+
+Furthermore, we lack a formal intermediate representation. Since we are
+not able to directly feed a neural network to a SMT solver, a sound and deterministic model of
+representation is needed to bridge this gap.
 
 % Solution
-We present VEIN, a framework that leverages the computational properties of interaction nets to
-perform symbolic simplification of neural networks prior to formal verification.
-The system is composed of two primary modules: a modified version of Inpla and the Z3 SMT solver for
-property validation.
-The tool is divided into three steps:
+To address the computational bottleneck, we can perform symbolic simplification on the neural
+network as a pre-processing step to reduce the burden on the SMT solver. Considering that we can
+easily map the layers and neurons of neural networks to graph nodes and that the input of a SMT
+solver is a mathematical formula that can be represented by an \textit{Abstract Syntax Tree} (AST), we can
+use a graph rewriting system as intermediate model. The motivation behind this choice is that this
+type of model would enable us to simultaneously apply the simplification and produce the AST by
+directly rewriting the graph obtained from the neural network.
+To model such graphs and these rewriting mechanisms, we leverage \textit{Interaction Nets}
+(IN)~\cite{lafont1990interactionnets}, a graphical model of computation characterized by local and
+parallel graph rewriting rules. Additionally, IN are \textit{strongly confluent}, meaning that they
+always reduce to a unique normal form regardless of the order in which simplification rules are
+applied. Thanks to these properties, the simplification of neural network graphs can be parallelized
+while maintaining determinism of the resulting AST. In the context of neural network equivalence,
+this is useful because comparing two neural networks becomes a comparison of two simplified
+canonical forms of the same intermediate model.
+
+Building on this capability, we developed \textbf{VEIN} (VErification via Interaction Nets), a
+framework for neural network verification focused on equivalence. This tool aims to verify both
+Single-Network and Multi-Network properties. The tool is composed of two primary modules:
 \begin{itemize}
-	\item \textbf{Translation}: a neural network in ONNX format is translated into an interaction net using
-		the Inpla string representation;
-	\item \textbf{Reduction}: the interaction net gets reduced to its normal form by Inpla;
-	\item \textbf{Evaluation}: the normal form gets processed along with the property to verify by Z3.
+	\item \textbf{Reduction engine}: a modified version of \textit{Interaction Nets as a Programming
+		LAnguage}\footnote{\href{https://github.com/inpla/inpla}{\textbf{INPLA Github repository}}.}
+		(INPLA), a multi-threaded parallel interpreter of IN, to simplify the neural
+		network graph;
+	\item \textbf{Solver}: Z3~\cite{demoura2008z3} for property validation.
 \end{itemize}
-Z3 is not optimized for ReLU splitting, but it was chosen for its mature Python package.
-In any case a specialized solver like Marabou can be integrated to improve performance.
-Our contributions are:
+The tool runtime follows three steps:
 \begin{itemize}
-	\item \textbf{Interaction Rules}: we designed a set of interaction rules to enable symbolic constant
-		folding;
-	\item \textbf{ONNX-Interaction Net Translation}: we developed a translation procedure for ONNX models to
-		interaction net;
-	\item \textbf{Soundness Analysis}: we provided a formal proof that the interaction net reduction preserves
-		the mathematical properties of the neural network;
-	\item \textbf{Experimental Evaluation}: we conducted an extensive benchmarking on widely known datasets and
-		common VNN-COMP datasets of varying complexity.
+	\item \textbf{Translation}: the system translates a neural network in \textit{Open Neural Network
+		Exchange}\footnote{\href{https://onnx.ai/}{\textbf{ONNX Website}}.}
+		(ONNX) file format, an open format built to represent machine learning models, into an IN;
+	\item \textbf{Reduction}: the INPLA engine reduces the IN to its normal form using the graph
+		rewriting rules that implement symbolic constant folding and identity elimination;
+	\item \textbf{Evaluation}: then we parse the resulting normal form into Z3 representation and run the
+		solver to evaluate it along with the provided specification.
 \end{itemize}
 
 % Validation
-Our interaction nets pipeline soundness is proven by induction on the number of interaction steps,
-demonstrating that the ONNX translation and each interaction rule preserves the semantic meaning of
-the original neural network. Furthermore, interaction nets are deterministic and strongly confluent,
-meaning they will always reduce to the same normal form because interactions are local and linear. 
-In addition to this formal analysis, we conducted several benchmarks on checking equivalence between
-a neural network trained on a dataset and a transformation.
+We prove the soundness of our IN pipeline by induction on the number of interaction steps,
+demonstrating that the ONNX translation and each interaction rule preserve the semantic meaning of
+the original neural network. In addition to this formal analysis, we conducted several benchmarks on
+checking equivalence between a neural network trained on a dataset and a transformation.
+
+% Contributions
+The development of the VEIN framework and the design of its underlying simplification layer
+constitute the primary work of this thesis. To address the challenges of verification complexity (A)
+and the need for a formal model of representation (B), this thesis introduces several key
+contributions:
+\begin{itemize}
+	\item \textbf{Interaction Rules (Solves A)}: we designed a set of interaction rules to enable graph
+		rewriting for symbolic constant folding while producing an AST ready to be parsed for the SMT
+		solver;
+	\item \textbf{ONNX-Interaction Net Translation (Solves B)}: we developed a translation procedure for ONNX
+		models to IN;
+	\item \textbf{Soundness Analysis (Validates A/B)}: we provide a formal proof that the IN reduction
+		preserves the mathematical properties of the neural network;
+	\item \textbf{Experimental Evaluation (Validates A/B Empirically)}: we conducted an extensive benchmarking
+		on widely known datasets and common \textit{International Verification of Neural Networks
+		Competition}\footnote{The premier international competition dedicated to evaluating and advancing
+		the state-of-the-art in neural network verification, see the
+		\href{https://vnn-comp.github.io/}{\textbf{website}}.} (VNN-COMP) datasets of varying complexity.
+\end{itemize}
 
 % Outline
 \section{Outline}
 \label{sec:outline}
 This section outlines the organization of the thesis:
 \begin{itemize}
-	\item \textbf{\Cref{ch:background}}: Introduces key concepts to understand the contributions...
-	\begin{itemize}
-		\item \textbf{\Cref{sec:neural-networks}}: Introduces the concepts of neural networks and deep learning...
-		\item \textbf{\Cref{sec:interaction-nets}}: Introduces the interaction net computational model...
-		\item \textbf{\Cref{sec:satisfiability-modulo-theories}}: Introduces SMT solvers...
-	\end{itemize}
-	\item \textbf{\Cref{ch:core}}: Dives deeper into the implementation...
+	\item \textbf{\Cref{ch:background}}: Introduces key concepts needed to understand the main work...
+	\item \textbf{\Cref{ch:core}}: Dives deeper into the details...
 	\item \textbf{\Cref{ch:related-work}}: Analyzes existing verification approaches...
 	\item \textbf{\Cref{ch:conclusion}}: Summarizes the findings and discusses future work...
 \end{itemize}

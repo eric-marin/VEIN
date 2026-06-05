@@ -8,7 +8,7 @@ The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into t
 	\item
 		\textbf{Carriers}: Agents that contain float attributes.
 		\begin{itemize}
-			\item \textbf{Linear}: Represents the linear transformation $f(x) = q \cdot x + r$.
+			\item \textbf{Linear}: Represents the affine transformation $f(x) = q \cdot x + r$.
 			\item \textbf{Concrete}: Represents a constant value $k$.
 		\end{itemize}
 	\item
@@ -17,8 +17,8 @@ The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into t
 			\item \textbf{Add}: Binary operator for addition.
 			\item \textbf{Mul}: Binary operator for multiplication.
 			\item \textbf{ReLU}: Unary operator for rectified linear unit.
-			\item \textbf{Eraser}: Built-in Inpla unary operator to delete other agents.
-			\item \textbf{Duplicator}: Built-in Inpla unary operator to duplicate other agents.
+			\item \textbf{Eraser}: Built-in INPLA unary operator to delete other agents.
+			\item \textbf{Duplicator}: Built-in INPLA unary operator to duplicate other agents.
 		\end{itemize}
 	\item
 		\textbf{Intermediates}: Agents needed to perform each step of the operators.
@@ -227,7 +227,7 @@ enables short-circuiting. In \textbf{\Cref{fig:rule-concrete-add}} we can see th
 with $k=0$ we do not need to check the other operand and we simply wire it to the output.
 This rewiring is also implemented when multiplying a \textit{Concrete} with $k=1$, as shown in
 \textbf{\Cref{fig:rule-concrete-mul}}, with the addition that when $k=0$ the other operand is deleted
-before the SMT solver is even invoked.
+before is even invoked.
 
 % Concrete >< Add
 \begin{figure}[ht]
@@ -249,6 +249,7 @@ before the SMT solver is even invoked.
 				\node[right] at (AC.above pal) {$\mathit{b}$};
 				\node[left] at (AC.above pax) {$\mathit{out}$};
 			} \\
+			\hline
 			% k == 0
 			\interactionrule[$k=0$]{
 				\agentConcrete{C}{0}[90]
@@ -288,6 +289,7 @@ before the SMT solver is even invoked.
 				\node[right] at (MC.above pal) {$\mathit{b}$};
 				\node[left] at (MC.above pax) {$\mathit{out}$};
 			} \\
+			\hline
 			% k == 0
 			\interactionrule[$k=0$]{
 				\agentConcrete{C}{0}[90]
@@ -303,6 +305,7 @@ before the SMT solver is even invoked.
 				\node[right] at (C.above pal) {$\mathit{out}$};
 				\node[right] at (E.above pal) {$\mathit{b}$};
 			} \\
+			\hline
 			% k == 1
 			\interactionrule[$k=1$]{
 				\agentConcrete{C}{1}[90]
@@ -359,6 +362,7 @@ $q=1,r=0$.
 				\node[left] at (L2.above pax) {$\mathit{y}$};
 				\node[right] at (L3.above pal) {$\mathit{out}$};
 			} \\
+			\hline
 			% (s == 0) && (t == 0)
 			\interactionrule[$(s=0)\land(t=0)$]{
 				\agentLinear{L}{0}{0}[90]
@@ -376,6 +380,7 @@ $q=1,r=0$.
 				\node[right] at (L.above pal) {$\mathit{out}$};
 				\node[right] at (E.above pal) {$\mathit{y}$};
 			} \\
+			\hline
 			% (q == 0) && (r == 0)
 			\interactionrule[$(q=0)\land(r=0)$]{
 				\agentLinear{L}{s}{t}[90]
@@ -393,6 +398,7 @@ $q=1,r=0$.
 				\node[right] at (L.above pal) {$\mathit{out}$};
 				\node[right] at (E.above pal) {$\mathit{x}$};
 			} \\
+			\hline
 			% (q == 0) && (r == 0) && (s == 0) && (t == 0)
 			\interactionrule[$(q=0)\land(r=0)\land(s=0)\land(t=0)$]{
 				\agentLinear{L}{0}{0}[90]
@@ -444,6 +450,7 @@ $q=1,r=0$.
 				\node[left] at (L2.above pax) {$\mathit{y}$};
 				\node[right] at (L3.above pal) {$\mathit{out}$};
 			} \\
+			\hline
 			% ((q == 0) && (r == 0)) || ((s == 0) && (t == 0))
 			\interactionrule[$((q=0)\land(r=0))\lor((s=0)\land(t=0))$]{
 				\agentLinear{L}{s}{t}[90]
@@ -578,6 +585,7 @@ or short-circuited as illustrated in \textbf{\Cref{fig:rule-concrete-addcheckcon
 				\inetwirefree(C.pal)
 				\node[right] at (C.above pal) {$\mathit{out}$};
 			} \\
+			\hline
 			% j == 0
 			\interactionrule[$j=0$]{
 				\agentConcrete{C}{0}[90]
@@ -613,6 +621,7 @@ or short-circuited as illustrated in \textbf{\Cref{fig:rule-concrete-addcheckcon
 				\inetwirefree(C.pal)
 				\node[right] at (C.above pal) {$\mathit{out}$};
 			} \\
+			\hline
 			% j == 0
 			\interactionrule[$j = 0$]{
 				\agentConcrete{C}{0}[90]
@@ -625,6 +634,7 @@ or short-circuited as illustrated in \textbf{\Cref{fig:rule-concrete-addcheckcon
 				\inetwirefree(C.pal)
 				\node[right] at (C.above pal) {$\mathit{out}$};
 			} \\
+			\hline
 			% j == 1
 			\interactionrule[$j = 1$]{
 				\agentConcrete{C}{1}[90]
@@ -644,7 +654,7 @@ or short-circuited as illustrated in \textbf{\Cref{fig:rule-concrete-addcheckcon
 \end{figure}
 
 When the \textit{Linear} carrier agent interacts with the \textit{ReLU} operator agents there is no
-enough informations to perform any simplification so, as shown in \textbf{\Cref{fig:rule-linear-relu}},
+enough information to perform any simplification so, as shown in \textbf{\Cref{fig:rule-linear-relu}},
 the agent is just materialized, passed to a \textit{TermReLU} and then wrapped in a \textit{Linear}.
 In \textbf{\Cref{fig:rule-concrete-relu}} is illustrated that when the \textit{Concrete} carrier agent
 meets the \textit{ReLU} agent, a \textit{Concrete} is wired to the output either with attribute $k$
@@ -693,6 +703,7 @@ if $k>0$ or with attribute equal $0$ otherwise.
 				\inetwirefree(C.pal)
 				\node[right] at (C.above pal) {$\mathit{out}$};
 			} \\
+			\hline
 			% k > 0
 			\interactionrule[$k > 0$]{
 				\agentConcrete{C}{k}[90]
@@ -739,6 +750,7 @@ When a \textit{Concrete} needs to be materialized nothing needs to be done and i
 				\node [left] at (TM.above pax 2) {$\mathit{x}$};
 				\node [right] at (TA.above pal) {$\mathit{out}$};
 			} \\
+			\hline
 			% q == 0
 			\interactionrule[$q=0$]{
 				\agentLinear{L}{0}{r}[90]
@@ -754,6 +766,7 @@ When a \textit{Concrete} needs to be materialized nothing needs to be done and i
 				\node [right] at (C.above pal) {$\mathit{out}$};
 				\node [right] at (E.above pal) {$\mathit{x}$};
 			} \\
+			\hline
 			% (q == 1) && (r == 0)
 			\interactionrule[$(q=1)\land(r=0)$]{
 				\agentLinear{L}{1}{0}[90]
@@ -767,6 +780,7 @@ When a \textit{Concrete} needs to be materialized nothing needs to be done and i
 				\node(x) at (1, 0) {$\mathit{x}$};
 				\draw[\inetwirestyle] (x) -- (out);
 			} \\
+			\hline
 			% (q == 1) && (r != 0)
 			\interactionrule[$(q=1)\land(r\neq0)$]{
 				\agentLinear{L}{1}{r}[90]
@@ -783,6 +797,7 @@ When a \textit{Concrete} needs to be materialized nothing needs to be done and i
 				\node [left] at (TA.above pax 1) {$\mathit{x}$};
 				\node [right] at (TA.above pal) {$\mathit{out}$};
 			} \\
+			\hline
 			% (q != 0) && (r == 0)
 			\interactionrule[$(q\neq0)\land(r=0)$]{
 				\agentLinear{L}{q}{0}[90]
