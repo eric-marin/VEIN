@@ -1,14 +1,14 @@
 import sys
 import vein
 
-def check_property(onnx_a, onnx_b, vnnlib):
+def check_property(onnx_a, onnx_b, smtlib):
     solver = vein.Solver()
 
-    print(f"--- Checking {vnnlib} ---")
+    print(f"--- Checking {smtlib} ---")
 
     solver.load_onnx(onnx_a)
     solver.load_onnx(onnx_b)
-    solver.load_vnnlib(vnnlib)
+    solver.load_smtlib(smtlib)
 
     result = solver.check()
 
@@ -35,39 +35,39 @@ if __name__ == "__main__":
         case "xor":
             net_a = "./examples/xor/xor_a.onnx"
             net_b = "./examples/xor/xor_b.onnx"
-            strict = "./examples/xor/xor_strict.vnnlib"
-            epsilon = "./examples/xor/xor_epsilon.vnnlib"
-            argmax = "./examples/xor/xor_argmax.vnnlib"
+            strict = "./examples/xor/xor_strict.smtlib"
+            epsilon = "./examples/xor/xor_epsilon.smtlib"
+            argmax = "./examples/xor/xor_argmax.smtlib"
         case "mnist":
             net_a = "./examples/mnist/mnist_a.onnx"
             net_b = "./examples/mnist/mnist_b.onnx"
-            strict = "./examples/mnist/mnist_strict.vnnlib"
-            epsilon = "./examples/mnist/mnist_epsilon.vnnlib"
-            argmax = "./examples/mnist/mnist_argmax.vnnlib"
+            strict = "./examples/mnist/mnist_strict.smtlib"
+            epsilon = "./examples/mnist/mnist_epsilon.smtlib"
+            argmax = "./examples/mnist/mnist_argmax.smtlib"
         case "iris":
             net_a = "./examples/iris/iris_a.onnx"
             net_b = "./examples/iris/iris_b.onnx"
-            strict = "./examples/iris/iris_strict.vnnlib"
-            epsilon = "./examples/iris/iris_epsilon.vnnlib"
-            argmax = "./examples/iris/iris_argmax.vnnlib"
+            strict = "./examples/iris/iris_strict.smtlib"
+            epsilon = "./examples/iris/iris_epsilon.smtlib"
+            argmax = "./examples/iris/iris_argmax.smtlib"
         case "acasxu":
             net_a = "./examples/ACASXU/ACASXU_run2a_1_1_batch_2000.onnx"
             net_b = "./examples/ACASXU/ACASXU_run2a_1_1_batch_2000.onnx"
-            strict = "./examples/ACASXU/ACASXU_strict.vnnlib"
-            epsilon = "./examples/ACASXU/ACASXU_epsilon.vnnlib"
-            argmax = "./examples/ACASXU/ACASXU_argmax.vnnlib"
+            strict = "./examples/ACASXU/ACASXU_strict.smtlib"
+            epsilon = "./examples/ACASXU/ACASXU_epsilon.smtlib"
+            argmax = "./examples/ACASXU/ACASXU_argmax.smtlib"
         case "pendulum":
             net_a = "./examples/pendulum/pendulum_finetune_con.onnx"
             net_b = "./examples/pendulum/pendulum_finetune_con.onnx"
-            strict = "./examples/pendulum/pendulum_strict.vnnlib"
-            epsilon = "./examples/pendulum/pendulum_epsilon.vnnlib"
-            argmax = "./examples/pendulum/pendulum_argmax.vnnlib"
+            strict = "./examples/pendulum/pendulum_strict.smtlib"
+            epsilon = "./examples/pendulum/pendulum_epsilon.smtlib"
+            argmax = "./examples/pendulum/pendulum_argmax.smtlib"
         case "double_integrator":
             net_a = "./examples/double_integrator/double_integrator_finetune_inv.onnx"
             net_b = "./examples/double_integrator/double_integrator_finetune_inv.onnx"
-            strict = "./examples/double_integrator/double_integrator_strict.vnnlib"
-            epsilon = "./examples/double_integrator/double_integrator_epsilon.vnnlib"
-            argmax = "./examples/double_integrator/double_integrator_argmax.vnnlib"
+            strict = "./examples/double_integrator/double_integrator_strict.smtlib"
+            epsilon = "./examples/double_integrator/double_integrator_epsilon.smtlib"
+            argmax = "./examples/double_integrator/double_integrator_argmax.smtlib"
         case _:
             print("Available Nets: 'xor', 'mnist', 'iris', 'acasxu', 'pendulum', 'double_integrator'")
             sys.exit()

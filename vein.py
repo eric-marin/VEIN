@@ -61,12 +61,12 @@ rules = """
         | k > 0 => out ~ (*L)Concrete(k)
         | _ => out ~ Concrete(0);
     Linear(x, float q, float r) >< Materialize(out)
-        | (q == 0) => out ~ Concrete(r), x ~ Eraser
+        | (q == 0) => out ~ TermConcrete(r), x ~ Eraser
         | (q == 1) && (r == 0) => out ~ x
-        | (q == 1) && (r != 0) => out ~ TermAdd(x, Concrete(r))
-        | (q != 0) && (r == 0) => out ~ TermMul(Concrete(q), x)
-        | _ => out ~ TermAdd(TermMul(Concrete(q), x), Concrete(r));
-    Concrete(float k) >< Materialize(out) => out ~ (*L)Concrete(k);
+        | (q == 1) && (r != 0) => out ~ TermAdd(x, TermConcrete(r))
+        | (q != 0) && (r == 0) => out ~ TermMul(TermConcrete(q), x)
+        | _ => out ~ TermAdd(TermMul(Concrete(q), x), TermConcrete(r));
+    Concrete(float k) >< Materialize(out) => out ~ (*L)TermConcrete(k);
 """
 
 _CACHE  = {}
@@ -97,36 +97,37 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
             if i.name == name: return i.type.tensor_type.shape.dim[-1].dim_value
         return None
 
-    def flatten_nest(agent_name: str, terms: List[str]) -> str:
+    def balanced_fanout(agent_name: str, terms: List[str]) -> str:
         if not terms: return "Eraser"
         if len(terms) == 1: return terms[0]
-        current = terms[0]
-        for i in range(1, len(terms)):
-            wire = wire_gen.next()
-            script.append(f"{wire} ~ {agent_name}({current}, {terms[i]});")
-            current = wire
-        return current
-
-    def balance_add(terms: List[str], sink: str):
-        if not terms:
-            script.append(f"{sink} ~ Eraser;")
-            return
-        if len(terms) == 1:
-            script.append(f"{sink} ~ {terms[0]};")
-            return
-
         nodes = terms
         while len(nodes) > 1:
             next_level = []
             for i in range(0, len(nodes), 2):
                 if i + 1 < len(nodes):
-                    wire_out = wire_gen.next()
-                    script.append(f"{nodes[i]} ~ Add({wire_out}, {nodes[i+1]});")
-                    next_level.append(wire_out)
+                    in_w = wire_gen.next()
+                    script.append(f"{in_w} ~ {agent_name}({nodes[i]}, {nodes[i+1]});")
+                    next_level.append(in_w)
                 else:
                     next_level.append(nodes[i])
             nodes = next_level
-        script.append(f"{nodes[0]} ~ {sink};")
+        return nodes[0]
+
+    def balanced_fanin(agent_name: str, terms: List[str]) -> str:
+        if not terms: return "Eraser"
+        if len(terms) == 1: return terms[0]
+        nodes = terms
+        while len(nodes) > 1:
+            next_level = []
+            for i in range(0, len(nodes), 2):
+                if i + 1 < len(nodes):
+                    res_w = wire_gen.next()
+                    script.append(f"{nodes[i]} ~ {agent_name}({res_w}, {nodes[i+1]});")
+                    next_level.append(res_w)
+                else:
+                    next_level.append(nodes[i])
+            nodes = next_level
+        return nodes[0]
 
     def op_gemm(node, override_attrs=None):
         attrs = override_attrs if override_attrs is not None else get_attrs(node)
@@ -144,7 +145,7 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
         out_terms = interactions.get(node.output[0]) or [[f"Materialize(result{j})"] for j in range(out_dim)]
 
         for j in range(out_dim):
-            sink = flatten_nest("Dup", out_terms[j])
+            sink = balanced_fanout("Dup", out_terms[j])
             neuron_terms = []
             for i in range(in_dim):
                 weight = float(alpha * W[j, i])
@@ -157,7 +158,8 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
             if bias_val != 0 or not neuron_terms:
                 neuron_terms.append(f"Concrete({bias_val})")
 
-            balance_add(neuron_terms, sink)
+            root = balanced_fanin("Add", neuron_terms)
+            script.append(f"{root} ~ {sink};")
 
     def op_matmul(node):
         op_gemm(node, override_attrs={"alpha": 1.0, "beta": 0.0, "transB": 0})
@@ -172,7 +174,7 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
         out_terms = interactions.get(node.output[0]) or [[f"Materialize(result{j})"] for j in range(dim)]
 
         for i in range(dim):
-            sink = flatten_nest("Dup", out_terms[i])
+            sink = balanced_fanout("Dup", out_terms[i])
             v = wire_gen.next()
             interactions[in_name][i].append(f"ReLU({v})")
             script.append(f"{v} ~ {sink};")
@@ -198,7 +200,7 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
         a_const = initializers.get(in_a)
 
         for i in range(dim):
-            sink = flatten_nest("Dup", out_terms[i])
+            sink = balanced_fanout("Dup", out_terms[i])
             if b_const is not None:
                 val = float(b_const.flatten()[i % b_const.size])
                 interactions[in_a][i].append(f"Add({sink}, Concrete({val}))")
@@ -228,17 +230,18 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
         a_const = initializers.get(in_a)
 
         for i in range(dim):
-            sink = flatten_nest("Dup", out_terms[i])
+            sink = balanced_fanout("Dup", out_terms[i])
             if b_const is not None:
                 val = float(b_const.flatten()[i % b_const.size])
                 interactions[in_a][i].append(f"Add({sink}, Concrete({-val}))")
             elif a_const is not None:
                 val = float(a_const.flatten()[i % a_const.size])
-                interactions[in_b][i].append(f"Add({sink}, Concrete({-val}))")
+                v_b = wire_gen.next()
+                interactions[in_b][i].append(f"Mul(Add({sink}, Concrete({val})), Concrete(-1.0))")
             else:
                 v_b = wire_gen.next()
-                interactions[in_a][i].append(f"Add({sink}, Mul({v_b}, Concrete(-1.0)))")
-                interactions[in_b][i].append(f"{v_b}")
+                interactions[in_a][i].append(f"Add({sink}, {v_b})")
+                interactions[in_b][i].append(f"Mul({v_b}, Concrete(-1.0))")
 
     def op_slice(node):
         in_name, out_name = node.input[0], node.output[0]
@@ -303,8 +306,8 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
     if graph.input:
         input = "input" if "input" in interactions else graph.input[0].name
         for i, terms in enumerate(interactions[input]):
-            sink = flatten_nest("Dup", terms)
-            script.append(f"{sink} ~ Linear(Symbolic(X_{i}), 1.0, 0.0);")
+            sink = balanced_fanout("Dup", terms)
+            script.append(f"{sink} ~ Linear(TermSymbolic(X_{i}), 1.0, 0.0);")
 
     result_lines = [f"result{i};" for i in range(len(interactions.get(graph.output[0].name, [])))]
     return "\n".join(script + result_lines)
@@ -325,18 +328,18 @@ def inpla_run(model: str) -> str:
 
 
 def z3_evaluate(model: str, X: dict):
-    def Symbolic(id):
+    def TermSymbolic(id):
         if id not in X:
             X[id] = z3.Real(id)
         return X[id]
-    def Concrete(val): return z3.RealVal(val)
+    def TermConcrete(val): return z3.RealVal(val)
     def TermAdd(a, b): return a + b
     def TermMul(a, b): return a * b
     def TermReLU(x): return z3.If(x > 0, x, 0)
 
     context = {
-        'Concrete': Concrete,
-        'Symbolic': Symbolic,
+        'TermConcrete': TermConcrete,
+        'TermSymbolic': TermSymbolic,
         'TermAdd': TermAdd,
         'TermMul': TermMul,
         'TermReLU': TermReLU
@@ -408,7 +411,7 @@ class Solver(z3.Solver):
         self.bounds: Dict[str, List[float]] = {}
         self.pending_nets: List[onnx.ModelProto] = []
 
-    def load_vnnlib(self, file_path: str):
+    def load_smtlib(self, file_path: str):
         with open(file_path, "r") as f:
             content = f.read()
 
