@@ -1,4 +1,36 @@
 \subsection{Python Module}
 \label{sec:python-module}
 
-% This subsection talks how the tool is contained in a neat python module and various optimizations
+The core functionality of the VEIN system is implemented via the \texttt{vein.Solver}, an extension of
+the \texttt{z3.Solver} class offered in the Z3 python
+package\footnote{\href{https://pypi.org/project/z3-solver}{\textbf{PyPi package}}}. This design choice
+ensures flexibility and ease of use for researchers already familiar with using the Z3 Python API.
+
+The methods offered by \texttt{vein.Solver} are:
+\begin{itemize}
+	\item \texttt{load\_onnx}: loads a neural network in ONNX file format.
+	\item \texttt{load\_smtlib}: loads a file containing the specification.
+	\item \texttt{check}: orchestrates the translation and reduction pipeline before invoking the
+		solver to check the specification against one or many neural networks.
+\end{itemize}
+
+The framework uses a \textit{lazy evaluation} strategy: when loading a neural network, it is placed
+into a pending queue and it is reduced to normal form only after the \texttt{check} method is
+called.
+
+The specification follows the SMT-LIB\footnote{\href{https://smt-lib.org}{\textbf{SMT-LIB Website}}}
+format. It should contain the input and output symbolic variables declaration, optional range
+constraints on the input variables and the properties to be verified. For Multi-Network (relational)
+verification, the system ensures that multiple networks share the same input symbolic variables.
+This approach allows Z3 to compare their outputs directly given the same inputs.
+
+The execution pipeline is implemented within the \texttt{check} method:
+\begin{itemize}
+	\item \texttt{inpla\_export}: invokes the translation layer to generate an IN.
+	\item \texttt{inpla\_run}: executes INPLA as a subprocess.
+	\item \texttt{z3\_evaluate}: parses the normal form, represented by an AST, and constructs the
+		Z3 expression.
+\end{itemize}
+This method utilizes a memoization technique to increase performance: if a specific pair of (neural
+network, range constraints) has been previously reduced to a normal form, the system retrieves the
+cached Z3 expression, instead of running the pipeline redundantly.

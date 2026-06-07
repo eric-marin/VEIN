@@ -1,4 +1,36 @@
 \subsection{Mathematical Definitions}
 \label{sec:mathematical-definitions}
 
-% This subsection contains the mathematical definitions used in the proof
+We define the semantic function $\llbracket \cdot \rrbracket$. This function maps the state of an IN
+to its equivalent mathematical interpretation. Wires and attributes in IN are mapped respectively to
+free variables and real numbers in the mathematical interpretation.
+
+The agents are defined as:
+\begin{itemize}
+	\item $\llbracket \mathit{Linear}(x, q, r) \sim \mathit{out} \rrbracket \iff \mathit{out} = q \cdot x + r $\\
+		where $x, \mathit{out}$ are wires and $q, r \in \mathbb{R}$ are attributes.
+	\item $\llbracket \mathit{Concrete}(k) \sim \mathit{out} \rrbracket \iff \mathit{out} = k$\\
+		where $\mathit{out}$ is a wire and $k \in \mathbb{R}$ is an attribute.
+	\item $\llbracket \mathit{Add}(\mathit{out}, b) \sim a \rrbracket \iff \mathit{out} = a + b$\\
+		where $a, b, \mathit{out}$ are wires.
+	\item $\llbracket \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \sim b \rrbracket \iff \mathit{out} = q \cdot x + (r + b)$\\
+		where $x, b, \mathit{out}$ are wires and $q, r \in \mathbb{R}$ are attributes.
+	\item $\llbracket \mathit{AddCheckConcrete}(\mathit{out}, k) \sim b \rrbracket \iff \mathit{out} = k + b$\\
+		where $b, \mathit{out}$ are wires and $k \in \mathbb{R}$ is an attribute.
+	\item $\llbracket \mathit{Mul}(\mathit{out}, b) \sim a \rrbracket \iff \mathit{out} = a \cdot b$\\
+		where $a, b, \mathit{out}$ are wires.
+	\item $\llbracket \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \sim b \rrbracket \iff \mathit{out} = q \cdot b \cdot x + r \cdot b$\\
+		where $x, b, \mathit{out}$ are wires and $q, r \in \mathbb{R}$ are attributes.
+	\item $\llbracket \mathit{MulCheckConcrete}(\mathit{out}, k) \sim b \rrbracket \iff \mathit{out} = k \cdot b$\\
+		where $b, \mathit{out}$ are wires and $k \in \mathbb{R}$ is an attribute.
+	\item $\llbracket \mathit{ReLU}(\mathit{out}) \sim x \rrbracket \iff \mathit{out} = \max(0, x)$\\
+		where $x, \mathit{out}$ are wires.
+	\item $\llbracket \mathit{Materialize}(\mathit{out}) \sim x \rrbracket \iff \mathit{out} = x$\\
+		where $x, \mathit{out}$ are wires.
+	\item $\llbracket \mathit{TermAdd}(a, b) \sim \mathit{out} \rrbracket \Rightarrow \mathit{out} = a + b$\\
+		where $a, b, \mathit{out}$ are wires.
+	\item $\llbracket \mathit{TermMul}(a, b) \sim \mathit{out} \rrbracket \Rightarrow \mathit{out} = a \cdot b$\\
+		where $a, b, \mathit{out}$ are wires.
+	\item $\llbracket \mathit{TermReLU}(x) \sim \mathit{out} \rrbracket \iff \mathit{out} = \max(0, x)$\\
+		where $x, \mathit{out}$ are wires.
+\end{itemize}

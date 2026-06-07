@@ -1,4 +1,55 @@
 \subsection{Inpla fork}
 \label{sec:inpla}
 
-% This subsection talks about my Inpla fork
+The  VEIN reduction engine utilizes a modified version of INPLA\footnote{\textbf{\href{https://github.com/inpla/inpla/blob/main/Gentle_introduction_Inpla.md}{INPLA documentation.}}},
+a multi-threaded parallel interpreter of IN. Performance and ease of use motivated the choice of
+INPLA. Additionally, it supports attribute values, which is a special extension that allows agents
+to hold numerical values at their ports.
+
+Several modifications adapt INPLA to the pipeline of the framework:
+\begin{itemize}
+	\item \textbf{Floating-Point arithmetic}: attributes were limited to integer values. To correctly
+		represent the computation performed by neural networks, the fork replaces the internal numerical
+		representation by floating-point types.
+	\item \textbf{Pipeline integration}: INPLA was designed for interactive use through the command line, so
+		various debugging and informational messages are printed along the actual output. To integrate
+		INPLA in our automated framework, the fork introduces a suppression flag to prevent unnecessary
+		printing from disrupting its execution.
+\end{itemize}
+
+\paragraph{INPLA syntax}
+INPLA evaluates nets, they consist of connections between terms. Terms are built on names and agents:
+\begin{verbatim}
+<term> ::= <name> | <agent>
+<name> ::= <nameID>
+<agent> ::= <agentID>
+          | <agentID> ['(' <term> ',' ... ',' <term> ')']
+\end{verbatim}
+\begin{itemize}
+	\item \textbf{Name}: it works as a buffer between terms.
+	\item \textbf{Agent}: it works as a constructor and de-constructor (defined functions).
+\end{itemize}
+A connection is a relation between two terms and the symbol \texttt{\~} expresses this relation.
+Interaction rules rewrite connections between agents:
+\begin{verbatim}
+<interaction-rule> ::= <rule-agent> '><' <rule-agent> '=>' <connections> ';'
+<rule-agent> ::= <agentID>
+               | <agentID> '(' <name> ',' ... ',' <name> ')'
+\end{verbatim}
+
+\paragraph{Example}
+Unary natural numbers are built by $\texttt{Z}$ (zero) and $\texttt{S}$ (successive function). For
+instance, 0, 1, 2, 3 are expressed as \texttt{Z}, \texttt{S(Z)}, \texttt{S(S(Z))}, \texttt{S(S(S(Z)))}. Here, let's think about an
+increment operation "inc" such that:
+\begin{verbatim}
+inc(n) = S(n).
+\end{verbatim}
+This is written as the following rules:
+\begin{verbatim}
+inc(r) >< Z => r ~ S(Z);
+inc(r) >< S(x) => r ~ S(S(x));
+\end{verbatim}
+Then, the result of \texttt{inc(r) \~{} S(S(Z))} is:
+\begin{verbatim}
+r ~ S(S(S(Z)));
+\end{verbatim}

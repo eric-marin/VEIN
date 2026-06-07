@@ -1,9 +1,7 @@
 \subsection{Interaction Rules}
 \label{sec:interaction-rules}
 
-This subsection contains the definition of the agents and the interaction rules that implement the symbolic simplification.
-
-The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into three groups:
+The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into four groups:
 \begin{itemize}
 	\item
 		\textbf{Carriers}: Agents that contain float attributes.
@@ -30,12 +28,12 @@ The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into t
 			\item \textbf{Materialize}: Converts a Linear agent into an explicit representation for the SMT solver.
 		\end{itemize}
 	\item
-		\textbf{Inerts}: Agents that will compose the normal form.
+		\textbf{Inerts}: Agents that compose the normal form.
 		\begin{itemize}
-			\item \textbf{TermAdd}: This agent that will be parsed as addition for the SMT solver.
-			\item \textbf{TermMul}: This agent that will be parsed as multiplication for the SMT solver.
-			\item \textbf{TermReLU}: This agent that will be parsed as rectified linear unit for the SMT solver.
-			\item \textbf{Symbolic}: This agent that will be parsed as specific variable for the SMT solver.
+			\item \textbf{TermAdd}: This agent is parsed as addition for the SMT solver.
+			\item \textbf{TermMul}: This agent is parsed as multiplication for the SMT solver.
+			\item \textbf{TermReLU}: This agent is parsed as rectified linear unit for the SMT solver.
+			\item \textbf{Symbolic}: This agent is parsed as specific variable for the SMT solver.
 		\end{itemize}
 \end{itemize}
 
@@ -172,11 +170,12 @@ The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into t
 	\label{fig:agents}
 \end{figure}
 
+\paragraph{Linear with Add/Mul}
 The \textit{Linear} carrier agent interacts directly with the \textit{Add} and \textit{Mul} operators agents as illustrated in
 \textbf{\Cref{fig:rule-linear-add}} and \textbf{\Cref{fig:rule-linear-mul}}. Because interactions are local, the binary
-operators need to check one operator at the time. For this reason \textit{Add} and \textit{Mul} gets replaced by
+operators need to check one operand a time. For this reason \textit{Add} and \textit{Mul} agents are replaced by
 \textit{AddCheckLinear} and \textit{MulCheckLinear} intermediate agents that carry the attributes $q$ and $r$ and their
-principal port is faced toward the other operand.
+principal port faces the other operand.
 
 % Linear >< Add
 \begin{figure}[ht]
@@ -222,12 +221,13 @@ principal port is faced toward the other operand.
 	\label{fig:rule-linear-mul}
 \end{figure}
 
+\paragraph{Concrete with Add/Mul}
 The same logic is applied to the \textit{Concrete} carrier agent, but here analyzing the attribute $k$
 enables short-circuiting. In \textbf{\Cref{fig:rule-concrete-add}} we can see that when summing a \textit{Concrete}
 with $k=0$ we do not need to check the other operand and we simply wire it to the output.
 This rewiring is also implemented when multiplying a \textit{Concrete} with $k=1$, as shown in
 \textbf{\Cref{fig:rule-concrete-mul}}, with the addition that when $k=0$ the other operand is deleted
-before is even invoked.
+before it is even invoked.
 
 % Concrete >< Add
 \begin{figure}[ht]
@@ -325,11 +325,13 @@ before is even invoked.
 	\label{fig:rule-concrete-mul}
 \end{figure}
 
+\paragraph{Linear with AddCheckLinear/MulCheckLinear}
 If both operands are \textit{Linear} agents they need to be materialized before being wrapped in another
 \textit{Linear} to allow further simplification. This is done because multiplying two linear packets
 gives a non-linear result.
-While adding two linear packets gives a linear result, it depends on two free variables and the \textit{Linear} agent
-only supports one. A solution to this could be storing a dictionay of variables instead of a single one.
+While adding two linear packets gives a linear result, it depends on two free variables and the
+\textit{Linear} agent only supports keeping track of one; consequently, the addition of two linear packets
+results in their materialization.
 This is illustrated in \textbf{\Cref{fig:rule-linear-addchecklinear}}
 and \textbf{\Cref{fig:rule-linear-mulchecklinear}} where the result of the materialization is passed
 to a TermAdd or TermMul, for Add and Mul respectively, and then to a \textit{Linear} with attributes
@@ -475,10 +477,11 @@ $q=1,r=0$.
 	\label{fig:rule-linear-mulchecklinear}
 \end{figure}
 
-Instead if the first operand is a \textit{Linear} agents and the second is a \textit{Concrete} agent different rules are applied.
-In the case of addition (\textbf{\Cref{fig:rule-concrete-addchecklinear}}) we add the attribute of the \textit{Concrete}
-agent to the attribute that represents the constant of the \textit{Linear} agent.
-For multiplication (\textbf{\Cref{fig:rule-concrete-mulchecklinear}}) we multiply the attribute of
+\paragraph{Concrete with AddCheckLinear/MulCheckLinear}
+If, instead, the first operand is a \textit{Linear} agents and the second is a \textit{Concrete} agent different rules
+are applied. In the case of addition (\textbf{\Cref{fig:rule-concrete-addchecklinear}}) the system adds the
+attribute of the \textit{Concrete} agent to the attribute that represents the constant of the \textit{Linear} agent.
+For multiplication (\textbf{\Cref{fig:rule-concrete-mulchecklinear}}) the system multiplies the attribute of
 the \textit{Concrete} agent to both the attributes of the \textit{Linear}
 
 % Concrete >< AddCheckLinear
@@ -521,6 +524,7 @@ the \textit{Concrete} agent to both the attributes of the \textit{Linear}
 	\label{fig:rule-concrete-mulchecklinear}
 \end{figure}
 
+\paragraph{Linear with AddCheckConcrete/MulCheckConcrete}
 In the rules shown in \textbf{\Cref{fig:rule-linear-addcheckconcrete}} and \textbf{\Cref{fig:rule-linear-mulcheckconcrete}}
 we follow the exact same logic except the first operand is a \textit{Concrete} and the second is a \textit{Linear}.
 
@@ -564,6 +568,7 @@ we follow the exact same logic except the first operand is a \textit{Concrete} a
 	\label{fig:rule-linear-mulcheckconcrete}
 \end{figure}
 
+\paragraph{Concrete with AddCheckConcrete/MulCheckConcrete}
 Finally if both operands are \textit{Concrete} agents they are either merged into a single \textit{Concrete}
 or short-circuited as illustrated in \textbf{\Cref{fig:rule-concrete-addcheckconcrete}} and
 \textbf{\Cref{fig:rule-concrete-mulcheckconcrete}} following a similar logic to the previous rules.
@@ -653,6 +658,7 @@ or short-circuited as illustrated in \textbf{\Cref{fig:rule-concrete-addcheckcon
 	\label{fig:rule-concrete-mulcheckconcrete}
 \end{figure}
 
+\paragraph{Linear/Concrete with ReLU}
 When the \textit{Linear} carrier agent interacts with the \textit{ReLU} operator agents there is no
 enough information to perform any simplification so, as shown in \textbf{\Cref{fig:rule-linear-relu}},
 the agent is just materialized, passed to a \textit{TermReLU} and then wrapped in a \textit{Linear}.
@@ -722,7 +728,8 @@ if $k>0$ or with attribute equal $0$ otherwise.
 	\label{fig:rule-concrete-relu}
 \end{figure}
 
-When a \textit{Linear} is materialized it will explicitly build an AST using \textit{TermAdd} and \textit{TermMul}
+\paragraph{Linear/Concrete with Materialize}
+When a \textit{Linear} is materialized it explicitly build an AST using \textit{TermAdd} and \textit{TermMul}
 to recreate $q*x+r$ as shown in \textbf{\Cref{fig:rule-linear-materialize}}.
 When a \textit{Concrete} needs to be materialized nothing needs to be done and it is directly wired to output
 \textbf{\Cref{fig:rule-concrete-materialize}}.

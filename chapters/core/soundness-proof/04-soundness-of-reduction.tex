@@ -1,4 +1,28 @@
 \subsection{Soundness of Reduction}
 \label{sec:soundness-of-reduction}
 
-% This subsection gives the proof that each reduction step doesn't alter the semantic
+Let $\text{IN}_0$ be the IN translated from a neural network $\text{NN}$. Let $\text{IN}_n$ be
+the IN after $n$ reduction steps. Then we need to prove:
+$$
+\forall n \in \mathbb{N} \quad \llbracket \text{IN}_n \rrbracket = \llbracket \text{NN} \rrbracket
+$$
+
+\paragraph{Base case: $n = 0$} By \textbf{\Cref{sec:soundness-of-translation}}, the initial
+$\text{IN}_0$ is constructed such that its semantics $\llbracket \text{IN}_0 \rrbracket$ exactly
+match the mathematical definition of the ONNX operators in $\text{NN}$.
+
+\paragraph{Induction step: $n \to n + 1$} Assume $\llbracket \text{IN}_n \rrbracket = \llbracket \text{NN} \rrbracket$.
+If $\text{IN}_n$ is in normal form, the proof is complete. Otherwise, there exists an active pair
+$A \bowtie B$ that reduces $\text{IN}_n$ to $\text{IN}_{n+1}$. By \textbf{\Cref{sec:soundness-of-interaction-rules}},
+the mathematical definition is preserved after any reduction step, it follows that:
+$$
+\llbracket \text{IN}_{n+1} \rrbracket = \llbracket \text{IN}_{n} \rrbracket
+$$
+By the inductive hypothesis:
+$$
+\llbracket \text{IN}_{n+1} \rrbracket = \llbracket \text{NN} \rrbracket
+$$
+
+By the principle of mathematical induction, $\text{IN}_n$ remains semantically equivalent to the
+original $\text{NN}$ at every step of the reduction process. Additionally, since IN are confluent,
+the reduced mathematical expression is unique regardless of order in which rules are applied.

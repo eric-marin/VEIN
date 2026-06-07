@@ -18,20 +18,19 @@ either hold or are violated. The kind of properties that can be verified are two
 	\item \textbf{Multi-Network}: we check if multiple neural networks satisfy a given relation.
 \end{itemize}
 An example of a Multi-Network property is equivalence between different neural networks; this
-verification is crucial if we want to replace a neural network with a smaller, equivalent one.
-Techniques based on specialized \textit{Satisfiability Modulo Theories} (SMT) solvers may be used in
-the verification algorithm, however, as networks grow in depth and width, the number of non-linear
-components, most notably the \textit{Rectified Linear Unit}\footnote{Defined as $f(x)=\max(0, x)$, where $x$ is
-the input to the neuron.} (ReLU) activation function, creates an exponential search space for the
-solver. Because of this issue, running a solver against a raw, unoptimized network is often
-computationally prohibitive.
+verification is crucial when replacing a neural network with a smaller, equivalent one. Techniques
+based on specialized \textit{Satisfiability Modulo Theories} (SMT) solvers may be used in the verification
+algorithm, however, as networks grow in depth and width, the number of non-linear components, most
+notably the \textit{Rectified Linear Unit}\footnote{Defined as $f(x)=\max(0, x)$, where $x$ is the input to the
+neuron.} (ReLU) activation function, creates an exponential search space for the solver. Because of
+this issue, running a solver against a raw, unoptimized network is often computationally prohibitive.
 
 Furthermore, we lack a formal intermediate representation. Since we are
 not able to directly feed a neural network to a SMT solver, a sound and deterministic model of
 representation is needed to bridge this gap.
 
 % Solution
-To address the computational bottleneck, we can perform symbolic simplification on the neural
+To address the computational bottleneck, symbolic simplification is performed on the neural
 network as a pre-processing step to reduce the burden on the SMT solver. Considering that we can
 easily map the layers and neurons of neural networks to graph nodes and that the input of a SMT
 solver is a mathematical formula that can be represented by an \textit{Abstract Syntax Tree} (AST), we can

@@ -1,4 +1,142 @@
-\subsection{ONNX Translation}
+\subsection{ONNX-to-IN Translation}
 \label{sec:translation}
 
-% This subsection talks about the function used to translate ONNX to Inpla syntax
+An ONNX neural network is organized as a \textit{Directed Acyclic Graph} (DAG), where nodes represent
+a specific mathematical operation. While in a standard DAG, a node can be connected to many nodes to
+share its value or result, in an IN, an agent has a fixed number of ports, with each port supporting
+at most one connection. This limitation is solved by utilizing the \textit{Dup} agent to create the
+necessary copies of a value required by the next operations. Since nodes do not know how successor
+nodes will utilize their outputs, the translation layer traverses the DAG in reverse order
+to be able to instantiate the correct number of \textit{Dup} agents. The main algorithm, illustrated
+in \textbf{\Cref{alg:onnx-to-in}}, maintains an \textit{interactions} dictionary data-structure, that maps each tensor
+name to a list of ports, to keep track of the graph traversal.
+
+To maximize the concurrency of the INPLA engine, the translation layer avoids generating linear
+chains of agents, opting instead for balanced binary trees for signal distribution (single input to
+multiple output) and signal reduction (multiple input to single output). As \textbf{\Cref{alg:balanced-fan-in}}
+and \textbf{\Cref{alg:balanced-fan-out}} illustrate, the depth of agent chains (especially \textit{Dup} chains)
+is limited to $O(\log N)$. The two algorithms are very similar, the difference is in how they wire the
+agents together: in the \textit{Fan-In} the principal port of the agents are facing the leaves, while in the
+\textit{Fan-Out} they are facing the root.
+
+\begin{algorithm}[ht]
+	\caption{Backwards ONNX-to-IN Translation}
+	\label{alg:onnx-to-in}
+	\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+	\Input{ONNX Graph $G$}
+	\Output{Inpla script $S$}
+
+	$interactions \leftarrow \emptyset$ \tcp*{Map: Tensor Name $\rightarrow$ List of ports}
+	$S \leftarrow \emptyset$
+	
+	\ForEach{neuron $y$ in $G.output$}{
+		$interactions[G.output][y] \leftarrow [\text{Materialize}(result_y)]$
+	}
+
+	\ForEach{node $N$ in \textbf{reverse}($G.nodes$)}{
+		\Switch{$N.type$}{
+			\Case{ReLU}{
+				\ForEach{neuron $i$ in $N.output$}{
+					$sink \leftarrow \text{BalancedFanOut}(interactions[N.output][i], \text{Dup}, S)$
+
+					$v \leftarrow \text{generate\_wire}()$
+
+					$interactions[N.input][i].\text{append}(\text{ReLU}(v))$
+
+					$S.\text{append}(v \sim sink)$
+				}
+			}
+			\Case{Gemm}{
+				\ForEach{neuron $j$ in $N.output$}{
+					$sink \leftarrow \text{BalancedFanOut}(interactions[N.output][j], \text{Dup}, S)$
+
+					$neuron\_terms \leftarrow \emptyset$
+
+					\ForEach{neuron $i$ in $N.input$}{
+						$v \leftarrow \text{generate\_wire}()$
+
+						$interactions[N.input][i].\text{append}(\text{Mul}(v, \text{Concrete}(N.alpha * N.weight[j, i])))$
+
+						$neuron\_terms.\text{append}(v)$
+					}
+
+					$neuron\_terms.\text{append}(\text{Concrete}(N.beta * N.bias[j]))$
+
+					$root \leftarrow \text{BalancedFanIn}(neuron\_terms, \text{Add}, S)$
+
+					$S.\text{append}(root \sim sink)$
+				}
+			}
+			\Case{Identity}{
+				$interactions[N.input] \leftarrow interactions[N.output]$
+			}
+		}
+	}
+
+	\ForEach{neuron $x$ in $G.input$}{
+		$sink \leftarrow \text{BalancedFanOut}(interactions[G.input][x], \text{Dup}, S)$
+
+		$S.\text{append}(sink \sim \text{Linear}(\text{Symbolic}(x), 1.0, 0.0))$
+	}
+
+	\Return{S}
+\end{algorithm}
+
+\begin{algorithm}[ht]
+	\caption{Balanced Fan-In}
+	\label{alg:balanced-fan-in}
+	\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+	\Input{A list of input signal wires $T$, Agent type $A$, Script $S$}
+	\Output{A single wire connected to the output of the balanced tree}
+
+	\If{$T = \emptyset$}{\Return{\text{Eraser}}}
+	\If{$|T| = 1$}{\Return{$T[0]$}}
+
+	\While{$|T| > 1$}{
+		$T' \leftarrow \emptyset$
+
+		\For{$i \leftarrow 0$ \KwTo $|T|-1$ \textbf{by} 2}{
+			\eIf{$i+1 < |T|$}{
+				$w_{out} \leftarrow \text{generate\_wire}()$
+
+				$S.\text{append}(T[i] \sim A(w_{out}, T[i+1]))$
+
+				$T'.\text{append}(w_{out})$
+			}{
+				$T'.\text{append}(T[i])$
+			}
+		}
+		$T \leftarrow T'$
+	}
+	\Return{$T[0]$}
+\end{algorithm}
+
+
+\begin{algorithm}[ht]
+	\caption{Balanced Fan-Out}
+	\label{alg:balanced-fan-out}
+	\SetKwInOut{Input}{Input}\SetKwInOut{Output}{Output}
+	\Input{A list of output signal wires $T$, Agent type $A$, Script $S$}
+	\Output{A single wire connected to the input of the balanced tree}
+
+	\If{$T = \emptyset$}{\Return{\text{Eraser}}}
+	\If{$|T| = 1$}{\Return{$T[0]$}}
+
+	\While{$|T| > 1$}{
+		$T' \leftarrow \emptyset$
+
+		\For{$i \leftarrow 0$ \KwTo $|T|-1$ \textbf{by} 2}{
+			\eIf{$i+1 < |T|$}{
+				$w_{out} \leftarrow \text{generate\_wire}()$
+
+				$S.\text{append}(w_{out} \sim A(T[i], T[i+1]))$
+
+				$T'.\text{append}(w_{out})$
+			}{
+				$T'.\text{append}(T[i])$
+			}
+		}
+		$T \leftarrow T'$
+	}
+	\Return{$T[0]$}
+\end{algorithm}

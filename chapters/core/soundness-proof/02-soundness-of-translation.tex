@@ -1,4 +1,54 @@
 \subsection{Soundness of Translation}
 \label{sec:soundness-of-translation}
 
-% This subsection gives the proof for ONNX-to-Inpla translation soundness
+We need to prove that for each ONNX operator a semantically equivalent IN is produced.
+
+\paragraph{ReLU}
+The ONNX ReLU operator for an input tensor X and output tensor Y is defined as:
+$$
+Y = \max(0, X)
+$$
+The translation layer produces, for each neuron, the interaction:
+$$
+\mathit{ReLU}(y_i) \sim x_i
+$$
+Applying the semantic function:
+$$
+\llbracket \mathit{ReLU}(y_i) \sim x_i \rrbracket \Rightarrow y_i = \max(0, x_i)
+$$
+Which is identical to the ONNX definition.
+
+\paragraph{Gemm}
+The ONNX Gemm (General Matrix Multiplication) operator for input tensors A, B, C, input $\alpha$
+and $\beta$ and output tensor Y is defined as:
+$$
+Y = \alpha \cdot A \cdot B + \beta \cdot C
+$$
+The translation layer produces, for each neuron, the interactions:
+$$
+\mathit{Mul}(v_i, \mathit{Concrete}(\alpha \cdot b_{j, i})) \sim a_i
+$$
+And for each layer:
+$$
+\mathit{Add}(\dots(\mathit{Add}(y_j, v_1),\dots), v_n) \sim \mathit{Concrete}(\beta \cdot c_j)
+$$
+Applying the semantic function:
+$$
+\begin{aligned}
+	\llbracket \mathit{Mul}(v_i, \mathit{Concrete}(\alpha \cdot b_{j, i})) \sim a_i \rrbracket \Rightarrow v_i = \alpha \cdot a_i \cdot b_{j, i}\\
+	\llbracket \mathit{Add}(\dots(\mathit{Add}(y_j, v_1),\dots), v_n) \sim \mathit{Concrete}(\beta \cdot c_j) \rrbracket \Rightarrow y_j = \sum_{i=1}^n v_i + \beta \cdot c_j
+\end{aligned}
+$$
+By substituting $v_i$, the result matches the ONNX definition.
+
+\paragraph{Identity}
+The ONNX Identity does not modify the numerical values of the tensors. As this operator results in a
+direct wire connection:
+$$
+y_i \sim x_i
+$$
+The semantic:
+$$
+\llbracket y_i \sim x_i \rrbracket \Rightarrow y_i = x_i
+$$
+trivially preserve the identity mapping.
