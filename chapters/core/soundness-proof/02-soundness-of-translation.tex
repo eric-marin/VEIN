@@ -3,7 +3,7 @@
 
 We need to prove that for each ONNX operator a semantically equivalent IN is produced.
 
-\paragraph{ReLU}
+\begin{lemma}
 The ONNX ReLU operator for an input tensor X and output tensor Y is defined as:
 $$
 Y = \max(0, X)
@@ -17,8 +17,9 @@ $$
 \llbracket \mathit{ReLU}(y_i) \sim x_i \rrbracket \Rightarrow y_i = \max(0, x_i)
 $$
 Which is identical to the ONNX definition.
+\end{lemma}
 
-\paragraph{Gemm}
+\begin{lemma}
 The ONNX Gemm (General Matrix Multiplication) operator for input tensors A, B, C, input $\alpha$
 and $\beta$ and output tensor Y is defined as:
 $$
@@ -40,15 +41,4 @@ $$
 \end{aligned}
 $$
 By substituting $v_i$, the result matches the ONNX definition.
-
-\paragraph{Identity}
-The ONNX Identity does not modify the numerical values of the tensors. As this operator results in a
-direct wire connection:
-$$
-y_i \sim x_i
-$$
-The semantic:
-$$
-\llbracket y_i \sim x_i \rrbracket \Rightarrow y_i = x_i
-$$
-trivially preserve the identity mapping.
+\end{lemma}

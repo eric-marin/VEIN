@@ -10,13 +10,17 @@ The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into f
 			\item \textbf{Concrete}: Represents a constant value $k$.
 		\end{itemize}
 	\item
-		\textbf{Operators}: Agents that perform some kind of operation on the carrier agents.
+		\textbf{Computational Operators}: Agents that perform some kind of operation on the carrier agents.
 		\begin{itemize}
 			\item \textbf{Add}: Binary operator for addition.
 			\item \textbf{Mul}: Binary operator for multiplication.
 			\item \textbf{ReLU}: Unary operator for rectified linear unit.
+		\end{itemize}
+	\item
+		\textbf{Structural Operators}: Agents that perform some kind of operation on net structure.
+		\begin{itemize}
 			\item \textbf{Eraser}: Built-in INPLA unary operator to delete other agents.
-			\item \textbf{Duplicator}: Built-in INPLA unary operator to duplicate other agents.
+			\item \textbf{Dup}: Built-in INPLA unary operator to duplicate other agents.
 		\end{itemize}
 	\item
 		\textbf{Intermediates}: Agents needed to perform each step of the operators.
@@ -28,32 +32,37 @@ The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into f
 			\item \textbf{Materialize}: Converts a Linear agent into an explicit representation for the SMT solver.
 		\end{itemize}
 	\item
-		\textbf{Inerts}: Agents that compose the normal form.
+		\textbf{Terminals}: Agents that compose the normal form.
 		\begin{itemize}
 			\item \textbf{TermAdd}: This agent is parsed as addition for the SMT solver.
 			\item \textbf{TermMul}: This agent is parsed as multiplication for the SMT solver.
 			\item \textbf{TermReLU}: This agent is parsed as rectified linear unit for the SMT solver.
-			\item \textbf{Symbolic}: This agent is parsed as specific variable for the SMT solver.
+			\item \textbf{TermSymbolic}: This agent is parsed as a specific variable for the SMT solver.
+			\item \textbf{TermConcrete}: This agent is parsed as a real value for the SMT solver.
 		\end{itemize}
 \end{itemize}
 
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\resizebox{\textwidth}{!}{
-		\begin{tabular}{cccc}
+		\begin{tabular}{ccccc}
 			% Linear
+			&
 			\begin{tikzpicture}
 				\agentLinear{L}{q}{r}
 				\inetwirefree(L.pal) \inetwirefree(L.pax)
 				\node[below] at (L.above pal) {$\mathit{out}$};
 				\node[above] at (L.above pax) {$\mathit{x}$};
 			\end{tikzpicture} &
+			&
 			% Concrete
 			\begin{tikzpicture}
 				\agentConcrete{C}{k}
 				\inetwirefree(C.pal)
 				\node[below] at (C.above pal) {$\mathit{out}$};
-			\end{tikzpicture} &
+			\end{tikzpicture} & \\
+			& (a) $\mathit{Linear}$ & & (b) $\mathit{Concrete}$ & \\[0.5cm]
+
 			% Add
 			\begin{tikzpicture}
 				\agentAdd{A}
@@ -69,22 +78,13 @@ The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into f
 				\node[below] at (M.above pal) {$\mathit{a}$};
 				\node[above] at (M.above pax 1) {$\mathit{out}$};
 				\node[above] at (M.above pax 2) {$\mathit{b}$};
-			\end{tikzpicture} \\
-			(a) $\mathit{Linear}$ & (b) $\mathit{Concrete}$ & (c) $\mathit{Add}$ & (d) $\mathit{Mul}$ \\[0.5cm]
-
+			\end{tikzpicture} &
 			% ReLU
 			\begin{tikzpicture}
 				\agentReLU{R}
 				\inetwirefree(R.pal) \inetwirefree(R.pax)
 				\node[below] at (R.above pal) {$\mathit{x}$};
 				\node[above] at (R.above pax) {$\mathit{out}$};
-			\end{tikzpicture} &
-			% Materialize
-			\begin{tikzpicture}
-				\agentMaterialize{MAT}
-				\inetwirefree(MAT.pal) \inetwirefree(MAT.pax)
-				\node[below] at (MAT.above pal) {$\mathit{x}$};
-				\node[above] at (MAT.above pax) {$\mathit{out}$};
 			\end{tikzpicture} &
 			% Eraser
 			\begin{tikzpicture}
@@ -100,7 +100,7 @@ The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into f
 				\node[above] at (D.above pax 1) {$\mathit{d_{1}}$};
 				\node[above] at (D.above pax 2) {$\mathit{d_{2}}$};
 			\end{tikzpicture} \\
-			(e) $\mathit{ReLU}$ & (f) $\mathit{Materialize}$ & (g) $\mathit{Eraser}$ & (h) $\mathit{Duplicator}$ \\[0.5cm]
+			(c) $\mathit{Add}$ & (d) $\mathit{Mul}$ & (e) $\mathit{ReLU}$ & (f) $\mathit{Eraser}$ & (g) $\mathit{Duplicator}$ \\[0.5cm]
 
 			% AddCheckLinear
 			\begin{tikzpicture}
@@ -131,8 +131,15 @@ The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into f
 				\inetwirefree(MC.pal) \inetwirefree(MC.pax)
 				\node[below] at (MC.above pal) {$\mathit{b}$};
 				\node[above] at (MC.above pax) {$\mathit{out}$};
+			\end{tikzpicture} &
+			% Materialize
+			\begin{tikzpicture}
+				\agentMaterialize{MAT}
+				\inetwirefree(MAT.pal) \inetwirefree(MAT.pax)
+				\node[below] at (MAT.above pal) {$\mathit{x}$};
+				\node[above] at (MAT.above pax) {$\mathit{out}$};
 			\end{tikzpicture} \\
-			(i) $\mathit{AddCheckLinear}$ & (j) $\mathit{MulCheckLinear}$ & (k) $\mathit{AddCheckConcrete}$ & (l) $\mathit{MulCheckConcrete}$ \\[0.5cm]
+			(h) $\mathit{AddCheckLinear}$ & (i) $\mathit{MulCheckLinear}$ & (j) $\mathit{AddCheckConcrete}$ & (k) $\mathit{MulCheckConcrete}$ & (l) $\mathit{Materialize}$ \\[0.5cm]
 
 			% TermAdd
 			\begin{tikzpicture}
@@ -157,13 +164,19 @@ The agents, illustrated in \textbf{\Cref{fig:agents}}, can be categorized into f
 				\node[below] at (TR.above pal) {$\mathit{out}$};
 				\node[above] at (TR.above pax) {$\mathit{x}$};
 			\end{tikzpicture} &
-			% Symbolic
+			% TermSymbolic
 			\begin{tikzpicture}
-				\agentSymbolic{S}{id}
+				\agentTermSymbolic{S}{id}
 				\inetwirefree(S.pal)
 				\node[below] at (S.above pal) {$\mathit{out}$};
+			\end{tikzpicture} &
+			% TermConcrete
+			\begin{tikzpicture}
+				\agentTermConcrete{C}{k}
+				\inetwirefree(C.pal)
+				\node[below] at (C.above pal) {$\mathit{out}$};
 			\end{tikzpicture} \\
-			(m) $\mathit{TermAdd}$ & (n) $\mathit{TermMul}$ & (o) $\mathit{TermReLU}$ & (p) $\mathit{Symbolic}$ \\[0.5cm]
+			(m) $\mathit{TermAdd}$ & (n) $\mathit{TermMul}$ & (o) $\mathit{TermReLU}$ & (p) $\mathit{TermSymbolic}$ & (q) $\mathit{TermConcrete}$ \\[0.5cm]
 		\end{tabular}
 	}
 	\caption{Agents used in VEIN.}
@@ -178,7 +191,7 @@ operators need to check one operand a time. For this reason \textit{Add} and \te
 principal port faces the other operand.
 
 % Linear >< Add
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\interactionrule{
 		\agentLinear{L}{q}{r}[90]
@@ -200,7 +213,7 @@ principal port faces the other operand.
 \end{figure}
 
 % Linear >< Mul
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\interactionrule{
 		\agentLinear{L}{q}{r}[90]
@@ -230,7 +243,7 @@ This rewiring is also implemented when multiplying a \textit{Concrete} with $k=1
 before it is even invoked.
 
 % Concrete >< Add
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{c}
@@ -270,7 +283,7 @@ before it is even invoked.
 \end{figure}
 
 % Concrete >< Mul
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{c}
@@ -338,7 +351,7 @@ to a TermAdd or TermMul, for Add and Mul respectively, and then to a \textit{Lin
 $q=1,r=0$.
 
 % Linear >< AddCheckLinear
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{c}
@@ -426,7 +439,7 @@ $q=1,r=0$.
 \end{figure}
 
 % Linear >< MulCheckLinear
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{c}
@@ -485,7 +498,7 @@ For multiplication (\textbf{\Cref{fig:rule-concrete-mulchecklinear}}) the system
 the \textit{Concrete} agent to both the attributes of the \textit{Linear}
 
 % Concrete >< AddCheckLinear
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\interactionrule{
 		\agentConcrete{C}{j}[90]
@@ -505,7 +518,7 @@ the \textit{Concrete} agent to both the attributes of the \textit{Linear}
 \end{figure}
 
 % Concrete >< MulCheckLinear
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\interactionrule{
 		\agentConcrete{C}{j}[90]
@@ -529,7 +542,7 @@ In the rules shown in \textbf{\Cref{fig:rule-linear-addcheckconcrete}} and \text
 we follow the exact same logic except the first operand is a \textit{Concrete} and the second is a \textit{Linear}.
 
 % Linear >< AddCheckConcrete
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\interactionrule{
 		\agentLinear{L}{s}{t}[90]
@@ -549,7 +562,7 @@ we follow the exact same logic except the first operand is a \textit{Concrete} a
 \end{figure}
 
 % Linear >< MulCheckConcrete
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\interactionrule{
 		\agentLinear{L}{s}{t}[90]
@@ -574,7 +587,7 @@ or short-circuited as illustrated in \textbf{\Cref{fig:rule-concrete-addcheckcon
 \textbf{\Cref{fig:rule-concrete-mulcheckconcrete}} following a similar logic to the previous rules.
 
 % Concrete >< AddCheckConcrete
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{c}
@@ -610,7 +623,7 @@ or short-circuited as illustrated in \textbf{\Cref{fig:rule-concrete-addcheckcon
 \end{figure}
 
 % Concrete >< MulCheckConcrete
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{c}
@@ -659,7 +672,7 @@ or short-circuited as illustrated in \textbf{\Cref{fig:rule-concrete-addcheckcon
 \end{figure}
 
 \paragraph{Linear/Concrete with ReLU}
-When the \textit{Linear} carrier agent interacts with the \textit{ReLU} operator agents there is no
+When the \textit{Linear} carrier agent interacts with the \textit{ReLU} operator agents there is not
 enough information to perform any simplification so, as shown in \textbf{\Cref{fig:rule-linear-relu}},
 the agent is just materialized, passed to a \textit{TermReLU} and then wrapped in a \textit{Linear}.
 In \textbf{\Cref{fig:rule-concrete-relu}} is illustrated that when the \textit{Concrete} carrier agent
@@ -667,7 +680,7 @@ meets the \textit{ReLU} agent, a \textit{Concrete} is wired to the output either
 if $k>0$ or with attribute equal $0$ otherwise.
 
 % Linear >< ReLU
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\resizebox{\textwidth}{!}{
 		\interactionrule{
@@ -693,7 +706,7 @@ if $k>0$ or with attribute equal $0$ otherwise.
 \end{figure}
 
 % Concrete >< ReLU
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{c}
@@ -729,13 +742,13 @@ if $k>0$ or with attribute equal $0$ otherwise.
 \end{figure}
 
 \paragraph{Linear/Concrete with Materialize}
-When a \textit{Linear} is materialized it explicitly build an AST using \textit{TermAdd} and \textit{TermMul}
+When a \textit{Linear} is materialized it explicitly build an AST using \textit{TermAdd}, \textit{TermMul} and \textit{TermConcrete}
 to recreate $q*x+r$ as shown in \textbf{\Cref{fig:rule-linear-materialize}}.
-When a \textit{Concrete} needs to be materialized nothing needs to be done and it is directly wired to output
+When a \textit{Concrete} needs to be materialized it is converted into \textit{TermConcrete} as illustrated in
 \textbf{\Cref{fig:rule-concrete-materialize}}.
 
 % Linear >< Materialize
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\resizebox{\textwidth}{!}{
 		\begin{tabular}{c}
@@ -750,8 +763,8 @@ When a \textit{Concrete} needs to be materialized nothing needs to be done and i
 			}{
 				\agentTermAdd{TA}[90]
 				\agentTermMul[left=of TA.pax 1]{TM}[90]
-				\agentConcrete[left=of TA.pax 2, below=of TM]{C1}{r}[90]
-				\agentConcrete[left=of TM.pax 1]{C2}{q}[90]
+				\agentTermConcrete[left=of TA.pax 2, below=of TM]{C1}{r}[90]
+				\agentTermConcrete[left=of TM.pax 1]{C2}{q}[90]
 				\inetwire(TA.pax 1)(TM.pal) \inetwire(TA.pax 2)(C1.pal) \inetwire(TM.pax 1)(C2.pal)
 				\inetwirefree(TA.pal) \inetwirefree(TM.pax 2)
 				\node [left] at (TM.above pax 2) {$\mathit{x}$};
@@ -767,7 +780,7 @@ When a \textit{Concrete} needs to be materialized nothing needs to be done and i
 				\node [left] at (L.above pax) {$\mathit{x}$};
 				\node [right] at (MAT.above pax) {$\mathit{out}$};
 			}{
-				\agentConcrete{C}{r}[90]
+				\agentTermConcrete{C}{r}[90]
 				\agentEraser[below=of C]{E}[90]
 				\inetwirefree(C.pal) \inetwirefree(E.pal)
 				\node [right] at (C.above pal) {$\mathit{out}$};
@@ -798,7 +811,7 @@ When a \textit{Concrete} needs to be materialized nothing needs to be done and i
 				\node [right] at (MAT.above pax) {$\mathit{out}$};
 			}{
 				\agentTermAdd{TA}[90]
-				\agentConcrete[left=of TA.right pax]{C}{r}[90]
+				\agentTermConcrete[left=of TA.right pax]{C}{r}[90]
 				\inetwire(C.pal)(TA.pax 2)
 				\inetwirefree(TA.pax 1) \inetwirefree(TA.pal)
 				\node [left] at (TA.above pax 1) {$\mathit{x}$};
@@ -815,7 +828,7 @@ When a \textit{Concrete} needs to be materialized nothing needs to be done and i
 				\node [right] at (MAT.above pax) {$\mathit{out}$};
 			}{
 				\agentTermMul{TM}[90]
-				\agentConcrete[left=of TM.left pax]{C}{q}[90]
+				\agentTermConcrete[left=of TM.left pax]{C}{q}[90]
 				\inetwire(C.pal)(TM.pax 1)
 				\inetwirefree(TM.pax 2) \inetwirefree(TM.pal)
 				\node [left] at (TM.above pax 2) {$\mathit{x}$};
@@ -828,7 +841,7 @@ When a \textit{Concrete} needs to be materialized nothing needs to be done and i
 \end{figure}
 
 % Concrete >< Materialize
-\begin{figure}[ht]
+\begin{figure}[H]
 	\centering
 	\resizebox{\textwidth}{!}{
 		\interactionrule{
@@ -838,7 +851,7 @@ When a \textit{Concrete} needs to be materialized nothing needs to be done and i
 			\inetwirefree(MAT.pax)
 			\node [right] at (MAT.above pax) {$\mathit{out}$};
 		}{
-			\agentConcrete{C}{k}[90]
+			\agentTermConcrete{C}{k}[90]
 			\inetwirefree(C.pal)
 			\node [right] at (C.above pal) {$\mathit{out}$};
 		}

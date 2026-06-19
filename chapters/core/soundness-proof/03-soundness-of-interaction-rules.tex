@@ -1,507 +1,849 @@
 \subsection{Soundness of Interaction Rules}
 \label{sec:soundness-of-interaction-rules}
 
-\paragraph{Linear and Add}
-For the \textit{Linear} and \textit{Add} agents we have the interaction rule:
-$$
-\mathit{Linear}(x, q, r) \bowtie \mathit{Add}(\mathit{out}, b) \Rightarrow \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \sim b \\
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Linear}(x, q, r) \sim w \rrbracket \Rightarrow q \cdot x + r = w \\
-		& \llbracket \mathit{Add}(\mathit{out}, b) \sim w \rrbracket \Rightarrow \mathit{out} = w + b \\
-		& \Rightarrow \mathit{out} = (q \cdot x + r) + b
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: } & \llbracket \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \sim b \rrbracket \\
-		& \Rightarrow \mathit{out} = q \cdot x + (r + b)
-	\end{aligned}
-\end{aligned}
-$$
-Since $(q \cdot x + r) + b = q \cdot x + (r + b)$, the rule is sound.
-
-\paragraph{Linear and Mul}
-For the \textit{Linear} and \textit{Mul} agents we have the interaction rule:
-$$
-\mathit{Linear}(x, q, r) \bowtie \mathit{Mul}(\mathit{out}, b) \Rightarrow \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \sim b \\
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Linear}(x, q, r) \sim w \rrbracket \Rightarrow q \cdot x + r = w \\
-		& \llbracket \mathit{Mul}(\mathit{out}, b) \sim w \rrbracket \Rightarrow \mathit{out} = w \cdot b \\
-		& \Rightarrow \mathit{out} = (q \cdot x + r) \cdot b
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: } & \llbracket \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \sim b \rrbracket \\
-		& \Rightarrow \mathit{out} = q \cdot b \cdot x + r \cdot b
-	\end{aligned}
-\end{aligned}
-$$
-Since $(q \cdot x + r) \cdot b = q \cdot b \cdot x + r \cdot b$, the rule is sound.
-
-\paragraph{Concrete and Add}
-For the \textit{Concrete} and \textit{Add} agents we have the interaction rule:
-$$
-\mathit{Concrete}(k) \bowtie \mathit{Add}(\mathit{out}, b) \Rightarrow
-\begin{cases}
-	\mathit{out} \sim b & \text{if } k = 0 \\
-	\mathit{AddCheckConcrete}(\mathit{out}, k) \sim b & \text{otherwise}
-\end{cases}
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Concrete}(k) \sim w \rrbracket \Rightarrow k = w \\
-		& \llbracket \mathit{Add}(\mathit{out}, b) \sim w \rrbracket \Rightarrow \mathit{out} = w + b \\
-		& \Rightarrow \mathit{out} = k + b
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: }
-		\begin{cases}
-			\llbracket \mathit{out} \sim b \rrbracket \Rightarrow \mathit{out} = b & \text{if } k = 0 \\
-			\llbracket \mathit{AddCheckConcrete}(\mathit{out}, k) \sim b \rrbracket \Rightarrow \mathit{out} = k + b & \text{otherwise}
-		\end{cases}
-	\end{aligned}
-\end{aligned}
-$$
-Since:
-$$
-\begin{cases}
-	0 + b = b & \text{if } k = 0 \\
-	k + b = k + b & \text{otherwise}
-\end{cases}
-$$
-the rule is sound.
-
-\paragraph{Concrete and Mul}
-For the \textit{Concrete} and \textit{Mul} agents we have the interaction rule:
-$$
-\mathit{Concrete}(k) \bowtie \mathit{Mul}(\mathit{out}, b) \Rightarrow
-\begin{cases}
-	\mathit{out} \sim \mathit{Concrete}(0); b \sim \mathit{Eraser} & \text{if } k = 0 \\
-	\mathit{out} \sim  b & \text{if } k = 1 \\
-	\mathit{MulCheckConcrete}(\mathit{out}, k) \sim b & \text{otherwise}
-\end{cases}
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Concrete}(k) \sim w \rrbracket \Rightarrow k = w \\
-		& \llbracket \mathit{Mul}(\mathit{out}, b) \sim w \rrbracket \Rightarrow \mathit{out} = w \cdot b \\
-		& \Rightarrow \mathit{out} = k \cdot b
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: }
-		\begin{cases}
-			\llbracket \mathit{out} \sim \mathit{Concrete}(0); b \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = 0 & \text{if } k = 0 \\
-			\llbracket \mathit{out} \sim b \rrbracket \Rightarrow \mathit{out} = b & \text{if } k = 1 \\
-			\llbracket \mathit{MulCheckConcrete}(\mathit{out}, k) \sim b \rrbracket \Rightarrow \mathit{out} = k \cdot b & \text{otherwise}
-		\end{cases}
-	\end{aligned}
-\end{aligned}
-$$
-Since:
-$$
-\begin{cases}
-	0 \cdot b = 0 & \text{if } k = 0 \\
-	1 \cdot b = b & \text{if } k = 1 \\
-	k \cdot b = k \cdot b & \text{otherwise}
-\end{cases}
-$$
-the rule is sound.
-
-\paragraph{Linear and AddCheckLinear}
-For the \textit{Linear} and \textit{AddCheckLinear} agents we have the interaction rule:
-$$
-\begin{aligned}
-	& \mathit{Linear}(y, s, t) \bowtie \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \Rightarrow \\
-	& \quad \begin{cases}
-		\mathit{out} \sim \mathit{Concrete}(0); x \sim \mathit{Eraser}; y \sim \mathit{Eraser} & \text{if } q,r,s,t = 0 \\
-		\mathit{out} \sim  \mathit{Linear}(x, q, r); y \sim \mathit{Eraser} & \text{if } s,t = 0 \\
-		\mathit{out} \sim  \mathit{Linear}(y, s, t); x \sim \mathit{Eraser} & \text{if } q,r = 0 \\
-		\begin{aligned}
-			& \mathit{Linear}(x, q, r) \sim \mathit{Materialize}(\mathit{out}_x); \\
-			& \mathit{Linear}(y, s, t) \sim \mathit{Materialize}(\mathit{out}_y); \\
-			& \mathit{out} \sim \mathit{Linear}(\mathit{TermAdd}(\mathit{out}_x, \mathit{out}_y), 1, 0)
+\begin{lemma}
+	For the \textit{Linear} and \textit{Add} agents we have the interaction rule:
+	$$
+	\mathit{Linear}(x, q, r) \bowtie \mathit{Add}(\mathit{out}, b) \Rightarrow \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \sim b \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Linear}(x, q, r) \sim w \rrbracket \Rightarrow q \cdot x + r = w \\
+			& \llbracket \mathit{Add}(\mathit{out}, b) \sim w \rrbracket \Rightarrow \mathit{out} = w + b \\
+			& \Rightarrow \mathit{out} = (q \cdot x + r) + b
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \sim b \rrbracket \\
+			& \Rightarrow \mathit{out} = q \cdot x + (r + b)
 		\end{aligned}
-		& \text{otherwise}
-	\end{cases}
-\end{aligned}
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Linear}(y, s, t) \sim w \rrbracket \Rightarrow s \cdot y + t = w \\
-		& \llbracket \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \sim w \rrbracket \Rightarrow \mathit{out} = q \cdot x + (r + w) \\
-		& \Rightarrow \mathit{out} = q \cdot x + (r + s \cdot y + t)
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: }
-		\begin{cases}
-			\llbracket \mathit{out} \sim \mathit{Concrete}(0); x \sim \mathit{Eraser}; y \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = 0 & \text{if } q,r,s,t = 0 \\
-			\llbracket \mathit{out} \sim  \mathit{Linear}(x, q, r); y \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = q \cdot x + r & \text{if } s,t = 0 \\
-			\llbracket \mathit{out} \sim  \mathit{Linear}(y, s, t); x \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = s \cdot y + t & \text{if } q,r = 0 \\
-			\begin{aligned}
-				& \llbracket \mathit{Linear}(x, q, r) \sim w_1 \rrbracket \Rightarrow w_1 = q \cdot x + r \\
-				& \llbracket \mathit{Materialize}(\mathit{out}_x) \sim w_1 \rrbracket \Rightarrow \mathit{out}_x = w_1 \\
-				& \llbracket \mathit{Linear}(y, s, t) \sim w_2 \rrbracket \Rightarrow w_2 = s \cdot y + t \\
-				& \llbracket \mathit{Materialize}(\mathit{out}_y) \sim w_2 \rrbracket \Rightarrow \mathit{out}_y = w_2 \\
-				& \llbracket \mathit{Linear}(\mathit{TermAdd}(\mathit{out}_x, \mathit{out}_y), 1, 0) \sim \mathit{out} \rrbracket \Rightarrow \mathit{out} = 1 \cdot (\mathit{out}_x + \mathit{out}_y) + 0
-			\end{aligned}\\
-			\Rightarrow \mathit{out} = 1 \cdot (q \cdot x + r + s \cdot y + t) + 0 & \text{otherwise}
-		\end{cases}
 	\end{aligned}
-\end{aligned}
-$$
-Since:
-$$
-\begin{cases}
-	0 \cdot x + (0 + 0 \cdot y + 0) = 0 & \text{if } q,r,s,t = 0 \\
-	q \cdot x + (r + 0 \cdot y + 0) = q \cdot x + r & \text{if } s,t = 0 \\
-	0 \cdot x + (0 + s \cdot y + t) = s \cdot y + t & \text{if } q,r = 0 \\
-	q \cdot x + (r + s \cdot y + t) = 1 \cdot (q \cdot x + r + s \cdot y + t) + 0 & \text{otherwise}
-\end{cases}
-$$
-the rule is sound.
+	$$
+	Since $(q \cdot x + r) + b = q \cdot x + (r + b)$, the rule is sound.
+\end{lemma}
 
-\paragraph{Linear and MulCheckLinear}
-For the \textit{Linear} and \textit{MulCheckLinear} agents we have the interaction rule:
-$$
-\begin{aligned}
-	& \mathit{Linear}(y, s, t) \bowtie \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \Rightarrow \\
-	& \quad \begin{cases}
-		\mathit{out} \sim \mathit{Concrete}(0); x \sim \mathit{Eraser}; y \sim \mathit{Eraser} & \text{if } q,r = 0 \lor s,t = 0 \\
-		\begin{aligned}
-			& \mathit{Linear}(x, q, r) \sim \mathit{Materialize}(\mathit{out}_x); \\
-			& \mathit{Linear}(y, s, t) \sim \mathit{Materialize}(\mathit{out}_y); \\
-			& \mathit{out} \sim \mathit{Linear}(\mathit{TermMul}(\mathit{out}_x, \mathit{out}_y), 1, 0)
+\begin{lemma}
+	For the \textit{Linear} and \textit{Mul} agents we have the interaction rule:
+	$$
+	\mathit{Linear}(x, q, r) \bowtie \mathit{Mul}(\mathit{out}, b) \Rightarrow \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \sim b \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Linear}(x, q, r) \sim w \rrbracket \Rightarrow q \cdot x + r = w \\
+			& \llbracket \mathit{Mul}(\mathit{out}, b) \sim w \rrbracket \Rightarrow \mathit{out} = w \cdot b \\
+			& \Rightarrow \mathit{out} = (q \cdot x + r) \cdot b
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \sim b \rrbracket \\
+			& \Rightarrow \mathit{out} = q \cdot b \cdot x + r \cdot b
 		\end{aligned}
-		& \text{otherwise}
+	\end{aligned}
+	$$
+	Since $(q \cdot x + r) \cdot b = q \cdot b \cdot x + r \cdot b$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Concrete} and \textit{Add} agents we have the interaction rule:
+	$$
+	\mathit{Concrete}(k) \bowtie \mathit{Add}(\mathit{out}, b) \Rightarrow
+	\begin{cases}
+		\mathit{out} \sim b & \text{if } k = 0 \\
+		\mathit{AddCheckConcrete}(\mathit{out}, k) \sim b & \text{otherwise}
 	\end{cases}
-\end{aligned}
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Linear}(y, s, t) \sim w \rrbracket \Rightarrow s \cdot y + t = w \\
-		& \llbracket \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \sim w \rrbracket \Rightarrow \mathit{out} = q \cdot w \cdot x + r \cdot w \\
-		& \Rightarrow \mathit{out} = q \cdot (s \cdot y + t) \cdot x + r \cdot (s \cdot y + t)
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: }
-		\begin{cases}
-			\llbracket \mathit{out} \sim \mathit{Concrete}(0); x \sim \mathit{Eraser}; y \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = 0 & \text{if } q,r = 0 \lor s,t = 0 \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Concrete}(k) \sim w \rrbracket \Rightarrow k = w \\
+			& \llbracket \mathit{Add}(\mathit{out}, b) \sim w \rrbracket \Rightarrow \mathit{out} = w + b \\
+			& \Rightarrow \mathit{out} = k + b
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: }
+			\begin{cases}
+				\llbracket \mathit{out} \sim b \rrbracket \Rightarrow \mathit{out} = b & \text{if } k = 0 \\
+				\llbracket \mathit{AddCheckConcrete}(\mathit{out}, k) \sim b \rrbracket \Rightarrow \mathit{out} = k + b & \text{otherwise}
+			\end{cases}
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since:
+	$$
+	\begin{cases}
+		0 + b = b & \text{if } k = 0 \\
+		k + b = k + b & \text{otherwise}
+	\end{cases}
+	$$
+	the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Concrete} and \textit{Mul} agents we have the interaction rule:
+	$$
+	\mathit{Concrete}(k) \bowtie \mathit{Mul}(\mathit{out}, b) \Rightarrow
+	\begin{cases}
+		\mathit{out} \sim \mathit{Concrete}(0); b \sim \mathit{Eraser} & \text{if } k = 0 \\
+		\mathit{out} \sim  b & \text{if } k = 1 \\
+		\mathit{MulCheckConcrete}(\mathit{out}, k) \sim b & \text{otherwise}
+	\end{cases}
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Concrete}(k) \sim w \rrbracket \Rightarrow k = w \\
+			& \llbracket \mathit{Mul}(\mathit{out}, b) \sim w \rrbracket \Rightarrow \mathit{out} = w \cdot b \\
+			& \Rightarrow \mathit{out} = k \cdot b
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: }
+			\begin{cases}
+				\llbracket \mathit{out} \sim \mathit{Concrete}(0); b \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = 0 & \text{if } k = 0 \\
+				\llbracket \mathit{out} \sim b \rrbracket \Rightarrow \mathit{out} = b & \text{if } k = 1 \\
+				\llbracket \mathit{MulCheckConcrete}(\mathit{out}, k) \sim b \rrbracket \Rightarrow \mathit{out} = k \cdot b & \text{otherwise}
+			\end{cases}
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since:
+	$$
+	\begin{cases}
+		0 \cdot b = 0 & \text{if } k = 0 \\
+		1 \cdot b = b & \text{if } k = 1 \\
+		k \cdot b = k \cdot b & \text{otherwise}
+	\end{cases}
+	$$
+	the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Linear} and \textit{AddCheckLinear} agents we have the interaction rule:
+	$$
+	\begin{aligned}
+		& \mathit{Linear}(y, s, t) \bowtie \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \Rightarrow \\
+		& \quad \begin{cases}
+			\mathit{out} \sim \mathit{Concrete}(0); x \sim \mathit{Eraser}; y \sim \mathit{Eraser} & \text{if } q,r,s,t = 0 \\
+			\mathit{out} \sim  \mathit{Linear}(x, q, r); y \sim \mathit{Eraser} & \text{if } s,t = 0 \\
+			\mathit{out} \sim  \mathit{Linear}(y, s, t); x \sim \mathit{Eraser} & \text{if } q,r = 0 \\
 			\begin{aligned}
-				& \llbracket \mathit{Linear}(x, q, r) \sim w_1 \rrbracket \Rightarrow w_1 = q \cdot x + r \\
-				& \llbracket \mathit{Materialize}(\mathit{out}_x) \sim w_1 \rrbracket \Rightarrow \mathit{out}_x = w_1 \\
-				& \llbracket \mathit{Linear}(y, s, t) \sim w_2 \rrbracket \Rightarrow w_2 = s \cdot y + t \\
-				& \llbracket \mathit{Materialize}(\mathit{out}_y) \sim w_2 \rrbracket \Rightarrow \mathit{out}_y = w_2 \\
-				& \llbracket \mathit{Linear}(\mathit{TermMul}(\mathit{out}_x, \mathit{out}_y), 1, 0) \sim \mathit{out} \rrbracket \Rightarrow \mathit{out} = 1 \cdot \mathit{out}_x \cdot \mathit{out}_y + 0
-			\end{aligned}\\
-			\Rightarrow \mathit{out} = 1 \cdot (q \cdot x + r) \cdot (s \cdot y + t) + 0 & \text{otherwise}
+				& \mathit{Linear}(x, q, r) \sim \mathit{Materialize}(\mathit{out}_x); \\
+				& \mathit{Linear}(y, s, t) \sim \mathit{Materialize}(\mathit{out}_y); \\
+				& \mathit{out} \sim \mathit{Linear}(\mathit{TermAdd}(\mathit{out}_x, \mathit{out}_y), 1, 0)
+			\end{aligned}
+			& \text{otherwise}
 		\end{cases}
 	\end{aligned}
-\end{aligned}
-$$
-Since:
-$$
-\begin{cases}
-	0 \cdot (s \cdot y + t) \cdot x + 0 \cdot (s \cdot y + t) = 0 \lor q \cdot (0 \cdot y + 0) \cdot x + r \cdot (0 \cdot y + 0) = 0 & \text{if } q,r = 0 \lor s,t = 0  \\
-	1 \cdot (q \cdot x + r) \cdot (s \cdot y + t) + 0 = q \cdot (s \cdot y + t) \cdot x + r \cdot (s \cdot y + t) & \text{otherwise}
-\end{cases}
-$$
-the rule is sound.
-
-\paragraph{Concrete and AddCheckLinear}
-For the \textit{Concrete} and \textit{AddCheckLinear} agents we have the interaction rule:
-$$
-\mathit{Concrete}(j) \bowtie \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \Rightarrow \mathit{Linear}(x, q, r + j) \sim \mathit{out} \\
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Concrete}(j) \sim w \rrbracket \Rightarrow j = w \\
-		& \llbracket \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \sim w \rrbracket \Rightarrow \mathit{out} = q \cdot x + (r + w) \\
-		& \Rightarrow \mathit{out} = q \cdot x + (r + j)
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: } & \llbracket \mathit{Linear}(x, q, r + j) \sim \mathit{out} \rrbracket \\
-		& \Rightarrow \mathit{out} = q \cdot x + (r + j)
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Linear}(y, s, t) \sim w \rrbracket \Rightarrow s \cdot y + t = w \\
+			& \llbracket \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \sim w \rrbracket \Rightarrow \mathit{out} = q \cdot x + (r + w) \\
+			& \Rightarrow \mathit{out} = q \cdot x + (r + s \cdot y + t)
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: }
+			\begin{cases}
+				\llbracket \mathit{out} \sim \mathit{Concrete}(0); x \sim \mathit{Eraser}; y \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = 0 & \text{if } q,r,s,t = 0 \\
+				\llbracket \mathit{out} \sim  \mathit{Linear}(x, q, r); y \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = q \cdot x + r & \text{if } s,t = 0 \\
+				\llbracket \mathit{out} \sim  \mathit{Linear}(y, s, t); x \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = s \cdot y + t & \text{if } q,r = 0 \\
+				\begin{aligned}
+					& \llbracket \mathit{Linear}(x, q, r) \sim w_1 \rrbracket \Rightarrow w_1 = q \cdot x + r \\
+					& \llbracket \mathit{Materialize}(\mathit{out}_x) \sim w_1 \rrbracket \Rightarrow \mathit{out}_x = w_1 \\
+					& \llbracket \mathit{Linear}(y, s, t) \sim w_2 \rrbracket \Rightarrow w_2 = s \cdot y + t \\
+					& \llbracket \mathit{Materialize}(\mathit{out}_y) \sim w_2 \rrbracket \Rightarrow \mathit{out}_y = w_2 \\
+					& \llbracket \mathit{Linear}(\mathit{TermAdd}(\mathit{out}_x, \mathit{out}_y), 1, 0) \sim \mathit{out} \rrbracket \Rightarrow \mathit{out} = 1 \cdot (\mathit{out}_x + \mathit{out}_y) + 0
+				\end{aligned}\\
+				\Rightarrow \mathit{out} = 1 \cdot (q \cdot x + r + s \cdot y + t) + 0 & \text{otherwise}
+			\end{cases}
+		\end{aligned}
 	\end{aligned}
-\end{aligned}
-$$
-Since $q \cdot x + (r + j) = q \cdot x + (r + j)$, the rule is sound.
-
-\paragraph{Concrete and MulCheckLinear}
-For the \textit{Concrete} and \textit{MulCheckLinear} agents we have the interaction rule:
-$$
-\mathit{Concrete}(j) \bowtie \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \Rightarrow \mathit{Linear}(x, q \cdot j, r \cdot j) \sim \mathit{out} \\
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Concrete}(j) \sim w \rrbracket \Rightarrow j = w \\
-		& \llbracket \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \sim w \rrbracket \Rightarrow \mathit{out} = q \cdot w \cdot x + r \cdot w \\
-		& \Rightarrow \mathit{out} = q \cdot j \cdot x + r \cdot j
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: } & \llbracket \mathit{Linear}(x, q \cdot j, r \cdot j) \sim \mathit{out} \rrbracket \\
-		& \Rightarrow \mathit{out} = (q \cdot j) \cdot x + (r \cdot j)
-	\end{aligned}
-\end{aligned}
-$$
-Since $q \cdot j \cdot x + r \cdot j = (q \cdot j) \cdot x + (r \cdot j)$, the rule is sound.
-
-\paragraph{Linear and AddCheckConcrete}
-For the \textit{Linear} and \textit{AddCheckConcrete} agents we have the interaction rule:
-$$
-\mathit{Linear}(y, s, t) \bowtie \mathit{AddCheckConcrete}(\mathit{out}, k) \Rightarrow \mathit{Linear}(y, s, t + k) \sim \mathit{out} \\
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Linear}(y, s, t) \sim w \rrbracket \Rightarrow s \cdot y + t = w \\
-		& \llbracket \mathit{AddCheckConcrete}(\mathit{out}, k) \sim w \rrbracket \Rightarrow \mathit{out} = k + w \\
-		& \Rightarrow \mathit{out} = k + (s \cdot y + t)
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: } & \llbracket \mathit{Linear}(y, s, t + k) \sim \mathit{out} \rrbracket \\
-		& \Rightarrow \mathit{out} = s \cdot y + (t + k)
-	\end{aligned}
-\end{aligned}
-$$
-Since $k + (s \cdot y + t) = s \cdot y + (t + k)$, the rule is sound.
-
-\paragraph{Linear and MulCheckConcrete}
-For the \textit{Linear} and \textit{MulCheckConcrete} agents we have the interaction rule:
-$$
-\mathit{Linear}(y, s, t) \bowtie \mathit{MulCheckConcrete}(\mathit{out}, k) \Rightarrow \mathit{Linear}(y, s \cdot k, t \cdot k) \sim \mathit{out} \\
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Linear}(y, s, t) \sim w \rrbracket \Rightarrow s \cdot y + t = w \\
-		& \llbracket \mathit{MulCheckConcrete}(\mathit{out}, k) \sim w \rrbracket \Rightarrow \mathit{out} = k \cdot w \\
-		& \Rightarrow \mathit{out} = k \cdot (s \cdot y + t)
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: } & \llbracket \mathit{Linear}(y, s \cdot k, t \cdot k) \sim \mathit{out} \rrbracket \\
-		& \Rightarrow \mathit{out} = (s \cdot k) \cdot y + (t \cdot k)
-	\end{aligned}
-\end{aligned}
-$$
-Since $k \cdot (s \cdot y + t) = (s \cdot k) \cdot y + (t \cdot k)$, the rule is sound.
-
-\paragraph{Concrete and AddCheckConcrete}
-For the \textit{Concrete} and \textit{AddCheckConcrete} agents we have the interaction rule:
-$$
-\mathit{Concrete}(j) \bowtie \mathit{AddCheckConcrete}(\mathit{out}, k) \Rightarrow
-\begin{cases}
-	\mathit{out} \sim \mathit{Concrete}(k) & \text{if } j = 0 \\
-	\mathit{out} \sim \mathit{Concrete}(k + j) & \text{otherwise}
-\end{cases}
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Concrete}(j) \sim w \rrbracket \Rightarrow j = w \\
-		& \llbracket \mathit{AddCheckConcrete}(\mathit{out}, k) \sim w \rrbracket \Rightarrow \mathit{out} = k + w \\
-		& \Rightarrow \mathit{out} = k + j
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: }
-		\begin{cases}
-			\llbracket \mathit{out} \sim \mathit{Concrete}(k) \rrbracket \Rightarrow \mathit{out} = k & \text{if } j = 0 \\
-			\llbracket \mathit{out} \sim \mathit{Concrete}(k + j) \rrbracket \Rightarrow \mathit{out} = k + j & \text{otherwise}
-		\end{cases}
-	\end{aligned}
-\end{aligned}
-$$
-Since:
-$$
-\begin{cases}
-	k + 0 = k & \text{if } j = 0 \\
-	k + j = k + j & \text{otherwise}
-\end{cases}
-$$
-the rule is sound.
-
-\paragraph{Concrete and MulCheckConcrete}
-For the \textit{Concrete} and \textit{MulCheckConcrete} agents we have the interaction rule:
-$$
-\mathit{Concrete}(j) \bowtie \mathit{MulCheckConcrete}(\mathit{out}, k) \Rightarrow
-\begin{cases}
-	\mathit{out} \sim \mathit{Concrete}(0) & \text{if } j = 0 \\
-	\mathit{out} \sim \mathit{Concrete}(k) & \text{if } j = 1 \\
-	\mathit{out} \sim \mathit{Concrete}(k \cdot j) & \text{otherwise}
-\end{cases}
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Concrete}(j) \sim w \rrbracket \Rightarrow j = w \\
-		& \llbracket \mathit{MulCheckConcrete}(\mathit{out}, k) \sim w \rrbracket \Rightarrow \mathit{out} = k \cdot w \\
-		& \Rightarrow \mathit{out} = k \cdot j
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: }
-		\begin{cases}
-			\llbracket \mathit{out} \sim \mathit{Concrete}(0) \rrbracket \Rightarrow \mathit{out} = 0 & \text{if } j = 0 \\
-			\llbracket \mathit{out} \sim \mathit{Concrete}(k) \rrbracket \Rightarrow \mathit{out} = k & \text{if } j = 1 \\
-			\llbracket \mathit{out} \sim \mathit{Concrete}(k \cdot j) \rrbracket \Rightarrow \mathit{out} = k \cdot j & \text{otherwise}
-		\end{cases}
-	\end{aligned}
-\end{aligned}
-$$
-Since:
-$$
-\begin{cases}
-	k \cdot 0 = 0 & \text{if } j = 0 \\
-	k \cdot 1 = k & \text{if } j = 1 \\
-	k \cdot j = k \cdot j & \text{otherwise}
-\end{cases}
-$$
-the rule is sound.
-
-\paragraph{Linear and ReLU}
-For the \textit{Linear} and \textit{ReLU} agents we have the interaction rule:
-$$
-\begin{aligned}
-	& \mathit{Linear}(x, q, r) \bowtie \mathit{ReLU}(\mathit{out}) \Rightarrow
-	\mathit{Linear}(x, q, r) \sim \mathit{Materialize}(\mathit{out}_x);
-	\mathit{out} \sim \mathit{Linear}(\mathit{TermReLU}(\mathit{out}_x), 1, 0)
-\end{aligned}
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Linear}(q, x, r) \sim w \rrbracket \Rightarrow q \cdot x + r = w \\
-		& \llbracket \mathit{ReLU}(\mathit{out}) \sim w \rrbracket \Rightarrow \mathit{out} = \max(0, w) \\
-		& \Rightarrow \mathit{out} = \max(0, q \cdot x + r)
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: } & \llbracket \mathit{Linear}(x, q, r) \sim w \rrbracket \Rightarrow w = q \cdot x + r \\
-		& \llbracket \mathit{Materialize}(\mathit{out}_x) \sim w \rrbracket \Rightarrow \mathit{out}_x = w \\
-		& \llbracket \mathit{Linear}(\mathit{TermReLU}(\mathit{out}_x), 1, 0) \sim \mathit{out} \rrbracket \Rightarrow \mathit{out} = 1 \cdot \max(0, \mathit{out}_x) + 0 \\
-		& \Rightarrow \mathit{out} = 1 \cdot \max(0, q \cdot x + r) + 0
-	\end{aligned}
-\end{aligned}
-$$
-Since $\max(0, q \cdot x + r) = 1 \cdot \max(0, q \cdot x + r) + 0$ the rule is sound.
-
-\paragraph{Concrete and ReLU}
-For the \textit{Concrete} and \textit{ReLU} agents we have the interaction rule:
-$$
-\mathit{Concrete}(k) \bowtie \mathit{ReLU}(\mathit{out}) \Rightarrow
-\begin{cases}
-	\mathit{out} \sim \mathit{Concrete}(k) & \text{if } k > 0 \\
-	\mathit{out} \sim \mathit{Concrete}(0) & \text{otherwise}
-\end{cases}
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Concrete}(k) \sim w \rrbracket \Rightarrow k = w \\
-		& \llbracket \mathit{ReLU}(\mathit{out}) \sim w \rrbracket \Rightarrow \mathit{out} = \max(0, w) \\
-		& \Rightarrow \mathit{out} = \max(0, k)
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: }
-		\begin{cases}
-			\llbracket \mathit{out} \sim \mathit{Concrete}(k) \rrbracket \Rightarrow \mathit{out} = k & \text{if } k > 0 \\
-			\llbracket \mathit{out} \sim \mathit{Concrete}(0) \rrbracket \Rightarrow \mathit{out} = 0 & \text{otherwise}
-		\end{cases}
-	\end{aligned}
-\end{aligned}
-$$
-Since:
-$$
-\begin{cases}
-	\max(0, k) = k & \text{if } k > 0 \\
-	\max(0, k) = 0 & \text{otherwise}
-\end{cases}
-$$
-the rule is sound.
-
-\paragraph{Linear and Materialize}
-For the \textit{Linear} and \textit{Materialize} agents we have the interaction rule:
-$$
-\begin{aligned}
-	& \mathit{Linear}(x, q, r) \bowtie \mathit{Materialize}(\mathit{out}) \Rightarrow \\
-	& \quad \begin{cases}
-		\mathit{out} \sim \mathit{Concrete}(r); x \sim \mathit{Eraser} & \text{if } q = 0 \\
-		\mathit{out} \sim x & \text{if } q = 1, r = 0 \\
-		\mathit{out} \sim \mathit{TermAdd}(x, \mathit{Concrete}(r)) & \text{if } q = 1 \\
-		\mathit{out} \sim \mathit{TermMul}(\mathit{Concrete}(q), x) & \text{if } r = 0 \\
-		\mathit{out} \sim \mathit{TermAdd}(\mathit{TermMul}(\mathit{Concrete}(q), x), \mathit{Concrete}(r)) & \text{otherwise}
+	$$
+	Since:
+	$$
+	\begin{cases}
+		0 \cdot x + (0 + 0 \cdot y + 0) = 0 & \text{if } q,r,s,t = 0 \\
+		q \cdot x + (r + 0 \cdot y + 0) = q \cdot x + r & \text{if } s,t = 0 \\
+		0 \cdot x + (0 + s \cdot y + t) = s \cdot y + t & \text{if } q,r = 0 \\
+		q \cdot x + (r + s \cdot y + t) = 1 \cdot (q \cdot x + r + s \cdot y + t) + 0 & \text{otherwise}
 	\end{cases}
-\end{aligned}
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Linear}(x, q, r) \sim w \rrbracket \Rightarrow q \cdot x + r = w \\
-		& \llbracket \mathit{Materialize}(\mathit{out}) \sim w \rrbracket \Rightarrow \mathit{out} = w \\
-		& \Rightarrow \mathit{out} = q \cdot x + r
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: }
-		\begin{cases}
-			\llbracket \mathit{out} \sim \mathit{Concrete}(r); x \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = r & \text{if } q = 0 \\
-			\llbracket \mathit{out} \sim x \rrbracket \Rightarrow \mathit{out} = x & \text{if } q = 1, r = 0 \\
-			\llbracket \mathit{out} \sim \mathit{TermAdd}(x, \mathit{Concrete}(r)) \rrbracket \Rightarrow \mathit{out} = x + r & \text{if } q = 1 \\
-			\llbracket \mathit{out} \sim \mathit{TermMul}(\mathit{Concrete}(q), x) \rrbracket \Rightarrow \mathit{out} = q \cdot x & \text{if } r = 0 \\
-			\llbracket \mathit{out} \sim \mathit{TermAdd}(\mathit{TermMul}(\mathit{Concrete}(q), x), \mathit{Concrete}(r)) \rrbracket \Rightarrow \mathit{out} = q \cdot x + r & \text{otherwise} \\
+	$$
+	the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Linear} and \textit{MulCheckLinear} agents we have the interaction rule:
+	$$
+	\begin{aligned}
+		& \mathit{Linear}(y, s, t) \bowtie \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \Rightarrow \\
+		& \quad \begin{cases}
+			\mathit{out} \sim \mathit{Concrete}(0); x \sim \mathit{Eraser}; y \sim \mathit{Eraser} & \text{if } q,r = 0 \lor s,t = 0 \\
+			\begin{aligned}
+				& \mathit{Linear}(x, q, r) \sim \mathit{Materialize}(\mathit{out}_x); \\
+				& \mathit{Linear}(y, s, t) \sim \mathit{Materialize}(\mathit{out}_y); \\
+				& \mathit{out} \sim \mathit{Linear}(\mathit{TermMul}(\mathit{out}_x, \mathit{out}_y), 1, 0)
+			\end{aligned}
+			& \text{otherwise}
 		\end{cases}
 	\end{aligned}
-\end{aligned}
-$$
-Since:
-$$
-\begin{cases}
-	0 \cdot x + r = r & \text{if } q = 0 \\
-	1 \cdot x + 0 = x & \text{if } q = 1, r = 0 \\
-	1 \cdot x + r = x + r & \text{if } q = 1 \\
-	q \cdot x + 0 = q	\cdot x & \text{if } r = 0 \\
-	q \cdot x + r = q \cdot x + r & \text{otherwise} \\
-\end{cases}
-$$
-the rule is sound.
-
-\paragraph{Concrete and Materialize}
-For the \textit{Concrete} and \textit{Materialize} agents we have the interaction rule:
-$$
-\mathit{Concrete}(k) \bowtie \mathit{Materialize}(\mathit{out}) \Rightarrow \mathit{Concrete}(k) \sim \mathit{out} \\
-$$
-We need to show that the LHS and RHS are semantically equivalent:
-$$
-\begin{aligned}
-	& \begin{aligned}
-		\text{LHS: } & \llbracket \mathit{Concrete}(k) \sim w \rrbracket \Rightarrow k = w \\
-		& \llbracket \mathit{Materialize}(\mathit{out}) \sim w \rrbracket \Rightarrow \mathit{out} =  w \\
-		& \Rightarrow \mathit{out} = k
-	\end{aligned} \\
-	& \begin{aligned}
-		\text{RHS: } & \llbracket \mathit{Concrete}(k) \sim \mathit{out} \rrbracket \\
-		& \Rightarrow \mathit{out} = k 
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Linear}(y, s, t) \sim w \rrbracket \Rightarrow s \cdot y + t = w \\
+			& \llbracket \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \sim w \rrbracket \Rightarrow \mathit{out} = q \cdot w \cdot x + r \cdot w \\
+			& \Rightarrow \mathit{out} = q \cdot (s \cdot y + t) \cdot x + r \cdot (s \cdot y + t)
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: }
+			\begin{cases}
+				\llbracket \mathit{out} \sim \mathit{Concrete}(0); x \sim \mathit{Eraser}; y \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = 0 & \text{if } q,r = 0 \lor s,t = 0 \\
+				\begin{aligned}
+					& \llbracket \mathit{Linear}(x, q, r) \sim w_1 \rrbracket \Rightarrow w_1 = q \cdot x + r \\
+					& \llbracket \mathit{Materialize}(\mathit{out}_x) \sim w_1 \rrbracket \Rightarrow \mathit{out}_x = w_1 \\
+					& \llbracket \mathit{Linear}(y, s, t) \sim w_2 \rrbracket \Rightarrow w_2 = s \cdot y + t \\
+					& \llbracket \mathit{Materialize}(\mathit{out}_y) \sim w_2 \rrbracket \Rightarrow \mathit{out}_y = w_2 \\
+					& \llbracket \mathit{Linear}(\mathit{TermMul}(\mathit{out}_x, \mathit{out}_y), 1, 0) \sim \mathit{out} \rrbracket \Rightarrow \mathit{out} = 1 \cdot \mathit{out}_x \cdot \mathit{out}_y + 0
+				\end{aligned}\\
+				\Rightarrow \mathit{out} = 1 \cdot (q \cdot x + r) \cdot (s \cdot y + t) + 0 & \text{otherwise}
+			\end{cases}
+		\end{aligned}
 	\end{aligned}
-\end{aligned}
-$$
-Since $k = k$, the rule is sound.
+	$$
+	Since:
+	$$
+	\begin{cases}
+		0 \cdot (s \cdot y + t) \cdot x + 0 \cdot (s \cdot y + t) = 0 \lor q \cdot (0 \cdot y + 0) \cdot x + r \cdot (0 \cdot y + 0) = 0 & \text{if } q,r = 0 \lor s,t = 0  \\
+		1 \cdot (q \cdot x + r) \cdot (s \cdot y + t) + 0 = q \cdot (s \cdot y + t) \cdot x + r \cdot (s \cdot y + t) & \text{otherwise}
+	\end{cases}
+	$$
+	the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Concrete} and \textit{AddCheckLinear} agents we have the interaction rule:
+	$$
+	\mathit{Concrete}(j) \bowtie \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \Rightarrow \mathit{Linear}(x, q, r + j) \sim \mathit{out} \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Concrete}(j) \sim w \rrbracket \Rightarrow j = w \\
+			& \llbracket \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \sim w \rrbracket \Rightarrow \mathit{out} = q \cdot x + (r + w) \\
+			& \Rightarrow \mathit{out} = q \cdot x + (r + j)
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{Linear}(x, q, r + j) \sim \mathit{out} \rrbracket \\
+			& \Rightarrow \mathit{out} = q \cdot x + (r + j)
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $q \cdot x + (r + j) = q \cdot x + (r + j)$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Concrete} and \textit{MulCheckLinear} agents we have the interaction rule:
+	$$
+	\mathit{Concrete}(j) \bowtie \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \Rightarrow \mathit{Linear}(x, q \cdot j, r \cdot j) \sim \mathit{out} \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Concrete}(j) \sim w \rrbracket \Rightarrow j = w \\
+			& \llbracket \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \sim w \rrbracket \Rightarrow \mathit{out} = q \cdot w \cdot x + r \cdot w \\
+			& \Rightarrow \mathit{out} = q \cdot j \cdot x + r \cdot j
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{Linear}(x, q \cdot j, r \cdot j) \sim \mathit{out} \rrbracket \\
+			& \Rightarrow \mathit{out} = (q \cdot j) \cdot x + (r \cdot j)
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $q \cdot j \cdot x + r \cdot j = (q \cdot j) \cdot x + (r \cdot j)$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Linear} and \textit{AddCheckConcrete} agents we have the interaction rule:
+	$$
+	\mathit{Linear}(y, s, t) \bowtie \mathit{AddCheckConcrete}(\mathit{out}, k) \Rightarrow \mathit{Linear}(y, s, t + k) \sim \mathit{out} \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Linear}(y, s, t) \sim w \rrbracket \Rightarrow s \cdot y + t = w \\
+			& \llbracket \mathit{AddCheckConcrete}(\mathit{out}, k) \sim w \rrbracket \Rightarrow \mathit{out} = k + w \\
+			& \Rightarrow \mathit{out} = k + (s \cdot y + t)
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{Linear}(y, s, t + k) \sim \mathit{out} \rrbracket \\
+			& \Rightarrow \mathit{out} = s \cdot y + (t + k)
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $k + (s \cdot y + t) = s \cdot y + (t + k)$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Linear} and \textit{MulCheckConcrete} agents we have the interaction rule:
+	$$
+	\mathit{Linear}(y, s, t) \bowtie \mathit{MulCheckConcrete}(\mathit{out}, k) \Rightarrow \mathit{Linear}(y, s \cdot k, t \cdot k) \sim \mathit{out} \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Linear}(y, s, t) \sim w \rrbracket \Rightarrow s \cdot y + t = w \\
+			& \llbracket \mathit{MulCheckConcrete}(\mathit{out}, k) \sim w \rrbracket \Rightarrow \mathit{out} = k \cdot w \\
+			& \Rightarrow \mathit{out} = k \cdot (s \cdot y + t)
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{Linear}(y, s \cdot k, t \cdot k) \sim \mathit{out} \rrbracket \\
+			& \Rightarrow \mathit{out} = (s \cdot k) \cdot y + (t \cdot k)
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $k \cdot (s \cdot y + t) = (s \cdot k) \cdot y + (t \cdot k)$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Concrete} and \textit{AddCheckConcrete} agents we have the interaction rule:
+	$$
+	\mathit{Concrete}(j) \bowtie \mathit{AddCheckConcrete}(\mathit{out}, k) \Rightarrow
+	\begin{cases}
+		\mathit{out} \sim \mathit{Concrete}(k) & \text{if } j = 0 \\
+		\mathit{out} \sim \mathit{Concrete}(k + j) & \text{otherwise}
+	\end{cases}
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Concrete}(j) \sim w \rrbracket \Rightarrow j = w \\
+			& \llbracket \mathit{AddCheckConcrete}(\mathit{out}, k) \sim w \rrbracket \Rightarrow \mathit{out} = k + w \\
+			& \Rightarrow \mathit{out} = k + j
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: }
+			\begin{cases}
+				\llbracket \mathit{out} \sim \mathit{Concrete}(k) \rrbracket \Rightarrow \mathit{out} = k & \text{if } j = 0 \\
+				\llbracket \mathit{out} \sim \mathit{Concrete}(k + j) \rrbracket \Rightarrow \mathit{out} = k + j & \text{otherwise}
+			\end{cases}
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since:
+	$$
+	\begin{cases}
+		k + 0 = k & \text{if } j = 0 \\
+		k + j = k + j & \text{otherwise}
+	\end{cases}
+	$$
+	the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Concrete} and \textit{MulCheckConcrete} agents we have the interaction rule:
+	$$
+	\mathit{Concrete}(j) \bowtie \mathit{MulCheckConcrete}(\mathit{out}, k) \Rightarrow
+	\begin{cases}
+		\mathit{out} \sim \mathit{Concrete}(0) & \text{if } j = 0 \\
+		\mathit{out} \sim \mathit{Concrete}(k) & \text{if } j = 1 \\
+		\mathit{out} \sim \mathit{Concrete}(k \cdot j) & \text{otherwise}
+	\end{cases}
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Concrete}(j) \sim w \rrbracket \Rightarrow j = w \\
+			& \llbracket \mathit{MulCheckConcrete}(\mathit{out}, k) \sim w \rrbracket \Rightarrow \mathit{out} = k \cdot w \\
+			& \Rightarrow \mathit{out} = k \cdot j
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: }
+			\begin{cases}
+				\llbracket \mathit{out} \sim \mathit{Concrete}(0) \rrbracket \Rightarrow \mathit{out} = 0 & \text{if } j = 0 \\
+				\llbracket \mathit{out} \sim \mathit{Concrete}(k) \rrbracket \Rightarrow \mathit{out} = k & \text{if } j = 1 \\
+				\llbracket \mathit{out} \sim \mathit{Concrete}(k \cdot j) \rrbracket \Rightarrow \mathit{out} = k \cdot j & \text{otherwise}
+			\end{cases}
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since:
+	$$
+	\begin{cases}
+		k \cdot 0 = 0 & \text{if } j = 0 \\
+		k \cdot 1 = k & \text{if } j = 1 \\
+		k \cdot j = k \cdot j & \text{otherwise}
+	\end{cases}
+	$$
+	the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Linear} and \textit{ReLU} agents we have the interaction rule:
+	$$
+	\begin{aligned}
+		\mathit{Linear}(x, q, r) \bowtie \mathit{ReLU}(\mathit{out}) \Rightarrow
+		& \mathit{Linear}(x, q, r) \sim \mathit{Materialize}(\mathit{out}_x); \\
+		& \mathit{out} \sim \mathit{Linear}(\mathit{TermReLU}(\mathit{out}_x), 1, 0)
+	\end{aligned}
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Linear}(x, q, r) \sim w \rrbracket \Rightarrow q \cdot x + r = w \\
+			& \llbracket \mathit{ReLU}(\mathit{out}) \sim w \rrbracket \Rightarrow \mathit{out} = \max(0, w) \\
+			& \Rightarrow \mathit{out} = \max(0, q \cdot x + r)
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{Linear}(x, q, r) \sim w \rrbracket \Rightarrow w = q \cdot x + r \\
+			& \llbracket \mathit{Materialize}(\mathit{out}_x) \sim w \rrbracket \Rightarrow \mathit{out}_x = w \\
+			& \llbracket \mathit{Linear}(\mathit{TermReLU}(\mathit{out}_x), 1, 0) \sim \mathit{out} \rrbracket \Rightarrow \mathit{out} = 1 \cdot \max(0, \mathit{out}_x) + 0 \\
+			& \Rightarrow \mathit{out} = 1 \cdot \max(0, q \cdot x + r) + 0
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $\max(0, q \cdot x + r) = 1 \cdot \max(0, q \cdot x + r) + 0$ the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Concrete} and \textit{ReLU} agents we have the interaction rule:
+	$$
+	\mathit{Concrete}(k) \bowtie \mathit{ReLU}(\mathit{out}) \Rightarrow
+	\begin{cases}
+		\mathit{out} \sim \mathit{Concrete}(k) & \text{if } k > 0 \\
+		\mathit{out} \sim \mathit{Concrete}(0) & \text{otherwise}
+	\end{cases}
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Concrete}(k) \sim w \rrbracket \Rightarrow k = w \\
+			& \llbracket \mathit{ReLU}(\mathit{out}) \sim w \rrbracket \Rightarrow \mathit{out} = \max(0, w) \\
+			& \Rightarrow \mathit{out} = \max(0, k)
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: }
+			\begin{cases}
+				\llbracket \mathit{out} \sim \mathit{Concrete}(k) \rrbracket \Rightarrow \mathit{out} = k & \text{if } k > 0 \\
+				\llbracket \mathit{out} \sim \mathit{Concrete}(0) \rrbracket \Rightarrow \mathit{out} = 0 & \text{otherwise}
+			\end{cases}
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since:
+	$$
+	\begin{cases}
+		\max(0, k) = k & \text{if } k > 0 \\
+		\max(0, k) = 0 & \text{otherwise}
+	\end{cases}
+	$$
+	the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Linear} and \textit{Materialize} agents we have the interaction rule:
+	$$
+	\begin{aligned}
+		& \mathit{Linear}(x, q, r) \bowtie \mathit{Materialize}(\mathit{out}) \Rightarrow \\
+		& \quad \begin{cases}
+			\mathit{out} \sim \mathit{TermConcrete}(r); x \sim \mathit{Eraser} & \text{if } q = 0 \\
+			\mathit{out} \sim x & \text{if } q = 1, r = 0 \\
+			\mathit{out} \sim \mathit{TermAdd}(x, \mathit{TermConcrete}(r)) & \text{if } q = 1 \\
+			\mathit{out} \sim \mathit{TermMul}(\mathit{TermConcrete}(q), x) & \text{if } r = 0 \\
+			\mathit{out} \sim \mathit{TermAdd}(\mathit{TermMul}(\mathit{TermConcrete}(q), x), \mathit{TermConcrete}(r)) & \text{otherwise}
+		\end{cases}
+	\end{aligned}
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Linear}(x, q, r) \sim w \rrbracket \Rightarrow q \cdot x + r = w \\
+			& \llbracket \mathit{Materialize}(\mathit{out}) \sim w \rrbracket \Rightarrow \mathit{out} = w \\
+			& \Rightarrow \mathit{out} = q \cdot x + r
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: }
+			\begin{cases}
+				\llbracket \mathit{out} \sim \mathit{TermConcrete}(r); x \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = r & \text{if } q = 0 \\
+				\llbracket \mathit{out} \sim x \rrbracket \Rightarrow \mathit{out} = x & \text{if } q = 1, r = 0 \\
+				\llbracket \mathit{out} \sim \mathit{TermAdd}(x, \mathit{TermConcrete}(r)) \rrbracket \Rightarrow \mathit{out} = x + r & \text{if } q = 1 \\
+				\llbracket \mathit{out} \sim \mathit{TermMul}(\mathit{TermConcrete}(q), x) \rrbracket \Rightarrow \mathit{out} = q \cdot x & \text{if } r = 0 \\
+				\llbracket \mathit{out} \sim \mathit{TermAdd}(\mathit{TermMul}(\mathit{TermConcrete}(q), x), \mathit{TermConcrete}(r)) \rrbracket \Rightarrow \mathit{out} = q \cdot x + r & \text{otherwise} \\
+			\end{cases}
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since:
+	$$
+	\begin{cases}
+		0 \cdot x + r = r & \text{if } q = 0 \\
+		1 \cdot x + 0 = x & \text{if } q = 1, r = 0 \\
+		1 \cdot x + r = x + r & \text{if } q = 1 \\
+		q \cdot x + 0 = q	\cdot x & \text{if } r = 0 \\
+		q \cdot x + r = q \cdot x + r & \text{otherwise} \\
+	\end{cases}
+	$$
+	the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Concrete} and \textit{Materialize} agents we have the interaction rule:
+	$$
+	\mathit{Concrete}(k) \bowtie \mathit{Materialize}(\mathit{out}) \Rightarrow \mathit{TermConcrete}(k) \sim \mathit{out} \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Concrete}(k) \sim w \rrbracket \Rightarrow k = w \\
+			& \llbracket \mathit{Materialize}(\mathit{out}) \sim w \rrbracket \Rightarrow \mathit{out} =  w \\
+			& \Rightarrow \mathit{out} = k
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{TermConcrete}(k) \sim \mathit{out} \rrbracket \\
+			& \Rightarrow \mathit{out} = k 
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $k = k$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Linear} and \textit{Dup} agents we have the interaction rule:
+	$$
+	\mathit{Linear}(z, q, r) \bowtie \mathit{Dup}(x, y) \Rightarrow \mathit{Linear}(z_1, q, r) \sim x; \mathit{Linear}(z_2, q, r) \sim y; \mathit{Dup}(z_1, z_2) \sim z \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Linear}(z, q, r) \sim w \rrbracket \Rightarrow z\cdot q + r = w \\
+			& \llbracket \mathit{Dup}(x, y) \sim w \rrbracket \Rightarrow w = x = y \\
+			& \Rightarrow z \cdot q + r = x = y
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{Linear}(z_1, q, r) \sim x \rrbracket \Rightarrow z_1 \cdot q + r = x \\
+			& \llbracket \mathit{Linear}(z_2, q, r) \sim y \rrbracket \Rightarrow z_2 \cdot q + r = y \\
+			& \llbracket \mathit{Dup}(z_1, z_2) \sim z \rrbracket \Rightarrow z = z_1 = z_2 \\
+			& \Rightarrow z \cdot q + r = x \land z \cdot q + r = y
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $z \cdot q + r = x = y \iff z \cdot q + r = x \land z \cdot q + r = y$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Linear} and \textit{Eraser} agents we have the interaction rule:
+	$$
+	\mathit{Linear}(x, q, r) \bowtie \mathit{Eraser} \Rightarrow \mathit{Eraser} \sim x \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Linear}(x, q, r) \sim w \rrbracket \Rightarrow x\cdot q + r = w \\
+			& \llbracket \mathit{Eraser} \sim w \rrbracket \Rightarrow w \in \mathbb{R} \\
+			& \Rightarrow x \cdot q + r \in \mathbb{R}
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{Eraser} \sim x \rrbracket \\
+			& \Rightarrow x \in \mathbb{R}
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $x \cdot q + r \in \mathbb{R} \iff x \in \mathbb{R}$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Concrete} and \textit{Dup} agents we have the interaction rule:
+	$$
+	\mathit{Concrete}(k) \bowtie \mathit{Dup}(x, y) \Rightarrow \mathit{Concrete}(k) \sim x; \mathit{Concrete}(k) \sim y \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Concrete}(k) \sim w \rrbracket \Rightarrow k = w \\
+			& \llbracket \mathit{Dup}(x, y) \sim w \rrbracket \Rightarrow w = x = y \\
+			& \Rightarrow k = x = y
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{Concrete}(k) \sim x \rrbracket \Rightarrow k = x \\
+			& \llbracket \mathit{Concrete}(k) \sim y \rrbracket \Rightarrow k = y \\
+			& \Rightarrow k = x \land k = y
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $k = x = y \iff k = x \land k = y$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{Concrete} and \textit{Eraser} agents we have the interaction rule:
+	$$
+	\mathit{Concrete}(k) \bowtie \mathit{Eraser} \Rightarrow  \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{Concrete}(k) \sim w \rrbracket \Rightarrow k = w \\
+			& \llbracket \mathit{Eraser} \sim w \rrbracket \Rightarrow w \in \mathbb{R} \\
+			& \Rightarrow k \in \mathbb{R} 
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: }
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $k \in \mathbb{R}$ is not violated by RHS, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{TermAdd} and \textit{Dup} agents we have the interaction rule:
+	$$
+	\begin{aligned}
+		\mathit{TermAdd}(a, b) \bowtie \mathit{Dup}(x, y) \Rightarrow & \mathit{TermAdd}(a_1, b_1) \sim x; \mathit{TermAdd}(a_2, b_2) \sim y; \\
+		& \mathit{Dup}(a_1, a_2) \sim a; \mathit{Dup}(b_1, b_2) \sim b\\
+	\end{aligned}
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{TermAdd}(a, b) \sim w \rrbracket \Rightarrow a + b = w \\
+			& \llbracket \mathit{Dup}(x, y) \sim w \rrbracket \Rightarrow w = x = y \\
+			& \Rightarrow a + b = x = y
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{TermAdd}(a_1, b_1) \sim x \rrbracket \Rightarrow a_1 + b_1 = x \\
+			& \llbracket \mathit{TermAdd}(a_2, b_2) \sim y \rrbracket \Rightarrow a_2 + b_2 = y \\
+			& \llbracket \mathit{Dup}(a_1, a_2) \sim a \rrbracket \Rightarrow a = a_1 = a_2 \\
+			& \llbracket \mathit{Dup}(b_1, b_2) \sim b \rrbracket \Rightarrow b = b_1 = b_2 \\
+			& \Rightarrow a + b = x \land a + b = y
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $a + b = x = y \iff a + b = x \land a + b = y$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{TermAdd} and \textit{Eraser} agents we have the interaction rule:
+	$$
+	\mathit{TermAdd}(a, b) \bowtie \mathit{Eraser} \Rightarrow \mathit{Eraser} \sim a; \mathit{Eraser} \sim b \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{TermAdd}(a, b) \sim w \rrbracket \Rightarrow a + b = w \\
+			& \llbracket \mathit{Eraser} \sim w \rrbracket \Rightarrow w \in \mathbb{R} \\
+			& \Rightarrow a + b \in \mathbb{R}
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{Eraser} \sim a \rrbracket \Rightarrow a \in \mathbb{R} \\
+			& \llbracket \mathit{Eraser} \sim b \rrbracket \Rightarrow b \in \mathbb{R} \\
+			& \Rightarrow a \in \mathbb{R} \land b \in \mathbb{R}
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $a + b \in \mathbb{R} \iff a \in \mathbb{R} \land b \in \mathbb{R}$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{TermMul} and \textit{Dup} agents we have the interaction rule:
+	$$
+	\begin{aligned}
+		\mathit{TermMul}(a, b) \bowtie \mathit{Dup}(x, y) \Rightarrow & \mathit{TermMul}(a_1, b_1) \sim x; \mathit{TermMul}(a_2, b_2) \sim y; \\
+		& \mathit{Dup}(a_1, a_2) \sim a; \mathit{Dup}(b_1, b_2) \sim b\\
+	\end{aligned}
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{TermMul}(a, b) \sim w \rrbracket \Rightarrow a \cdot b = w \\
+			& \llbracket \mathit{Dup}(x, y) \sim w \rrbracket \Rightarrow w = x = y \\
+			& \Rightarrow a \cdot b = x = y
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{TermMul}(a_1, b_1) \sim x \rrbracket \Rightarrow a_1 \cdot b_1 = x \\
+			& \llbracket \mathit{TermMul}(a_2, b_2) \sim y \rrbracket \Rightarrow a_2 \cdot b_2 = y \\
+			& \llbracket \mathit{Dup}(a_1, a_2) \sim a \rrbracket \Rightarrow a = a_1 = a_2 \\
+			& \llbracket \mathit{Dup}(b_1, b_2) \sim b \rrbracket \Rightarrow b = b_1 = b_2 \\
+			& \Rightarrow a \cdot b = x \land a \cdot b = y
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $a \cdot b = x = y \iff a \cdot b = x \land a \cdot b = y$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{TermMul} and \textit{Eraser} agents we have the interaction rule:
+	$$
+	\mathit{TermMul}(a, b) \bowtie \mathit{Eraser} \Rightarrow \mathit{Eraser} \sim a; \mathit{Eraser} \sim b \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{TermMul}(a, b) \sim w \rrbracket \Rightarrow a \cdot b = w \\
+			& \llbracket \mathit{Eraser} \sim w \rrbracket \Rightarrow w \in \mathbb{R} \\
+			& \Rightarrow a \cdot b \in \mathbb{R}
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{Eraser} \sim a \rrbracket \Rightarrow a \in \mathbb{R} \\
+			& \llbracket \mathit{Eraser} \sim b \rrbracket \Rightarrow b \in \mathbb{R} \\
+			& \Rightarrow a \in \mathbb{R} \land b \in \mathbb{R}
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $a \cdot b \in \mathbb{R} \iff a \in \mathbb{R} \land b \in \mathbb{R}$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{TermReLU} and \textit{Dup} agents we have the interaction rule:
+	$$
+	\mathit{TermReLU}(z) \bowtie \mathit{Dup}(x, y) \Rightarrow \mathit{TermReLU}(z_1) \sim x; \mathit{TermReLU}(z_2) \sim y; \mathit{Dup}(z_1, z_2) \sim z \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{TermReLU}(z) \sim w \rrbracket \Rightarrow \max(0, z) = w \\
+			& \llbracket \mathit{Dup}(x, y) \sim w \rrbracket \Rightarrow w = x = y \\
+			& \Rightarrow \max(0, z) = x = y
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{TermReLU}(z_1) \sim x \rrbracket \Rightarrow \max(0, z_1) = x \\
+			& \llbracket \mathit{TermReLU}(z_2) \sim y \rrbracket \Rightarrow \max(0, z_2) = y \\
+			& \llbracket \mathit{Dup}(z_1, z_2) \sim z \rrbracket \Rightarrow z = z_1 = z_2 \\
+			& \Rightarrow \max(0, z) = x \land \max(0, z) = y
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $\max(0, z) = x = y \iff \max(0, z) = x \land \max(0, z) = y$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{TermReLU} and \textit{Eraser} agents we have the interaction rule:
+	$$
+	\mathit{TermReLU}(x) \bowtie \mathit{Eraser} \Rightarrow \mathit{Eraser} \sim x \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{TermReLU}(x) \sim w \rrbracket \Rightarrow \max(0, x) = w \\
+			& \llbracket \mathit{Eraser} \sim w \rrbracket \Rightarrow w \in \mathbb{R} \\
+			& \Rightarrow \max(0, x) \in \mathbb{R}
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{Eraser} \sim x \rrbracket \\
+			& \Rightarrow x \in \mathbb{R}
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $\max(0, x) \in \mathbb{R} \iff x \in \mathbb{R}$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{TermConcrete} and \textit{Dup} agents we have the interaction rule:
+	$$
+	\mathit{TermConcrete}(k) \bowtie \mathit{Dup}(x, y) \Rightarrow \mathit{TermConcrete}(k) \sim x; \mathit{TermConcrete}(k) \sim y \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{TermConcrete}(k) \sim w \rrbracket \Rightarrow k = w \\
+			& \llbracket \mathit{Dup}(x, y) \sim w \rrbracket \Rightarrow w = x = y \\
+			& \Rightarrow k = x = y
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{TermConcrete}(k) \sim x \rrbracket \Rightarrow k = x \\
+			& \llbracket \mathit{TermConcrete}(k) \sim y \rrbracket \Rightarrow k = y \\
+			& \Rightarrow k = x \land k = y
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $k = x = y \iff k = x \land k = y$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{TermConcrete} and \textit{Eraser} agents we have the interaction rule:
+	$$
+	\mathit{TermConcrete}(k) \bowtie \mathit{Eraser} \Rightarrow  \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{TermConcrete}(k) \sim w \rrbracket \Rightarrow k = w \\
+			& \llbracket \mathit{Eraser} \sim w \rrbracket \Rightarrow w \in \mathbb{R} \\
+			& \Rightarrow k \in \mathbb{R} 
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: }
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $k \in \mathbb{R}$ is not violated by RHS, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{TermSymbolic} and \textit{Dup} agents we have the interaction rule:
+	$$
+	\mathit{TermSymbolic}(id) \bowtie \mathit{Dup}(x, y) \Rightarrow \mathit{TermSymbolic}(id) \sim x; \mathit{TermSymbolic}(id) \sim y \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{TermSymbolic}(id) \sim w \rrbracket \Rightarrow x_{id} = w \\
+			& \llbracket \mathit{Dup}(x, y) \sim w \rrbracket \Rightarrow w = x = y \\
+			& \Rightarrow x_{id} = x = y
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: } & \llbracket \mathit{TermSymbolic}(id) \sim x \rrbracket \Rightarrow x_{id} = x \\
+			& \llbracket \mathit{TermSymbolic}(id) \sim y \rrbracket \Rightarrow x_{id} = y \\
+			& \Rightarrow x_{id} = x \land x_{id} = y
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $x_{id} = x = y \iff x_{id} = x \land x_{id} = y$, the rule is sound.
+\end{lemma}
+
+\begin{lemma}
+	For the \textit{TermSymbolic} and \textit{Eraser} agents we have the interaction rule:
+	$$
+	\mathit{TermSymbolic}(id) \bowtie \mathit{Eraser} \Rightarrow  \\
+	$$
+	We need to show that the LHS and RHS are semantically equivalent:
+	$$
+	\begin{aligned}
+		& \begin{aligned}
+			\text{LHS: } & \llbracket \mathit{TermSymbolic}(id) \sim w \rrbracket \Rightarrow x_{id} = w \\
+			& \llbracket \mathit{Eraser} \sim w \rrbracket \Rightarrow w \in \mathbb{R} \\
+			& \Rightarrow x_{id} \in \mathbb{R} 
+		\end{aligned} \\
+		& \begin{aligned}
+			\text{RHS: }
+		\end{aligned}
+	\end{aligned}
+	$$
+	Since $x_{id} \in \mathbb{R}$ is not violated by RHS, the rule is sound.
+\end{lemma}

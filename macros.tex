@@ -58,9 +58,13 @@
 \newcommand{\agentTermReLU}[2][]{% [#1=options, #2=name]
 	\inetcell[arity=1, #1](#2){$\mathit{TR}$}
 }
-% Symbolic
-\newcommand{\agentSymbolic}[3][]{% [#1=options, #2=name, #3=symbol]
-	\inetcell[arity=0, #1](#2){$\mathit{S_{#3}}$}
+% TermSymbolic
+\newcommand{\agentTermSymbolic}[3][]{% [#1=options, #2=name, #3=symbol]
+	\inetcell[arity=0, #1](#2){$\mathit{TS_{#3}}$}
+}
+% TermConcrete
+\newcommand{\agentTermConcrete}[3][]{% [#1=options, #2=name, #3=k]
+	\inetcell[arity=0, #1](#2){$\mathit{TC}_{#3}$}
 }
 % Interaction Rule
 \newcommand{\interactionrule}[3][]{

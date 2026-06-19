@@ -27,10 +27,18 @@ The agents are defined as:
 		where $x, \mathit{out}$ are wires.
 	\item $\llbracket \mathit{Materialize}(\mathit{out}) \sim x \rrbracket \iff \mathit{out} = x$\\
 		where $x, \mathit{out}$ are wires.
-	\item $\llbracket \mathit{TermAdd}(a, b) \sim \mathit{out} \rrbracket \Rightarrow \mathit{out} = a + b$\\
+	\item $\llbracket \mathit{TermAdd}(a, b) \sim \mathit{out} \rrbracket \iff \mathit{out} = a + b$\\
 		where $a, b, \mathit{out}$ are wires.
-	\item $\llbracket \mathit{TermMul}(a, b) \sim \mathit{out} \rrbracket \Rightarrow \mathit{out} = a \cdot b$\\
+	\item $\llbracket \mathit{TermMul}(a, b) \sim \mathit{out} \rrbracket \iff \mathit{out} = a \cdot b$\\
 		where $a, b, \mathit{out}$ are wires.
 	\item $\llbracket \mathit{TermReLU}(x) \sim \mathit{out} \rrbracket \iff \mathit{out} = \max(0, x)$\\
 		where $x, \mathit{out}$ are wires.
+	\item $\llbracket \mathit{TermSymbolic}(id) \sim \mathit{out} \rrbracket \iff \mathit{out} = x_{id}$\\
+		where $\mathit{out}$ is a wire and $id$ is a variable identifier.
+	\item $\llbracket \mathit{TermConcrete}(k) \sim \mathit{out} \rrbracket \iff \mathit{out} = k$\\
+		where $\mathit{out}$ is a wire and $k \in \mathbb{R}$ is an attribute.
+	\item $\llbracket \mathit{Dup}(x, y) \sim z \rrbracket \iff z = x = y$\\
+		where $x, y, z$ are wires.
+	\item $\llbracket \mathit{Eraser} \sim x \rrbracket \iff x \in \mathbb{R}$\\
+		where $x$ is a wire. \textit{Eraser} effectively removes any constraints.
 \end{itemize}

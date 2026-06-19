@@ -1,7 +1,7 @@
-\subsection{Inpla fork}
+\subsection{INPLA fork}
 \label{sec:inpla}
 
-The  VEIN reduction engine utilizes a modified version of INPLA\footnote{\textbf{\href{https://github.com/inpla/inpla/blob/main/Gentle_introduction_Inpla.md}{INPLA documentation.}}},
+The VEIN reduction engine utilizes a modified version of INPLA\footnote{\textbf{\href{https://github.com/inpla/inpla/blob/main/Gentle_introduction_Inpla.md}{INPLA documentation.}}},
 a multi-threaded parallel interpreter of IN. Performance and ease of use motivated the choice of
 INPLA. Additionally, it supports attribute values, which is a special extension that allows agents
 to hold numerical values at their ports.
@@ -18,38 +18,48 @@ Several modifications adapt INPLA to the pipeline of the framework:
 \end{itemize}
 
 \paragraph{INPLA syntax}
-INPLA evaluates nets, they consist of connections between terms. Terms are built on names and agents:
+INPLA evaluates nets which consist of connections between terms. Terms are built on names and agents:
+\begin{small}
 \begin{verbatim}
 <term> ::= <name> | <agent>
 <name> ::= <nameID>
 <agent> ::= <agentID>
-          | <agentID> ['(' <term> ',' ... ',' <term> ')']
+					| <agentID> ['(' <term> ',' ... ',' <term> ')']
 \end{verbatim}
+\end{small}
 \begin{itemize}
 	\item \textbf{Name}: it works as a buffer between terms.
 	\item \textbf{Agent}: it works as a constructor and de-constructor (defined functions).
 \end{itemize}
 A connection is a relation between two terms and the symbol \texttt{\~} expresses this relation.
 Interaction rules rewrite connections between agents:
+\begin{small}
 \begin{verbatim}
 <interaction-rule> ::= <rule-agent> '><' <rule-agent> '=>' <connections> ';'
 <rule-agent> ::= <agentID>
-               | <agentID> '(' <name> ',' ... ',' <name> ')'
+							 | <agentID> '(' <name> ',' ... ',' <name> ')'
 \end{verbatim}
+\end{small}
 
 \paragraph{Example}
 Unary natural numbers are built by $\texttt{Z}$ (zero) and $\texttt{S}$ (successive function). For
 instance, 0, 1, 2, 3 are expressed as \texttt{Z}, \texttt{S(Z)}, \texttt{S(S(Z))}, \texttt{S(S(S(Z)))}. Here, let's think about an
-increment operation "inc" such that:
+increment operation ``inc'' such that:
+\begin{small}
 \begin{verbatim}
 inc(n) = S(n).
 \end{verbatim}
+\end{small}
 This is written as the following rules:
+\begin{small}
 \begin{verbatim}
 inc(r) >< Z => r ~ S(Z);
 inc(r) >< S(x) => r ~ S(S(x));
 \end{verbatim}
+\end{small}
 Then, the result of \texttt{inc(r) \~{} S(S(Z))} is:
+\begin{small}
 \begin{verbatim}
 r ~ S(S(S(Z)));
 \end{verbatim}
+\end{small}

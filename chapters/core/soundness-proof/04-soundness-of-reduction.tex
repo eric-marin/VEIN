@@ -1,28 +1,117 @@
 \subsection{Soundness of Reduction}
 \label{sec:soundness-of-reduction}
 
-Let $\text{IN}_0$ be the IN translated from a neural network $\text{NN}$. Let $\text{IN}_n$ be
-the IN after $n$ reduction steps. Then we need to prove:
-$$
-\forall n \in \mathbb{N} \quad \llbracket \text{IN}_n \rrbracket = \llbracket \text{NN} \rrbracket
-$$
+\begin{lemma}
+	A valid IN satisfies the following properties:
+	\begin{itemize}
+		\item \textbf{DAG}: the net forms a DAG where the roots are the free wires representing the network
+			outputs.
+		\item \textbf{Orientation}: carrier agents always have their principal ports oriented toward the outputs,
+			while operator and intermediate agents always have their principal ports oriented toward the
+			inputs. No interaction rule introduces carriers facing the input nor operators or
+			intermediates facing the output.
+		\item \textbf{Restricted Interaction}: the net is constructed such that active pairs only occur between a
+			carrier agent and an operator/intermediate agent. Because of \textbf{Orientation}, neither
+			carrier nor operator agents interact with agents of the same type. Terminal agents do not
+			interact with computational operators because they are wrapped in a \textit{Linear} agent.
+	\end{itemize}
+\end{lemma}
 
-\paragraph{Base case: $n = 0$} By \textbf{\Cref{sec:soundness-of-translation}}, the initial
-$\text{IN}_0$ is constructed such that its semantics $\llbracket \text{IN}_0 \rrbracket$ exactly
-match the mathematical definition of the ONNX operators in $\text{NN}$.
+\begin{theorem}
+	Let $\text{IN}_0$ be the valid IN translated from a neural network $\text{NN}$. Let $\text{IN}_n$ be
+	the IN after $n$ reduction steps, then:
+	\begin{equation}
+	\forall n \in \mathbb{N} \quad \llbracket \text{IN}_n \rrbracket = \llbracket \text{NN} \rrbracket
+	\end{equation}
+\end{theorem}
 
-\paragraph{Induction step: $n \to n + 1$} Assume $\llbracket \text{IN}_n \rrbracket = \llbracket \text{NN} \rrbracket$.
-If $\text{IN}_n$ is in normal form, the proof is complete. Otherwise, there exists an active pair
-$A \bowtie B$ that reduces $\text{IN}_n$ to $\text{IN}_{n+1}$. By \textbf{\Cref{sec:soundness-of-interaction-rules}},
-the mathematical definition is preserved after any reduction step, it follows that:
-$$
-\llbracket \text{IN}_{n+1} \rrbracket = \llbracket \text{IN}_{n} \rrbracket
-$$
-By the inductive hypothesis:
-$$
-\llbracket \text{IN}_{n+1} \rrbracket = \llbracket \text{NN} \rrbracket
-$$
+\begin{proof}
+	We will proceed by induction on the number $n$ of reduction steps:
+	\paragraph{Base case: $n = 0$} By \textbf{\Cref{sec:soundness-of-translation}}, the initial
+	$\text{IN}_0$ is constructed such that its semantics $\llbracket \text{IN}_0 \rrbracket$ exactly
+	match the mathematical definition of the ONNX operators in $\text{NN}$, it follows that:
+	\begin{equation}
+	\llbracket \text{IN}_{0} \rrbracket = \llbracket \text{NN} \rrbracket
+	\end{equation}
 
-By the principle of mathematical induction, $\text{IN}_n$ remains semantically equivalent to the
-original $\text{NN}$ at every step of the reduction process. Additionally, since IN are confluent,
-the reduced mathematical expression is unique regardless of order in which rules are applied.
+	\paragraph{Induction step: $n \to n + 1$} Assume $\llbracket \text{IN}_n \rrbracket = \llbracket \text{NN} \rrbracket$.
+	If $\text{IN}_n$ is in normal form, the proof is complete. Otherwise, there exists an active pair
+	$A \bowtie B$ that reduces $\text{IN}_n$ to $\text{IN}_{n+1}$. By \textbf{\Cref{sec:soundness-of-interaction-rules}},
+	the mathematical definition is preserved after any reduction step, it follows that:
+	\begin{equation}
+	\llbracket \text{IN}_{n+1} \rrbracket = \llbracket \text{IN}_{n} \rrbracket
+	\end{equation}
+	By the inductive hypothesis:
+	\begin{equation}
+	\llbracket \text{IN}_{n+1} \rrbracket = \llbracket \text{NN} \rrbracket
+	\end{equation}
+	By the principle of mathematical induction, $\text{IN}_n$ remains semantically equivalent to the
+	original $\text{NN}$ at every step of the reduction process.
+\end{proof}
+
+\begin{theorem}
+	For any valid $\text{IN}_0$ translated from a neural network $\text{NN}$, the reduction process
+	$\text{IN}_0 \to \text{IN}_1 \to \dots \to \text{IN}_n$ reaches a unique normal form, an IN with no active pair, in a
+	finite number of steps $n$.
+\end{theorem}
+
+\begin{proof}
+	We define a potential function $\Phi$. We need to show that:
+	\begin{equation}
+	\Phi(\text{IN}_n) > \Phi(\text{IN}_{n+1}) \quad \forall n \in \mathbb{N}
+	\end{equation}
+	The potential function is defined as:
+	\begin{equation}
+	\Phi(\text{IN}_n) = \sum_{a \in \text{Agents}(\text{IN}_n)} \begin{cases}
+		4 + 3^{D-d(a)} & \text{ if }a\text{ is of type computational operator} \\
+		3 + 3^{D-d(a)} & \text{ if }a\text{ is of type intermediate} \\
+		1 + 3^{D-d(a)} & \text{ if }a\text{ is a Materialize agent} \\
+		3^{D-d(a)} & \text{ if }a\text{ is of type structural operator} \\
+		0 & \text{ if }a\text{ is a Carrier, Terminal}
+	\end{cases}
+	\end{equation}
+	where $d(a)$ is the distance of the agent $a$ from the nearest output wire and $D$ the maximum depth
+	of $\text{IN}_0$,
+	We observe that every reduction step $n \to n+1$ strictly reduces $\Phi$:
+	\begin{itemize}
+		\item \textbf{Carrier with Computational Operator}: If a carrier $c$ interacts with an operator agent $o$, it
+			either gets pruned into a new carrier agent closer to the root:
+			\begin{equation}
+			\Phi(\text{IN}_n) = 4 + 3^{D-d(c)} > 0 = \Phi(\text{IN}_{n+1})
+			\end{equation}
+			or absorbed into an intermediate agent:
+			\begin{equation}
+			\Phi(\text{IN}_n) = 4 + 3^{D-d(c)} > 3 + 3^{D-d(c)} = \Phi(\text{IN}_{n+1})
+			\end{equation}
+		\item \textbf{Carrier with Intermediate}: If a carrier $c$ interacts with an intermediate agent $i$, it
+			either gets pruned into a new carrier agent closer to the root:
+			\begin{equation}
+			\Phi(\text{IN}_n) = 3 + 3^{D-d(i)} > 0 = \Phi(\text{IN}_{n+1})
+			\end{equation}
+			or temporary Linear agents are wired with Materialize agents, which are then forced to
+			interact to produce terminal agents, then wrapped into a new Linear agent:
+			\begin{equation}
+			\Phi(\text{IN}_n) = 3 + 3^{D-d(i)} > 1 + 3^{D-d(i)-2} + 1 + 3^{D-d(i)-2} = 2 + 2 \cdot 3^{D-d(i)-2} = \Phi(\text{IN}_{n+1})
+			\end{equation}
+			If the carrier $c$ interacts with a Materialize agent $i$:
+			\begin{equation}
+			\Phi(\text{IN}_n) = 1 + 3^{D-d(i)} > 0 = \Phi(\text{IN}_{n+1})
+			\end{equation}
+		\item \textbf{Carrier with Structural Operator}: If a carrier $c$ is duplicated with the \textit{Dup} or \textit{Eraser}
+			agent $a$, it traverses the agent structure:
+			\begin{equation}
+			\Phi(\text{IN}_n) = 3^{D-d(a)} > 3^{D-d(a)-1} = \Phi(\text{IN}_{n+1})
+			\end{equation}
+			if the Dup or Eraser agent interacts with a TermAdd or TermMul, two new agents are created at
+			each auxillary port:
+			\begin{equation}
+			\Phi(\text{IN}_n) = 3^{D-d(a)} > 2 * 3^{D-d(a)-1} = \Phi(\text{IN}_{n+1})
+			\end{equation}
+	\end{itemize}
+	Since $\Phi$ is a non-negative strictly decreasing function, the reduction
+	process must terminate in a finite number of steps $n$.
+
+	Additionally, since each active pair has exactly one applicable rule the reduction is
+	deterministic. Strong confluence follows immediately, meaning that the normal form is unique
+	regardless of order in which rules are applied.
+\end{proof}

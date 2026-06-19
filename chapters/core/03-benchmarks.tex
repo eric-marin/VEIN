@@ -1,4 +1,86 @@
 \section{Benchmarks}
 \label{sec:benchmarks}
 
-% This section contains the varius benchmarks
+This section contains the benchmark data, illustrated in \textbf{\Cref{tab:benchmarks}}.
+
+VEIN was tested on a laptop Zenbook UX3402ZA with:
+\begin{itemize}
+	\item \textbf{CPU}: 12th Gen Intel Core i5-1240P
+	\item \textbf{RAM}: 8GiB
+	\item \textbf{SWAP}: 16GiB on NVMe
+\end{itemize}
+using Hyperfine\footnote{\href{https://github.com/sharkdp/hyperfine}{\textbf{Hyperfine Github repository}}.}
+benchmarking tool. Hyperfine runs the test ten times, then reports the mean and standard deviation of
+execution time.
+
+\paragraph{Iris}
+Dataset of iris flowers presented by Fisher et al.~\cite{fisher1936iris}. It consists of three
+species of flower (\textit{Iris setosa}, \textit{Iris virginica} and \textit{Iris versicolor}) with fifty samples each. Each
+sample has four features: width and length of sepals and petals.
+\paragraph{Pendulum}
+A neural safety certificate for stabilizing a pendulum to its upright position under a bound on its
+angle $\theta$, with state $x=[\theta,\dot\theta]\in\mathbb{R}^2$ and nonlinear dynamics.
+\paragraph{Double Integrator}
+A neural safety certificate for stabilizing a second-order linear system to the origin under a bound
+on its position $p$, with state $x=[p,\dot p]\in\mathbb{R}^2$.
+\paragraph{MNIST}
+Widely known dataset of handwritten digits presented by LeCun et al.~\cite{lecun2010mnist}. It
+consists of 60'000 training images and 10'000 testing images.
+
+Pendulum and Double Integrator are taken from \textit{cersyve}, a benchmark presented by Kaulen et
+al.~\cite{kaulen20256thinternationalverificationneural}. We check equivalence between a pre-trained
+and a fine-tuned network for each task.
+
+In the Iris and MNIST dataset, we tested equivalence between a NN and its ad-hoc transformation,
+such as pruning always positive or negative ReLUs, as presented by Kumar et al.~\cite{kumar2019equivalentapproximatetransformationsdeep},
+or changing the architecture from wide to deep and viceversa, as presented by Fan et al.~\cite{JMLR:v24:21-0579}.
+
+For two NN $F: \mathbb{R}^n \to \mathbb{R}^m$ and $F': \mathbb{R}^n \to \mathbb{R}^m$, Eleftheriadis et al.~\cite{eleftheriadis2022equivalence}
+define three kinds of equivalence:
+\begin{itemize}
+	\item \textbf{Strict equivalence}: $\forall x \in \mathbb{R}^n \quad F(x) = F'(x)$.
+	\item \textbf{Epsilon equivalence}: $\forall x \in \mathbb{R}^n \quad ||F(x) - F'(x)|| < \epsilon$ for some $\epsilon > 0$.
+	\item \textbf{Argmax equivalence}: $\forall x \in \mathbb{R}^n \quad \mathtt{argmax}(F(x))=\mathtt{argmax}(F'(x))$ where \texttt{argmax}
+		is the function that returns the index of the maximum value of a vector.
+\end{itemize}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}[t]{ccccc}
+		\hline
+		Benchmark & Equivalence & Direct [s] & VEIN [s] & Status \\
+		\hline
+		Iris (Stably Active) & Strict & 0.0 & 0.0 & X \\
+		Iris (Stably Active) & Epsilon & 0.0 & 0.0 & X \\
+		Iris (Stably Active) & Argmax & 0.0 & 0.0 & X \\
+		Iris (Stably Inactive) & Strict & 0.0 & 0.0 & X \\
+		Iris (Stably Inactive) & Epsilon & 0.0 & 0.0 & X \\
+		Iris (Stably Inactive) & Argmax & 0.0 & 0.0 & X \\
+		Iris (To Wide) & Strict & 0.0 & 0.0 & X \\
+		Iris (To Wide) & Epsilon & 0.0 & 0.0 & X \\
+		Iris (To Wide) & Argmax & 0.0 & 0.0 & X \\
+		Iris (To Deep) & Strict & 0.0 & 0.0 & X \\
+		Iris (To Deep) & Epsilon & 0.0 & 0.0 & X \\
+		Iris (To Deep) & Argmax & 0.0 & 0.0 & X \\
+		Pendulum & Strict & 0.0 & 88.427 ± 0.670 & SAT \\
+		Pendulum & Epsilon & 0.0 & 0.0 & X \\
+		Pendulum & Argmax & 0.0 & 0.0 & X \\
+		Double Integrator & Strict & 0.0 & 0.0 & X \\
+		Double Integrator & Epsilon & 0.0 & 0.0 & X \\
+		Double Integrator & Argmax & 0.0 & 0.0 & X \\
+		MNIST (Stably Active) & Strict & 0.0 & 0.0 & X \\
+		MNIST (Stably Active) & Epsilon & 0.0 & 0.0 & X \\
+		MNIST (Stably Active) & Argmax & 0.0 & 0.0 & X \\
+		MNIST (Stably Inactive) & Strict & 0.0 & 0.0 & X \\
+		MNIST (Stably Inactive) & Epsilon & 0.0 & 0.0 & X \\
+		MNIST (Stably Inactive) & Argmax & 0.0 & 0.0 & X \\
+		MNIST (To Wide) & Strict & 0.0 & 0.0 & X \\
+		MNIST (To Wide) & Epsilon & 0.0 & 0.0 & X \\
+		MNIST (To Wide) & Argmax & 0.0 & 0.0 & X \\
+		MNIST (To Deep) & Strict & 0.0 & 0.0 & X \\
+		MNIST (To Deep) & Epsilon & 0.0 & 0.0 & X \\
+		MNIST (To Deep) & Argmax & 0.0 & 0.0 & X \\
+	\end{tabular}
+	\caption{Benchmark table.}
+	\label{tab:benchmarks}
+\end{table}
