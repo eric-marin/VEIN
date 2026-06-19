@@ -1,4 +1,24 @@
 \section{Satisfiability Modulo Theories}
 \label{sec:satisfiability-modulo-theories}
 
-% This section introduces Satisfiability Modulo Theories
+Satisfiability Modulo Theories (SMT) is the problem of determining whether a mathematical formula is
+satisfiable within a certain formal theory in first-order logic. Barrett et al.~\cite{barrett2016smtlib}
+defined the SMT-LIB standard for input format and theory definitions.
+
+For the verification of neural networks, the formal theory is \textit{Linear Real Arithmetic}
+(LRA). LRA deals with formulas containing real variables, constants, addition, subtraction,
+multiplication by constants, and equality/inequality relations: 
+\begin{equation}
+    \phi ::= t_1 \sim t_2 \mid \phi_1 \lor \phi_2 \mid \phi_1 \land \phi_2 \mid \neg \phi_1
+\end{equation}
+where $t_1, t_2$ are linear terms of the form $c_1 x_1 + \dots + c_k x_k + c_0$ (with $c_i \in \mathbb{R}$ and $x_i$ being real
+variables), and $\sim \;\in \{=, \le, <, \ge, >\}$.
+
+To represent a ReLU activation $y = \max(0, x)$ in LRA, we must introduce a disjunction:
+\begin{equation}
+    (x > 0 \land y = x) \lor (x \le 0 \land y = 0)
+\end{equation}
+For a network with $N$ ReLU neurons, there are up to $2^N$ possible activation patterns. Solving the
+verification property requires the SMT solver, such as Z3 presented by Demura et al.~\cite{demoura2008z3},
+to implicitly explore this branching search space.
+
