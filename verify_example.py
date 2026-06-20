@@ -13,22 +13,19 @@ def check_property(onnx_a, onnx_b, smtlib):
     result = solver.check()
 
     if result == vein.unsat:
-        print("VERIFIED (UNSAT): The networks are equivalent under this property.", end="\n\n")
+        print("VERIFIED (UNSAT): The networks are equivalent under this property.\n")
     elif result == vein.sat:
-        print("FAILED (SAT): The networks are NOT equivalent.")
-        print("Counter-example input:")
-        print(solver.model(), end="\n\n")
+        print(f"FAILED (SAT): The networks are NOT equivalent.\nCounter-example input:\n{solver.model()}\n")
         # m = solver.model()
         # sorted_symbols = sorted([s for s in m.decls() if s.name().startswith("X_")], key=lambda s: s.name())
         # for s in sorted_symbols:
             # print(f"  {s.name()} = {m[s]}")
     else:
-        print("UNKNOWN", end="\n\n")
+        print("UNKNOWN\n")
 
 if __name__ == "__main__":
     if len(sys.argv) <= 1:
-        print("Net not provided")
-        print("Available Nets: 'xor', 'mnist', 'iris', 'acasxu', 'pendulum', 'double_integrator'")
+        print("Net not provided\nAvailable Nets: 'xor', 'mnist', 'iris', 'acasxu', 'pendulum', 'double_integrator'")
         sys.exit()
 
     match sys.argv[1]:
@@ -57,13 +54,13 @@ if __name__ == "__main__":
             epsilon = "./examples/ACASXU/ACASXU_epsilon.smtlib"
             argmax = "./examples/ACASXU/ACASXU_argmax.smtlib"
         case "pendulum":
-            net_a = "./examples/pendulum/pendulum_finetune_con.onnx"
+            net_a = "./examples/pendulum/pendulum_pretrain_con.onnx"
             net_b = "./examples/pendulum/pendulum_finetune_con.onnx"
             strict = "./examples/pendulum/pendulum_strict.smtlib"
             epsilon = "./examples/pendulum/pendulum_epsilon.smtlib"
             argmax = "./examples/pendulum/pendulum_argmax.smtlib"
         case "double_integrator":
-            net_a = "./examples/double_integrator/double_integrator_finetune_inv.onnx"
+            net_a = "./examples/double_integrator/double_integrator_pretrain_inv.onnx"
             net_b = "./examples/double_integrator/double_integrator_finetune_inv.onnx"
             strict = "./examples/double_integrator/double_integrator_strict.smtlib"
             epsilon = "./examples/double_integrator/double_integrator_epsilon.smtlib"
@@ -72,7 +69,7 @@ if __name__ == "__main__":
             print("Available Nets: 'xor', 'mnist', 'iris', 'acasxu', 'pendulum', 'double_integrator'")
             sys.exit()
 
-    print(f"=== Comparing {net_a} and {net_b} ===", end="\n\n")
+    print(f"=== Comparing {net_a} and {net_b} ===\n")
 
     check_property(net_a, net_b, strict)
     check_property(net_a, net_b, epsilon)

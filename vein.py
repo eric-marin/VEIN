@@ -13,7 +13,6 @@
 # If not, see <https://www.gnu.org/licenses/>. 
 
 import z3
-import re
 import numpy as np
 import subprocess
 import onnx
@@ -23,6 +22,9 @@ from typing import List, Dict, Optional
 import os
 import tempfile
 import hashlib
+from itertools import count
+import re
+import ast
 
 sat = z3.sat
 unsat = z3.unsat
@@ -65,7 +67,7 @@ rules = """
         | (q == 1) && (r == 0) => out ~ x
         | (q == 1) && (r != 0) => out ~ TermAdd(x, TermConcrete(r))
         | (q != 0) && (r == 0) => out ~ TermMul(TermConcrete(q), x)
-        | _ => out ~ TermAdd(TermMul(Concrete(q), x), TermConcrete(r));
+        | _ => out ~ TermAdd(TermMul(TermConcrete(q), x), TermConcrete(r));
     Concrete(float k) >< Materialize(out) => out ~ (*L)TermConcrete(k);
 """
 
@@ -74,14 +76,6 @@ _CACHE  = {}
 def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]] = None) -> str:
     # TODO: Add Range agent
     _ = bounds
-    class NameGen:
-        def __init__(self, prefix="v"):
-            self.counter = 0
-            self.prefix = prefix
-        def next(self) -> str:
-            name = f"{self.prefix}{self.counter}"
-            self.counter += 1
-            return name
 
     def get_initializers(graph) -> Dict[str, np.ndarray]:
         initializers = {}
@@ -92,81 +86,77 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
     def get_attrs(node) -> Dict:
         return {attr.name: onnx.helper.get_attribute_value(attr) for attr in node.attribute}
 
-    def get_dim(name):
-        for i in list(graph.input) + list(graph.output) + list(graph.value_info):
-            if i.name == name: return i.type.tensor_type.shape.dim[-1].dim_value
-        return None
+    graph, initializers = model.graph, get_initializers(model.graph)
+    counter = count()
+    wire_gen = lambda: f"w{next(counter)}"
+    interactions: Dict[str, List[List[str]]] = {}
+    dims = {i.name: i.type.tensor_type.shape.dim[-1].dim_value for i in list(graph.input) + list(graph.output) + list(graph.value_info)}
+    script = []
 
     def balanced_fanout(agent_name: str, terms: List[str]) -> str:
         if not terms: return "Eraser"
         if len(terms) == 1: return terms[0]
-        nodes = terms
-        while len(nodes) > 1:
+        while len(terms) > 1:
             next_level = []
-            for i in range(0, len(nodes), 2):
-                if i + 1 < len(nodes):
-                    in_w = wire_gen.next()
-                    script.append(f"{in_w} ~ {agent_name}({nodes[i]}, {nodes[i+1]});")
+            for i in range(0, len(terms), 2):
+                if i + 1 < len(terms):
+                    in_w = wire_gen()
+                    script.append(f"{in_w} ~ {agent_name}({terms[i]}, {terms[i+1]});")
                     next_level.append(in_w)
                 else:
-                    next_level.append(nodes[i])
-            nodes = next_level
-        return nodes[0]
+                    next_level.append(terms[i])
+            terms = next_level
+        return terms[0]
 
     def balanced_fanin(agent_name: str, terms: List[str]) -> str:
         if not terms: return "Eraser"
         if len(terms) == 1: return terms[0]
-        nodes = terms
-        while len(nodes) > 1:
+        while len(terms) > 1:
             next_level = []
-            for i in range(0, len(nodes), 2):
-                if i + 1 < len(nodes):
-                    res_w = wire_gen.next()
-                    script.append(f"{nodes[i]} ~ {agent_name}({res_w}, {nodes[i+1]});")
+            for i in range(0, len(terms), 2):
+                if i + 1 < len(terms):
+                    res_w = wire_gen()
+                    script.append(f"{terms[i]} ~ {agent_name}({res_w}, {terms[i+1]});")
                     next_level.append(res_w)
                 else:
-                    next_level.append(nodes[i])
-            nodes = next_level
-        return nodes[0]
+                    next_level.append(terms[i])
+            terms = next_level
+        return terms[0]
 
-    def op_gemm(node, override_attrs=None):
-        attrs = override_attrs if override_attrs is not None else get_attrs(node)
-
-        W = initializers[node.input[1]]
-        if not attrs.get("transB", 0): W = W.T
-        out_dim, in_dim = W.shape
-
-        B = initializers[node.input[2]] if len(node.input) > 2 else np.zeros(out_dim)
-        alpha, beta = attrs.get("alpha", 1.0), attrs.get("beta", 1.0)
-
-        if node.input[0] not in interactions: 
-            interactions[node.input[0]] = [[] for _ in range(in_dim)]
-
-        out_terms = interactions.get(node.output[0]) or [[f"Materialize(result{j})"] for j in range(out_dim)]
-
+    def gemm(Y, A, B, C, alpha, beta, _, transB):
+        weights = initializers[B]
+        if transB == 0:
+            weights = weights.T
+        out_dim, in_dim = weights.shape
+        biases = initializers[C] if C is not None else None
+        if A not in interactions:
+            interactions[A] = [[] for _ in range(in_dim)]
+        out_terms = interactions.get(Y) or [[f"Materialize(result{j})"] for j in range(out_dim)]
         for j in range(out_dim):
             sink = balanced_fanout("Dup", out_terms[j])
             neuron_terms = []
             for i in range(in_dim):
-                weight = float(alpha * W[j, i])
+                weight = float(alpha * weights[j, i])
                 if weight != 0:
-                    v = wire_gen.next()
-                    interactions[node.input[0]][i].append(f"Mul({v}, Concrete({weight}))")
+                    v = wire_gen()
+                    interactions[A][i].append(f"Mul({v}, Concrete({weight}))")
                     neuron_terms.append(v)
-
-            bias_val = float(beta * B[j])
-            if bias_val != 0 or not neuron_terms:
-                neuron_terms.append(f"Concrete({bias_val})")
-
+            bias = float(beta * biases[j]) if biases is not None else 0.0
+            if bias != 0 or len(neuron_terms) == 0:
+                neuron_terms.append(f"Concrete({bias})")
             root = balanced_fanin("Add", neuron_terms)
             script.append(f"{root} ~ {sink};")
 
+    def op_gemm(node):
+        attrs = get_attrs(node)
+        gemm(node.output[0], node.input[0], node.input[1], node.input[2], attrs.get("alpha", 1.0), attrs.get("beta", 1.0), attrs.get("transA", 0), attrs.get("transB", 0))
+
     def op_matmul(node):
-        op_gemm(node, override_attrs={"alpha": 1.0, "beta": 0.0, "transB": 0})
+        gemm(node.output[0], node.input[0], node.input[1], None, 1.0, 0.0, 0, 0)
 
     def op_relu(node):
-        out_name, in_name = node.output[0], node.input[0]
-        dim = get_dim(out_name) or 1
+        in_name, out_name = node.input[0], node.output[0]
+        dim = dims.get(out_name) or 1
 
         if in_name not in interactions: 
             interactions[in_name] = [[] for _ in range(dim)]
@@ -175,24 +165,20 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
 
         for i in range(dim):
             sink = balanced_fanout("Dup", out_terms[i])
-            v = wire_gen.next()
+            v = wire_gen()
             interactions[in_name][i].append(f"ReLU({v})")
             script.append(f"{v} ~ {sink};")
 
-    def op_flatten(node):
-        op_identity(node)
-
-    def op_reshape(node):
-        op_identity(node)
-
     def op_add(node):
-        out_name = node.output[0]
         in_a, in_b = node.input[0], node.input[1]
+        out_name = node.output[0]
 
-        dim = get_dim(out_name) or get_dim(in_a) or get_dim(in_b) or 1
+        dim = dims.get(out_name) or dims.get(in_a) or dims.get(in_b) or 1
 
-        if in_a not in interactions: interactions[in_a] = [[] for _ in range(dim)]
-        if in_b not in interactions: interactions[in_b] = [[] for _ in range(dim)]
+        if in_a not in interactions:
+            interactions[in_a] = [[] for _ in range(dim)]
+        if in_b not in interactions:
+            interactions[in_b] = [[] for _ in range(dim)]
 
         out_terms = interactions.get(out_name) or [[f"Materialize(result{j})"] for j in range(dim)]
 
@@ -208,23 +194,22 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
                 val = float(a_const.flatten()[i % a_const.size])
                 interactions[in_b][i].append(f"Add({sink}, Concrete({val}))")
             else:
-                v_b = wire_gen.next()
+                v_b = wire_gen()
                 interactions[in_a][i].append(f"Add({sink}, {v_b})")
                 interactions[in_b][i].append(f"{v_b}")
 
     def op_sub(node):
-        out_name = node.output[0]
         in_a, in_b = node.input[0], node.input[1]
+        out_name = node.output[0]
 
-        dim = get_dim(out_name) or get_dim(in_a) or get_dim(in_b) or 1
+        dim = dims.get(out_name) or dims.get(in_a) or dims.get(in_b) or 1
 
-        if out_name not in interactions:
-            interactions[out_name] = [[f"Materialize(result{i})"] for i in range(dim)]
+        if in_a not in interactions:
+            interactions[in_a] = [[] for _ in range(dim)]
+        if in_b not in interactions:
+            interactions[in_b] = [[] for _ in range(dim)]
 
         out_terms = interactions.get(out_name) or [[f"Materialize(result{j})"] for j in range(dim)]
-
-        if in_a not in interactions: interactions[in_a] = [[] for _ in range(dim)]
-        if in_b not in interactions: interactions[in_b] = [[] for _ in range(dim)]
 
         b_const = initializers.get(in_b)
         a_const = initializers.get(in_a)
@@ -236,30 +221,11 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
                 interactions[in_a][i].append(f"Add({sink}, Concrete({-val}))")
             elif a_const is not None:
                 val = float(a_const.flatten()[i % a_const.size])
-                v_b = wire_gen.next()
                 interactions[in_b][i].append(f"Mul(Add({sink}, Concrete({val})), Concrete(-1.0))")
             else:
-                v_b = wire_gen.next()
+                v_b = wire_gen()
                 interactions[in_a][i].append(f"Add({sink}, {v_b})")
                 interactions[in_b][i].append(f"Mul({v_b}, Concrete(-1.0))")
-
-    def op_slice(node):
-        in_name, out_name = node.input[0], node.output[0]
-        if out_name in interactions:
-            starts = initializers.get(node.input[1])
-            steps = initializers.get(node.input[4]) if len(node.input) > 4 else None
-            
-            start = int(starts.flatten()[0]) if starts is not None else 0
-            step = int(steps.flatten()[0]) if steps is not None else 1
-            
-            in_dim = get_dim(in_name) or 1
-            if in_name not in interactions:
-                interactions[in_name] = [[] for _ in range(in_dim)]
-
-            for i, terms in enumerate(interactions[out_name]):
-                input_index = start + (i * step)
-                if input_index < in_dim:
-                    interactions[in_name][input_index].extend(terms)
 
     def op_squeeze(node):
         op_identity(node)
@@ -267,16 +233,17 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
     def op_unsqueeze(node):
         op_identity(node)
 
+    def op_flatten(node):
+        op_identity(node)
+
+    def op_reshape(node):
+        op_identity(node)
+
     def op_identity(node):
         in_name, out_name = node.input[0], node.output[0]
         if out_name in interactions:
             interactions[in_name] = interactions[out_name]
 
-
-    graph, initializers = model.graph, get_initializers(model.graph)
-    wire_gen = NameGen("w")
-    interactions: Dict[str, List[List[str]]] = {}
-    script = []
     ops = {
         "Gemm": op_gemm,
         "Relu": op_relu,
@@ -285,7 +252,6 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
         "MatMul": op_matmul,
         "Add": op_add,
         "Sub": op_sub,
-        "Slice": op_slice,
         "Squeeze": op_squeeze,
         "Unsqueeze": op_unsqueeze,
         "Identity": op_identity
@@ -293,7 +259,7 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
 
     if graph.output:
         out = graph.output[0].name
-        dim = get_dim(out)
+        dim = dims.get(out)
         if dim: 
             interactions[out] = [[f"Materialize(result{i})"] for i in range(dim)]
 
@@ -304,10 +270,11 @@ def inpla_export(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]
             raise RuntimeError(f"Unsupported ONNX operator: {node.op_type}")
 
     if graph.input:
-        input = "input" if "input" in interactions else graph.input[0].name
-        for i, terms in enumerate(interactions[input]):
-            sink = balanced_fanout("Dup", terms)
-            script.append(f"{sink} ~ Linear(TermSymbolic(X_{i}), 1.0, 0.0);")
+        for input in graph.input:
+            if input.name in interactions:
+                for i, terms in enumerate(interactions[input.name]):
+                    sink = balanced_fanout("Dup", terms)
+                    script.append(f"{sink} ~ Linear(TermSymbolic(X_{i}), 1.0, 0.0);")
 
     result_lines = [f"result{i};" for i in range(len(interactions.get(graph.output[0].name, [])))]
     return "\n".join(script + result_lines)
@@ -345,60 +312,35 @@ def z3_evaluate(model: str, X: dict):
         'TermReLU': TermReLU
     }
 
-    def tokenize(s):
-        i = 0
-        n = len(s)
-        while i < n:
-            c = s[i]
-            if c in '(),':
-                yield c
-                i += 1
-            elif c.isspace():
-                i += 1
-            else:
-                start = i
-                while i < n and s[i] not in '(), ' and not s[i].isspace():
-                    i += 1
-                yield s[start:i]
-
-    def iterative_eval(tokens_gen):
-        stack = [[]]
-        for token in tokens_gen:
-            if token == '(':
-                stack.append([])
-            elif token == ')':
-                args = stack.pop()
-                func_name = stack[-1].pop()
-                func = context.get(func_name)
-                if not func: raise ValueError(f"Unknown: {func_name}")
-                stack[-1].append(func(*args))
-            elif token == ',':
-                continue
-            else:
-                if token in context:
-                    stack[-1].append(token)
-                else:
-                    try:
-                        stack[-1].append(float(token))
-                    except ValueError:
-                        stack[-1].append(token)
-        return stack[0][0]
-
     exprs = []
+    allowed_calls = set(context.keys())
+    allowed_nodes = (ast.Expression, ast.Call, ast.Name, ast.Load, ast.Constant, ast.UnaryOp, ast.USub)
+    model = re.sub(r'X_\d+', lambda m: f'"{m.group(0)}"', model)
     for line in model.splitlines():
-        line = line.strip()
-        exprs.append(iterative_eval(tokenize(line)))
+        line = line.strip().rstrip(';')
+        if not line:
+            continue
+        tree = ast.parse(line, mode="eval")
+        for node in ast.walk(tree):
+            if not isinstance(node, allowed_nodes):
+                raise ValueError(f"Disallowed syntax: {type(node).__name__}")
+            if isinstance(node, ast.Call):
+                if not isinstance(node.func, ast.Name) or node.func.id not in allowed_calls:
+                    raise ValueError("Disallowed function call")
+            if isinstance(node, ast.Constant) and not isinstance(node.value, (int, float, str)):
+                raise ValueError(f"Only numeric constants and string names allowed")
+        exprs.append(eval(compile(tree, "<model>", "eval"), {"__builtins__": {}}, context))
     return exprs
 
-def net(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]] = None):
+def net(model: onnx.ModelProto, X, bounds: Optional[Dict[str, List[float]]] = None):
     model_hash = hashlib.sha256(model.SerializeToString()).hexdigest()
-    bounds_key = tuple(sorted((k, tuple(v)) for k, v in bounds.items())) if bounds else None
-    cache_key = (model_hash, bounds_key)
+    # bounds_key = tuple(sorted((k, tuple(v)) for k, v in bounds.items())) if bounds else None
+    # cache_key = (model_hash, bounds_key)
+    cache_key = model_hash
 
     if cache_key not in _CACHE:
         exported = inpla_export(model, bounds)
         reduced = inpla_run(exported)
-        X = {}
         evaluated = z3_evaluate(reduced, X)
         _CACHE[cache_key] = evaluated
 
@@ -408,19 +350,20 @@ def net(model: onnx.ModelProto, bounds: Optional[Dict[str, List[float]]] = None)
 class Solver(z3.Solver):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.bounds: Dict[str, List[float]] = {}
+        # self.bounds: Dict[str, List[float]] = {}
         self.pending_nets: List[onnx.ModelProto] = []
+        self.X = {}
 
     def load_smtlib(self, file_path: str):
         with open(file_path, "r") as f:
             content = f.read()
 
-        for match in re.finditer(r"\(assert\s+\((>=|<=)\s+(X_\d+)\s+([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\)\)", content):
-            op, var, val = match.groups()
-            val = float(val)
-            if var not in self.bounds: self.bounds[var] = [float('-inf'), float('inf')]
-            if op == ">=": self.bounds[var][0] = val
-            else: self.bounds[var][1] = val
+        # for match in re.finditer(r"\(assert\s+\((>=|<=)\s+(X_\d+)\s+([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\)\)", content):
+            # op, var, val = match.groups()
+            # val = float(val)
+            # if var not in self.bounds: self.bounds[var] = [float('-inf'), float('inf')]
+            # if op == ">=": self.bounds[var][0] = val
+            # else: self.bounds[var][1] = val
 
         assertions = z3.parse_smt2_string(content)
         self.add(assertions)
@@ -433,9 +376,10 @@ class Solver(z3.Solver):
     def _process_nets(self):
         y_count = 0
         for model in self.pending_nets:
-            z3_outputs = net(model, bounds=self.bounds)
+            z3_outputs = net(model, self.X)
+
             if z3_outputs:
-                for _, out_expr in enumerate(z3_outputs):
+                for out_expr in z3_outputs:
                     y_var = z3.Real(f"Y_{y_count}")
                     self.add(y_var == out_expr)
                     y_count += 1
