@@ -9,7 +9,8 @@ necessary copies of a value required by the next operations. Since nodes do not 
 nodes will utilize their outputs, the translation layer traverses the DAG in reverse order
 to be able to instantiate the correct number of \textit{Dup} agents. The main algorithm, illustrated
 in \textbf{\Cref{alg:onnx-to-in}}, maintains an \textit{interactions} dictionary data-structure, that maps each tensor
-name to a list of ports, to keep track of the graph traversal.
+name to a list of ports, to keep track of the graph traversal. The ONNX operators supported are Gemm
+(General matrix multiplication) and ReLU.
 
 \begin{algorithm}[H]
 	\caption{Backwards ONNX-to-IN Translation}
@@ -79,9 +80,9 @@ To maximize the concurrency of the INPLA engine, the translation layer avoids ge
 chains of agents, opting instead for balanced binary trees for signal distribution (single input to
 multiple output) and signal reduction (multiple input to single output). As \textbf{\Cref{alg:balanced-fan-in}}
 and \textbf{\Cref{alg:balanced-fan-out}} illustrate, the depth of agent chains (especially \textit{Dup} chains)
-is limited to $O(\log N)$. The two algorithms are very similar, the difference is in how they wire the
+is limited to $O(\log N)$. The two algorithms are very similar; the difference is in how they wire the
 agents together: in the \textit{Fan-In} the principal port of the agents are facing the leaves, while in the
-\textit{Fan-Out} they are facing the root.
+\textit{Fan-Out} they face the root.
 
 \begin{algorithm}[H]
 	\caption{Balanced Fan-In}

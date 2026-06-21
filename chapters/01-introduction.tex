@@ -4,15 +4,15 @@
 % Context
 Artificial Intelligence systems have made significant advancements in the last few years and enabled
 us to enter a new age of computing. Most of the credit goes to deep neural networks, and to their
-exceptional capacity for representing non-linear functions. But they do not come without drawbacks:
-neural networks are ``black boxes'' that lack transparency. To take advantage of these powerful
-tools in critical systems such as medicine and aerospace, we need to provide formal guarantees to
-ensure their safety and trustworthiness.
+exceptional capacity for representing non-linear functions. However, they do not come without
+drawbacks: neural networks are ``black boxes'' that lack transparency. To take advantage of these
+powerful tools in critical systems such as medicine and aerospace, we need to provide formal
+guarantees to ensure their safety and trustworthiness.
 
 % Problem
 In the field of neural network verification, a verification problem is composed of: a trained neural
 network and a set of specifications. Then a verification algorithm checks whether the specifications
-either hold or are violated. The kind of properties that can be verified are two:
+either hold or are violated. The two kinds of properties that can be verified are:
 \begin{itemize}
 	\item \textbf{Single-Network}: we check if a single neural network satisfies a given property.
 	\item \textbf{Multi-Network}: we check if multiple neural networks satisfy a given relation.
@@ -26,16 +26,16 @@ neuron.} (ReLU) activation function, creates an exponential search space for the
 this issue, running a solver against a raw, unoptimized network is often computationally prohibitive.
 
 Furthermore, we lack a formal intermediate representation. Since we are
-not able to directly feed a neural network to a SMT solver, a sound and deterministic model of
+not able to directly feed a neural network to an SMT solver, a sound and deterministic model of
 representation is needed to bridge this gap.
 
 % Solution
 To address the computational bottleneck, symbolic simplification is performed on the neural
 network as a pre-processing step to reduce the burden on the SMT solver. Considering that we can
-easily map the layers and neurons of neural networks to graph nodes and that the input of a SMT
+easily map the layers and neurons of neural networks to graph nodes and that the input of an SMT
 solver is a mathematical formula that can be represented by an \textit{Abstract Syntax Tree} (AST), we can
-use a graph rewriting system as intermediate model. The motivation behind this choice is that this
-type of model would enable us to simultaneously apply the simplification and produce the AST by
+use a graph rewriting system as an intermediate model. The motivation behind this choice is that
+this type of model would enable us to simultaneously apply the simplification and produce the AST by
 directly rewriting the graph obtained from the neural network.
 To model such graphs and these rewriting mechanisms, we leverage \textit{Interaction Nets}
 (IN)~\cite{lafont1990interactionnets}, a graphical model of computation characterized by local and
@@ -74,7 +74,7 @@ the original neural network. In addition to this formal analysis, we conducted s
 checking equivalence between a neural network trained on a dataset and a transformation.
 
 % Contributions
-The development of the VEIN framework and the design of its underlying simplification layer
+The development of the \textbf{VEIN} framework and the design of its underlying simplification layer
 constitute the primary work of this thesis. To address the challenges of verification complexity (A)
 and the need for a formal model of representation (B), this thesis introduces several key
 contributions:
@@ -98,8 +98,12 @@ contributions:
 \label{sec:outline}
 This section outlines the organization of the thesis:
 \begin{itemize}
-	\item \textbf{\Cref{ch:background}}: Introduces key concepts needed to understand the main work...
-	\item \textbf{\Cref{ch:core}}: Dives deeper into the details...
-	\item \textbf{\Cref{ch:related-work}}: Analyzes existing verification approaches...
-	\item \textbf{\Cref{ch:conclusion}}: Summarizes the findings and discusses future work...
+	\item \textbf{\Cref{ch:background}}: This chapter introduces key concepts needed to understand the
+		main work.
+	\item \textbf{\Cref{ch:core}}: This chapter dives deeper into the implementation details and
+		soundness proof.
+	\item \textbf{\Cref{ch:related-work}}: This chapter analyzes existing neural network verification
+		approaches.
+	\item \textbf{\Cref{ch:conclusion}}: This chapter summarizes the findings and discusses future
+		work.
 \end{itemize}

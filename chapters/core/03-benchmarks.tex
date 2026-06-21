@@ -3,83 +3,101 @@
 
 This section contains the benchmark data, illustrated in \textbf{\Cref{tab:benchmarks}}.
 
-VEIN was tested with the following hardware:
+\textbf{VEIN} was tested with the following hardware:
 \begin{itemize}
 	\item \textbf{CPU}: AMD Ryzen 7 5700x3D
 	\item \textbf{RAM}: 16GiB
 \end{itemize}
-using Hyperfine\footnote{\href{https://github.com/sharkdp/hyperfine}{\textbf{Hyperfine Github repository}}.}
-benchmarking tool. Hyperfine runs the test ten times, then reports the mean and standard deviation of
-execution time.
-
-\paragraph{Iris}
-Dataset of iris flowers presented by Fisher~\cite{fisher1936iris}. It consists of three
-species of flower (\textit{Iris setosa}, \textit{Iris virginica} and \textit{Iris versicolor}) with fifty samples each. Each
-sample has four features: width and length of sepals and petals.
-\paragraph{Pendulum}
-A neural safety certificate for stabilizing a pendulum to its upright position under a bound on its
-angle $\theta$, with state $x=[\theta,\dot\theta]\in\mathbb{R}^2$ and nonlinear dynamics.
-\paragraph{Double Integrator}
-A neural safety certificate for stabilizing a second-order linear system to the origin under a bound
-on its position $p$, with state $x=[p,\dot p]\in\mathbb{R}^2$.
-\paragraph{MNIST}
-Widely known dataset of handwritten digits presented by LeCun et al.~\cite{lecun2010mnist}. It
-consists of 60'000 training images and 10'000 testing images.
+using the Hyperfine\footnote{\href{https://github.com/sharkdp/hyperfine}{\textbf{Hyperfine Github repository}}.}
+benchmarking tool. Hyperfine runs the test ten times, then reports the mean and standard deviation
+of execution time. For longer runs, only execution is reported. We defined the following benchmarks:
+\begin{itemize}
+	\item \textbf{Iris}: Network trained on the Iris flowers dataset presented by Fisher~\cite{fisher1936iris}.
+		It consists of three species of flower (\textit{Iris setosa}, \textit{Iris virginica} and \textit{Iris versicolor}) with
+		fifty samples each. Each sample has four features: width and length of sepals and petals.
+	\item \textbf{Pendulum}: A neural safety certificate for stabilizing a pendulum to its upright position
+		under a bound on its angle $\theta$, with state $x=[\theta,\dot\theta]\in\mathbb{R}^2$.
+	\item \textbf{Double Integrator}: A neural safety certificate for stabilizing a second-order linear system
+		to the origin under a bound on its position $p$, with state $x=[p,\dot p]\in\mathbb{R}^2$.
+	\item \textbf{MNIST}: Network trained on the widely known dataset of handwritten digits presented by
+		LeCun et al.~\cite{lecun2010mnist}. It consists of 60'000 training images and 10'000 testing
+		images.
+\end{itemize}
 
 Pendulum and Double Integrator are taken from \textit{cersyve}, a benchmark presented by Kaulen et
 al.~\cite{kaulen20256thinternationalverificationneural}. We check equivalence between a pre-trained
 and a fine-tuned network for each task.
 
-In the Iris and MNIST dataset, we tested equivalence between a NN and its ad-hoc transformation,
-such as pruning always positive or negative ReLUs, as presented by Kumar et al.~\cite{kumar2019equivalentapproximatetransformationsdeep},
-or changing the architecture from wide to deep and viceversa, as presented by Fan et al.~\cite{JMLR:v24:21-0579}.
+In the Iris and MNIST datasets, we tested equivalence between a neural network and its ad-hoc
+transformation, such as pruning always positive or negative ReLUs, as presented by Kumar et
+al.~\cite{kumar2019equivalentapproximatetransformationsdeep}, or changing the architecture from wide
+to deep and viceversa, as presented by Fan et al.~\cite{JMLR:v24:21-0579}.
 
-For two NN $F: \mathbb{R}^n \to \mathbb{R}^m$ and $F': \mathbb{R}^n \to \mathbb{R}^m$, Eleftheriadis et al.~\cite{eleftheriadis2022equivalence}
-define three kinds of equivalence:
+For two neural networks $F: \mathbb{R}^n \to \mathbb{R}^m$ and $F': \mathbb{R}^n \to \mathbb{R}^m$, Eleftheriadis et
+al.~\cite{eleftheriadis2022equivalence} define three kinds of equivalence:
 \begin{itemize}
-	\item \textbf{Strict equivalence}: $\forall x \in \mathbb{R}^n \quad F(x) = F'(x)$.
-	\item \textbf{Epsilon equivalence}: $\forall x \in \mathbb{R}^n \quad ||F(x) - F'(x)|| < \epsilon$ for some $\epsilon > 0$.
-	\item \textbf{Argmax equivalence}: $\forall x \in \mathbb{R}^n \quad \mathtt{argmax}(F(x))=\mathtt{argmax}(F'(x))$ where \texttt{argmax}
+	\item \textbf{Strict equivalence}: $\forall x \in \mathbb{R}^n \; F(x) = F'(x)$.
+	\item \textbf{Epsilon equivalence}: $\forall x \in \mathbb{R}^n \; ||F(x) - F'(x)|| < \epsilon$ for some $\epsilon > 0$.
+	\item \textbf{Argmax equivalence}: $\forall x \in \mathbb{R}^n \; \mathtt{argmax}(F(x))=\mathtt{argmax}(F'(x))$ where \texttt{argmax}
 		is the function that returns the index of the maximum value of a vector.
 \end{itemize}
 
+We compare the verification time between a direct translation of the ONNX network into a Z3 formula
+and the \textbf{VEIN} framework.
+
 \begin{table}[H]
 	\centering
-	\begin{tabular}[t]{ccccc}
-		\hline
-		Benchmark & Equivalence & Time & Status \\
-		\hline
-		Iris (Stably Active) & Strict & 521.6ms ± 11.5ms & SAT \\
-		Iris (Stably Active) & Epsilon & 515.9ms ± 4.2ms & UNSAT \\
-		Iris (Stably Active) & Argmax & 519.5ms ± 6.0ms & UNSAT \\
-		Iris (Stably Inactive) & Strict & 581.9ms ± 6.2ms & UNSAT \\
-		Iris (Stably Inactive) & Epsilon & 593.8ms ± 6.9ms & UNSAT \\
-		Iris (Stably Inactive) & Argmax & 886.4ms ± 10.3ms & UNSAT \\
-		Iris (To Wide) & Strict & 595.4ms ± 11.3ms & UNSAT \\
-		Iris (To Wide) & Epsilon & 587.0ms ± 4.9ms & UNSAT \\
-		Iris (To Wide) & Argmax & 783.5ms ± 4.4ms & UNSAT \\
-		Iris (To Deep) & Strict & 581.4ms ± 6.6ms & UNSAT \\
-		Iris (To Deep) & Epsilon & 583.1ms ± 5.7ms & UNSAT \\
-		Iris (To Deep) & Argmax & 716.3ms ± 4.7ms & UNSAT \\
-		Pendulum & Strict & 43.276s ± 0.143s & SAT \\
-		Pendulum & Epsilon & 340.293s ± 2.843s & UNSAT \\
-		Pendulum & Argmax & 61.935s ± 0.148s & SAT \\
-		Double Integrator & Strict & 538.952s ± 7.207s & SAT \\
-		Double Integrator & Epsilon & 137.720s ± 0.419s & SAT \\
-		Double Integrator & Argmax & 618.705s ± 6.821s & SAT \\
-		MNIST (Stably Active) & Strict & 18.947s ± 0.034s & SAT \\
-		MNIST (Stably Active) & Epsilon & 18.980s ± 0.032s & UNSAT \\
-		MNIST (Stably Active) & Argmax & 18.906s ± 0.019s & UNSAT \\
-		MNIST (Stably Inactive) & Strict & 14.699s ± 0.024s & UNSAT \\
-		MNIST (Stably Inactive) & Epsilon & 14.702s ± 0.012s & UNSAT \\
-		MNIST (Stably Inactive) & Argmax & TIMEOUT & UNKNOWN \\
-		MNIST (To Wide) & Strict & 20.990s ± 0.181s & UNSAT \\
-		MNIST (To Wide) & Epsilon & 20.860s ± 0.022s & UNSAT \\
-		MNIST (To Wide) & Argmax & TIMEOUT & UNKNOWN \\
-		MNIST (To Deep) & Strict & 20.901s ± 0.027s & UNSAT \\
-		MNIST (To Deep) & Epsilon & 20.947s ± 0.035s & UNSAT \\
-		MNIST (To Deep) & Argmax & TIMEOUT & UNKNOWN \\
-	\end{tabular}
+	\resizebox{\textwidth}{!}{
+		\begin{tabular}[t]{ccccc}
+			\hline
+			Benchmark & Equivalence & Direct & VEIN & Status \\
+			\hline
+			Iris (Stably Active) & Strict & 265.2ms ± 6.8ms & 521.6ms ± 11.5ms & SAT \\
+			Iris (Stably Active) & Epsilon $\epsilon=0.1$ & 271.4ms ± 5.2ms & 515.9ms ± 4.2ms & UNSAT \\
+			Iris (Stably Active) & Argmax & 267.9ms ± 9.5ms & 519.5ms ± 6.0ms & UNSAT \\
+			Iris (Stably Inactive) & Strict & 278.3ms ± 7.7ms & 581.9ms ± 6.2ms & UNSAT \\
+			Iris (Stably Inactive) & Epsilon $\epsilon=0.1$ & 283.2ms ± 9.0ms & 593.8ms ± 6.9ms & UNSAT \\
+			Iris (Stably Inactive) & Argmax & 287.6ms ± 2.6ms & 886.4ms ± 10.3ms & UNSAT \\
+			Iris (Deep To Wide) & Strict & 269.5ms ± 5.1ms & 595.4ms ± 11.3ms & UNSAT \\
+			Iris (Deep To Wide) & Epsilon $\epsilon=0.1$ & 273.7ms ± 5.6ms & 587.0ms ± 4.9ms & UNSAT \\
+			Iris (Deep To Wide) & Argmax & 296.5ms ± 8.5ms & 783.5ms ± 4.4ms & UNSAT \\
+			Iris (Wide To Deep) & Strict & 271.5ms ± 7.7ms & 581.4ms ± 6.6ms & UNSAT \\
+			Iris (Wide To Deep) & Epsilon $\epsilon=0.1$ & 272.3ms ± 6.6ms & 583.1ms ± 5.7ms & UNSAT \\
+			Iris (Wide To Deep) & Argmax & 1.280s ± 0.019s & 716.3ms ± 4.7ms & UNSAT \\
+			Pendulum & Strict & 20m 47.679s & 43.276s ± 0.143s & SAT \\
+			Pendulum & Epsilon $\epsilon=0.1$ & 37m 54.754s & 340.293s ± 2.843s & UNSAT \\
+			Pendulum & Argmax & 24m 56.327s & 61.935s ± 0.148s & SAT \\
+			Double Integrator & Strict & 27m 45.657s & 538.952s ± 7.207s & SAT \\
+			Double Integrator & Epsilon $\epsilon=0.1$ & 59m 51.718s & 137.720s ± 0.419s & SAT \\
+			Double Integrator & Argmax & 41m 21.147s & 618.705s ± 6.821s & SAT \\
+			MNIST (Stably Active) & Strict & 740.5ms ± 4.7ms & 18.947s ± 0.034s & SAT \\
+			MNIST (Stably Active) & Epsilon $\epsilon=0.1$ & 1.571s ± 0.010s & 18.980s ± 0.032s & UNSAT \\
+			MNIST (Stably Active) & Argmax & 794.7ms ± 7.3ms & 18.906s ± 0.019s & UNSAT \\
+			MNIST (Stably Inactive) & Strict & TIMEOUT & 14.699s ± 0.024s & UNSAT \\
+			MNIST (Stably Inactive) & Epsilon $\epsilon=0.1$ & TIMEOUT & 14.702s ± 0.012s & UNSAT \\
+			MNIST (Stably Inactive) & Argmax & TIMEOUT & TIMEOUT & UNKNOWN \\
+			MNIST (Deep To Wide) & Strict & 692.2ms ± 5.6ms & 20.990s ± 0.181s & UNSAT \\
+			MNIST (Deep To Wide) & Epsilon $\epsilon=0.1$ & 691.4ms ± 3.2 ms & 20.860s ± 0.022s & UNSAT \\
+			MNIST (Deep To Wide) & Argmax & TIMEOUT & TIMEOUT & UNKNOWN \\
+			MNIST (Wide To Deep) & Strict & 718.3ms ± 4.8ms & 20.901s ± 0.027s & UNSAT \\
+			MNIST (Wide To Deep) & Epsilon $\epsilon=0.1$ & 722.1ms ± 6.0 ms & 20.947s ± 0.035s & UNSAT \\
+			MNIST (Wide To Deep) & Argmax & TIMEOUT & TIMEOUT & UNKNOWN \\
+		\end{tabular}
+	}
 	\caption{Benchmark table.}
 	\label{tab:benchmarks}
 \end{table}
+
+We make three observations:
+\begin{itemize}
+	\item On Iris, the direct translation is consistently faster by a roughly constant
+		margin, suggesting a fixed \textbf{VEIN} pipeline overhead.
+	\item On Pendulum and Double Integrator, the pattern reverses: \textbf{VEIN} outperforms the direct
+		translation by up to two orders of magnitude.
+	\item MNIST is mixed: most variants favor the direct translation, except Stably Inactive,
+		where the direct encoding times out while \textbf{VEIN} finishes in ~15s. We hypothesize this is because
+		direct encoding may face branching from the unpruned network that \textbf{VEIN} folds during
+		preprocessing.
+\end{itemize}
+Additionally, we identify two false SAT results (Stably Active transformation). These are caused
+by floating-point error introduced by the INPLA float attributes instead of using real numbers.

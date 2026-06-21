@@ -1,7 +1,7 @@
 \subsection{Soundness of Reduction}
 \label{sec:soundness-of-reduction}
 
-\begin{lemma}
+\begin{property}
 	A valid IN satisfies the following properties:
 	\begin{itemize}
 		\item \textbf{DAG}: the net forms a DAG where the roots are the free wires representing the network
@@ -15,7 +15,7 @@
 			carrier nor operator agents interact with agents of the same type. Terminal agents do not
 			interact with computational operators because they are wrapped in a \textit{Linear} agent.
 	\end{itemize}
-\end{lemma}
+\end{property}
 
 \begin{theorem}
 	Let $\text{IN}_0$ be the valid IN translated from a neural network $\text{NN}$. Let $\text{IN}_n$ be
@@ -65,9 +65,9 @@
 	\Phi(\text{IN}_n) = \sum_{a \in \text{Agents}(\text{IN}_n)} \begin{cases}
 		4 + 3^{D-d(a)} & \text{ if }a\text{ is of type computational operator} \\
 		3 + 3^{D-d(a)} & \text{ if }a\text{ is of type intermediate} \\
-		1 + 3^{D-d(a)} & \text{ if }a\text{ is a Materialize agent} \\
+		1 + 3^{D-d(a)} & \text{ if }a\text{ is a \textit{Materialize} agent} \\
 		3^{D-d(a)} & \text{ if }a\text{ is of type structural operator} \\
-		0 & \text{ if }a\text{ is a Carrier, Terminal}
+		0 & \text{ if }a\text{ is a carrier, terminal}
 	\end{cases}
 	\end{equation}
 	where $d(a)$ is the distance of the agent $a$ from the nearest output wire and $D$ the maximum depth
@@ -88,30 +88,44 @@
 			\begin{equation}
 			\Phi(\text{IN}_n) = 3 + 3^{D-d(i)} > 0 = \Phi(\text{IN}_{n+1})
 			\end{equation}
-			or temporary Linear agents are wired with Materialize agents, which are then forced to
-			interact to produce terminal agents, then wrapped into a new Linear agent:
+			or temporary Linear agents are wired with \textit{Materialize} agents, which are then forced to
+			interact to produce terminal agents, then wrapped into a new \textit{Linear} agent:
 			\begin{equation}
-			\Phi(\text{IN}_n) = 3 + 3^{D-d(i)} > 1 + 3^{D-d(i)-2} + 1 + 3^{D-d(i)-2} = 2 + 2 \cdot 3^{D-d(i)-2} = \Phi(\text{IN}_{n+1})
+			\begin{aligned}
+				\Phi(\text{IN}_n) &= 3 + 3^{D-d(i)} \\
+				&> 1 + 3^{D-d(i)-2} + 1 + 3^{D-d(i)-2} \\
+				&= 2 + 2 \cdot 3^{D-d(i)-2} = \Phi(\text{IN}_{n+1})
+			\end{aligned}
 			\end{equation}
-			If the carrier $c$ interacts with a Materialize agent $i$:
+			If the carrier $c$ interacts with a \textit{Materialize} agent $i$:
 			\begin{equation}
 			\Phi(\text{IN}_n) = 1 + 3^{D-d(i)} > 0 = \Phi(\text{IN}_{n+1})
 			\end{equation}
-		\item \textbf{Carrier with Structural Operator}: If a carrier $c$ is duplicated with the \textit{Dup} or \textit{Eraser}
+		\item \textbf{Carrier with Structural Operator}: If a carrier $c$ interacts with a \textit{Dup} or \textit{Eraser}
 			agent $a$, it traverses the agent structure:
 			\begin{equation}
 			\Phi(\text{IN}_n) = 3^{D-d(a)} > 3^{D-d(a)-1} = \Phi(\text{IN}_{n+1})
 			\end{equation}
-			if the Dup or Eraser agent interacts with a TermAdd or TermMul, two new agents are created at
-			each auxillary port:
+			if the \textit{Dup} or \textit{Eraser} agent interacts with a \textit{TermAdd} or \textit{TermMul}, two new agents are created at
+			each auxiliary port:
 			\begin{equation}
 			\Phi(\text{IN}_n) = 3^{D-d(a)} > 2 * 3^{D-d(a)-1} = \Phi(\text{IN}_{n+1})
+			\end{equation}
+			if the \textit{Dup} or \textit{Eraser} agent interacts with a \textit{TermReLU}, one new agent is created at the 
+			auxiliary port:
+			\begin{equation}
+			\Phi(\text{IN}_n) = 3^{D-d(a)} > 3^{D-d(a)-1} = \Phi(\text{IN}_{n+1})
+			\end{equation}
+			if the \textit{Dup} or \textit{Eraser} agent interacts with a \textit{TermConcrete} or \textit{TermSymbolic}, no new agents are
+			created:
+			\begin{equation}
+			\Phi(\text{IN}_n) = 3^{D-d(a)} > 0 = \Phi(\text{IN}_{n+1})
 			\end{equation}
 	\end{itemize}
 	Since $\Phi$ is a non-negative strictly decreasing function, the reduction
 	process must terminate in a finite number of steps $n$.
 
-	Additionally, since each active pair has exactly one applicable rule the reduction is
+	Additionally, since each active pair has exactly one applicable rule, the reduction is
 	deterministic. Strong confluence follows immediately, meaning that the normal form is unique
-	regardless of order in which rules are applied.
+	regardless of the order in which rules are applied.
 \end{proof}

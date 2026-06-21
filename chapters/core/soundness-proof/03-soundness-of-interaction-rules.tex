@@ -1,6 +1,8 @@
 \subsection{Soundness of Interaction Rules}
 \label{sec:soundness-of-interaction-rules}
 
+We need to prove that each interaction rule does not alter the semantics of the IN.
+
 \begin{lemma}
 	For the \textit{Linear} and \textit{Add} agents we have the interaction rule:
 	$$
@@ -146,8 +148,7 @@
 			& \llbracket \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \sim w \rrbracket \Rightarrow \mathit{out} = q \cdot x + (r + w) \\
 			& \Rightarrow \mathit{out} = q \cdot x + (r + s \cdot y + t)
 		\end{aligned} \\
-		& \begin{aligned}
-			\text{RHS: }
+		& \text{RHS: } \resizebox{0.85\linewidth}{!}{$
 			\begin{cases}
 				\llbracket \mathit{out} \sim \mathit{Concrete}(0); x \sim \mathit{Eraser}; y \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = 0 & \text{if } q,r,s,t = 0 \\
 				\llbracket \mathit{out} \sim  \mathit{Linear}(x, q, r); y \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = q \cdot x + r & \text{if } s,t = 0 \\
@@ -161,7 +162,7 @@
 				\end{aligned}\\
 				\Rightarrow \mathit{out} = 1 \cdot (q \cdot x + r + s \cdot y + t) + 0 & \text{otherwise}
 			\end{cases}
-		\end{aligned}
+		$}
 	\end{aligned}
 	$$
 	Since:
@@ -200,8 +201,7 @@
 			& \llbracket \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \sim w \rrbracket \Rightarrow \mathit{out} = q \cdot w \cdot x + r \cdot w \\
 			& \Rightarrow \mathit{out} = q \cdot (s \cdot y + t) \cdot x + r \cdot (s \cdot y + t)
 		\end{aligned} \\
-		& \begin{aligned}
-			\text{RHS: }
+		& \text{RHS: } \resizebox{0.85\linewidth}{!}{$
 			\begin{cases}
 				\llbracket \mathit{out} \sim \mathit{Concrete}(0); x \sim \mathit{Eraser}; y \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = 0 & \text{if } q,r = 0 \lor s,t = 0 \\
 				\begin{aligned}
@@ -213,15 +213,17 @@
 				\end{aligned}\\
 				\Rightarrow \mathit{out} = 1 \cdot (q \cdot x + r) \cdot (s \cdot y + t) + 0 & \text{otherwise}
 			\end{cases}
-		\end{aligned}
+		$}
 	\end{aligned}
 	$$
 	Since:
 	$$
+	\resizebox{0.95\linewidth}{!}{$
 	\begin{cases}
 		0 \cdot (s \cdot y + t) \cdot x + 0 \cdot (s \cdot y + t) = 0 \lor q \cdot (0 \cdot y + 0) \cdot x + r \cdot (0 \cdot y + 0) = 0 & \text{if } q,r = 0 \lor s,t = 0  \\
 		1 \cdot (q \cdot x + r) \cdot (s \cdot y + t) + 0 = q \cdot (s \cdot y + t) \cdot x + r \cdot (s \cdot y + t) & \text{otherwise}
 	\end{cases}
+	$}
 	$$
 	the rule is sound.
 \end{lemma}
@@ -317,11 +319,13 @@
 \begin{lemma}
 	For the \textit{Concrete} and \textit{AddCheckConcrete} agents we have the interaction rule:
 	$$
-	\mathit{Concrete}(j) \bowtie \mathit{AddCheckConcrete}(\mathit{out}, k) \Rightarrow
-	\begin{cases}
-		\mathit{out} \sim \mathit{Concrete}(k) & \text{if } j = 0 \\
-		\mathit{out} \sim \mathit{Concrete}(k + j) & \text{otherwise}
-	\end{cases}
+	\begin{aligned}
+		& \mathit{Concrete}(j) \bowtie \mathit{AddCheckConcrete}(\mathit{out}, k) \Rightarrow \\
+		& \quad \begin{cases}
+			\mathit{out} \sim \mathit{Concrete}(k) & \text{if } j = 0 \\
+			\mathit{out} \sim \mathit{Concrete}(k + j) & \text{otherwise}
+		\end{cases}
+	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
 	$$
@@ -353,12 +357,14 @@
 \begin{lemma}
 	For the \textit{Concrete} and \textit{MulCheckConcrete} agents we have the interaction rule:
 	$$
-	\mathit{Concrete}(j) \bowtie \mathit{MulCheckConcrete}(\mathit{out}, k) \Rightarrow
-	\begin{cases}
-		\mathit{out} \sim \mathit{Concrete}(0) & \text{if } j = 0 \\
-		\mathit{out} \sim \mathit{Concrete}(k) & \text{if } j = 1 \\
-		\mathit{out} \sim \mathit{Concrete}(k \cdot j) & \text{otherwise}
-	\end{cases}
+	\begin{aligned}
+		& \mathit{Concrete}(j) \bowtie \mathit{MulCheckConcrete}(\mathit{out}, k) \Rightarrow \\
+		& \quad \begin{cases}
+			\mathit{out} \sim \mathit{Concrete}(0) & \text{if } j = 0 \\
+			\mathit{out} \sim \mathit{Concrete}(k) & \text{if } j = 1 \\
+			\mathit{out} \sim \mathit{Concrete}(k \cdot j) & \text{otherwise}
+		\end{cases}
+	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
 	$$
@@ -458,13 +464,13 @@
 	$$
 	\begin{aligned}
 		& \mathit{Linear}(x, q, r) \bowtie \mathit{Materialize}(\mathit{out}) \Rightarrow \\
-		& \quad \begin{cases}
+		& \quad \resizebox{0.85\linewidth}{!}{$ \begin{cases}
 			\mathit{out} \sim \mathit{TermConcrete}(r); x \sim \mathit{Eraser} & \text{if } q = 0 \\
 			\mathit{out} \sim x & \text{if } q = 1, r = 0 \\
 			\mathit{out} \sim \mathit{TermAdd}(x, \mathit{TermConcrete}(r)) & \text{if } q = 1 \\
 			\mathit{out} \sim \mathit{TermMul}(\mathit{TermConcrete}(q), x) & \text{if } r = 0 \\
 			\mathit{out} \sim \mathit{TermAdd}(\mathit{TermMul}(\mathit{TermConcrete}(q), x), \mathit{TermConcrete}(r)) & \text{otherwise}
-		\end{cases}
+		\end{cases} $}
 	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
@@ -477,13 +483,16 @@
 		\end{aligned} \\
 		& \begin{aligned}
 			\text{RHS: }
-			\begin{cases}
+			\resizebox{0.9\linewidth}{!}{$ \begin{cases}
 				\llbracket \mathit{out} \sim \mathit{TermConcrete}(r); x \sim \mathit{Eraser} \rrbracket \Rightarrow \mathit{out} = r & \text{if } q = 0 \\
 				\llbracket \mathit{out} \sim x \rrbracket \Rightarrow \mathit{out} = x & \text{if } q = 1, r = 0 \\
 				\llbracket \mathit{out} \sim \mathit{TermAdd}(x, \mathit{TermConcrete}(r)) \rrbracket \Rightarrow \mathit{out} = x + r & \text{if } q = 1 \\
 				\llbracket \mathit{out} \sim \mathit{TermMul}(\mathit{TermConcrete}(q), x) \rrbracket \Rightarrow \mathit{out} = q \cdot x & \text{if } r = 0 \\
-				\llbracket \mathit{out} \sim \mathit{TermAdd}(\mathit{TermMul}(\mathit{TermConcrete}(q), x), \mathit{TermConcrete}(r)) \rrbracket \Rightarrow \mathit{out} = q \cdot x + r & \text{otherwise} \\
-			\end{cases}
+				\begin{aligned}
+					& \llbracket \mathit{out} \sim \mathit{TermAdd}(\mathit{TermMul}(\mathit{TermConcrete}(q), x), \mathit{TermConcrete}(r)) \rrbracket \\
+					& \Rightarrow \mathit{out} = q \cdot x + r
+				\end{aligned} & \text{otherwise} \\
+			\end{cases} $}
 		\end{aligned}
 	\end{aligned}
 	$$
@@ -526,9 +535,10 @@
 	For the \textit{Linear} and \textit{Dup} agents we have the interaction rule:
 	$$
 	\begin{aligned}
-		\mathit{Linear}(z, q, r) \bowtie \mathit{Dup}(x, y) \Rightarrow
-		& \mathit{Linear}(z_1, q, r) \sim x; \mathit{Linear}(z_2, q, r) \sim y;	\\
-		& \mathit{Dup}(z_1, z_2) \sim z
+		& \mathit{Linear}(z, q, r) \bowtie \mathit{Dup}(x, y) \Rightarrow \\
+		& \quad \mathit{Linear}(z_1, q, r) \sim x; \\
+		& \quad \mathit{Linear}(z_2, q, r) \sim y;	\\
+		& \quad \mathit{Dup}(z_1, z_2) \sim z
 	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
@@ -620,8 +630,11 @@
 	For the \textit{TermAdd} and \textit{Dup} agents we have the interaction rule:
 	$$
 	\begin{aligned}
-		\mathit{TermAdd}(a, b) \bowtie \mathit{Dup}(x, y) \Rightarrow & \mathit{TermAdd}(a_1, b_1) \sim x; \mathit{TermAdd}(a_2, b_2) \sim y; \\
-		& \mathit{Dup}(a_1, a_2) \sim a; \mathit{Dup}(b_1, b_2) \sim b\\
+		& \mathit{TermAdd}(a, b) \bowtie \mathit{Dup}(x, y) \Rightarrow \\
+		& \quad \mathit{TermAdd}(a_1, b_1) \sim x; \\
+		& \quad \mathit{TermAdd}(a_2, b_2) \sim y; \\
+		& \quad \mathit{Dup}(a_1, a_2) \sim a; \\
+		& \quad \mathit{Dup}(b_1, b_2) \sim b
 	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
@@ -671,9 +684,11 @@
 	For the \textit{TermMul} and \textit{Dup} agents we have the interaction rule:
 	$$
 	\begin{aligned}
-		\mathit{TermMul}(a, b) \bowtie \mathit{Dup}(x, y) \Rightarrow
-		& \mathit{TermMul}(a_1, b_1) \sim x; \mathit{TermMul}(a_2, b_2) \sim y; \\
-		& \mathit{Dup}(a_1, a_2) \sim a; \mathit{Dup}(b_1, b_2) \sim b
+		& \mathit{TermMul}(a, b) \bowtie \mathit{Dup}(x, y) \Rightarrow \\
+		& \quad \mathit{TermMul}(a_1, b_1) \sim x; \\
+		& \quad \mathit{TermMul}(a_2, b_2) \sim y; \\
+		& \quad \mathit{Dup}(a_1, a_2) \sim a; \\
+		& \quad \mathit{Dup}(b_1, b_2) \sim b
 	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
@@ -723,10 +738,10 @@
 	For the \textit{TermReLU} and \textit{Dup} agents we have the interaction rule:
 	$$
 	\begin{aligned}
-		\mathit{TermReLU}(z) \bowtie \mathit{Dup}(x, y) \Rightarrow
-		& \mathit{TermReLU}(z_1) \sim x; \\
-		&\mathit{TermReLU}(z_2) \sim y; \\
-		& \mathit{Dup}(z_1, z_2) \sim z
+		& \mathit{TermReLU}(z) \bowtie \mathit{Dup}(x, y) \Rightarrow \\
+		& \quad \mathit{TermReLU}(z_1) \sim x; \\
+		& \quad \mathit{TermReLU}(z_2) \sim y; \\
+		& \quad \mathit{Dup}(z_1, z_2) \sim z
 	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
@@ -774,9 +789,9 @@
 	For the \textit{TermConcrete} and \textit{Dup} agents we have the interaction rule:
 	$$
 	\begin{aligned}
-		\mathit{TermConcrete}(k) \bowtie \mathit{Dup}(x, y) \Rightarrow
-		& \mathit{TermConcrete}(k) \sim x; \\
-		& \mathit{TermConcrete}(k) \sim y
+		& \mathit{TermConcrete}(k) \bowtie \mathit{Dup}(x, y) \Rightarrow \\
+		& \quad \mathit{TermConcrete}(k) \sim x; \\
+		& \quad \mathit{TermConcrete}(k) \sim y
 	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
@@ -822,9 +837,9 @@
 	For the \textit{TermSymbolic} and \textit{Dup} agents we have the interaction rule:
 	$$
 	\begin{aligned}
-		\mathit{TermSymbolic}(id) \bowtie \mathit{Dup}(x, y) \Rightarrow
-		& \mathit{TermSymbolic}(id) \sim x; \\
-		& \mathit{TermSymbolic}(id) \sim y
+		& \mathit{TermSymbolic}(id) \bowtie \mathit{Dup}(x, y) \Rightarrow \\
+		& \quad \mathit{TermSymbolic}(id) \sim x; \\
+		& \quad \mathit{TermSymbolic}(id) \sim y
 	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:

@@ -1,7 +1,7 @@
 \subsection{INPLA fork}
 \label{sec:inpla}
 
-The VEIN reduction engine utilizes a modified version of INPLA\footnote{\textbf{\href{https://github.com/inpla/inpla/blob/main/Gentle_introduction_Inpla.md}{INPLA documentation.}}},
+The \textbf{VEIN} reduction engine utilizes a modified version of INPLA\footnote{\textbf{\href{https://github.com/inpla/inpla/blob/main/Gentle_introduction_Inpla.md}{INPLA documentation.}}},
 a multi-threaded parallel interpreter of IN. Performance and ease of use motivated the choice of
 INPLA. Additionally, it supports attribute values, which is a special extension that allows agents
 to hold numerical values at their ports.
@@ -24,7 +24,7 @@ INPLA evaluates nets which consist of connections between terms. Terms are built
 <term> ::= <name> | <agent>
 <name> ::= <nameID>
 <agent> ::= <agentID>
-					| <agentID> ['(' <term> ',' ... ',' <term> ')']
+          | <agentID> ['(' <term> ',' ... ',' <term> ')']
 \end{verbatim}
 \end{small}
 \begin{itemize}
@@ -37,12 +37,12 @@ Interaction rules rewrite connections between agents:
 \begin{verbatim}
 <interaction-rule> ::= <rule-agent> '><' <rule-agent> '=>' <connections> ';'
 <rule-agent> ::= <agentID>
-							 | <agentID> '(' <name> ',' ... ',' <name> ')'
+               | <agentID> '(' <name> ',' ... ',' <name> ')'
 \end{verbatim}
 \end{small}
 
 \paragraph{Example}
-Unary natural numbers are built by $\texttt{Z}$ (zero) and $\texttt{S}$ (successive function). For
+Unary natural numbers are built by $\texttt{Z}$ (zero) and $\texttt{S}$ (successor function). For
 instance, 0, 1, 2, 3 are expressed as \texttt{Z}, \texttt{S(Z)}, \texttt{S(S(Z))}, \texttt{S(S(S(Z)))}. Here, let's think about an
 increment operation ``inc'' such that:
 \begin{small}

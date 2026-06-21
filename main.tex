@@ -15,11 +15,13 @@
 \usepackage{tikz-inet}
 \usepackage{stmaryrd}
 \usepackage{float}
+\usepackage{tablefootnote}
 
 \usetikzlibrary{calc}
 \linenumbers
 \crefname{algocf}{alg.}{algs.}
 \Crefname{algocf}{Algorithm}{Algorithms}
+\crefformat{footnote}{#2\footnotemark[#1]#3}
 
 \input{macros}
 \input{cmds}
@@ -33,7 +35,14 @@
 \maketitle
 
 \begin{abstract}
-	Summary
+	This thesis introduces \textbf{VEIN} (VErification via Interaction Nets), a framework for neural network
+	verification with a focus on neural network equivalence. It acts as a	formally verified
+	preprocessor that reduces neural networks to a normal form before they can be compared by a solver.
+	To enable this reduction, \textbf{VEIN} translates neural networks into Interaction Nets, a graph rewriting
+	computational model, and applies a set of graph rewriting rules to reduce the network into an
+	Abstract Syntax Tree. We present the complete framework and provide in detail: the translation
+	process, the graph rewriting rules and rigorous proofs of both soundness and termination for the
+	reduction process.
 \end{abstract}
 
 \tableofcontents
@@ -41,13 +50,13 @@
 % Introduction: Context -> Problem -> Solution -> Validation -> Outline
 \input{chapters/01-introduction}
 
-% Background: Concepts and notions
+% Background
 \input{chapters/02-background}
 
-% Core: The main work
+% Core
 \input{chapters/03-core}
 
-% Related Work: At the end, before conclusions
+% Related Work
 \input{chapters/04-related-work}
 
 % Conclusion

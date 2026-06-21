@@ -1,11 +1,11 @@
 \section{Interaction Nets}
 \label{sec:interaction-nets}
 
-Interaction Nets, introduced by Yves Lafont et al.~\cite{lafont1990interactionnets}, are a
+\textit{Interaction Nets} (IN), introduced by Lafont~\cite{lafont1990interactionnets}, are a
 graphical model of computation based on graph rewriting.
 
 \subsection{Basic Concepts}
-An interaction net is an undirected graph with labelled vertices, called \textit{agents}. Each agent
+An IN is an undirected graph with labelled vertices, called \textit{agents}. Each agent
 is an instance of a \textit{symbol}, which has a principal port and a fixed number of auxiliary ports:
 \begin{figure}[H]
 	\centering
@@ -16,11 +16,12 @@ is an instance of a \textit{symbol}, which has a principal port and a fixed numb
 		\node[left] at (A.above pax 2) {$\mathit{y}$};
 		\node[right] at (A.above pal) {$\mathit{x}$};
 	\end{tikzpicture}
-	\caption{Example of an agent \textit{Add} with two auxiliary ports.}
+	\caption{Example of an agent \textit{Add} with two auxiliary ports connected to $x, y, z$ wires.}
 	\label{fig:agent}
 \end{figure}
 
-Each port can be wired to at most one other port. When two different agents are wired to their respective principal ports they are called an \textit{active pair}:
+Each port can be wired to at most one other port. When two different agents are wired to their
+respective principal ports they are called an \textit{active pair}:
 
 \begin{figure}[H]
 	\centering
@@ -38,8 +39,8 @@ Each port can be wired to at most one other port. When two different agents are 
 \end{figure}
 
 \subsection{Interaction Rules}
-Computation in interaction nets proceeds by rewriting the net using local \emph{interaction rules}. A rule
-is defined only for an active pair and, for any pair of agent types, there is at most one
+Computation in IN proceeds by rewriting the net using local \emph{interaction rules}. A rule
+is defined only for an active pair and for any pair of symbols there is at most one
 interaction rule.
 
 \begin{figure}[H]
@@ -66,10 +67,11 @@ interaction rule.
 \end{figure}
 
 \subsection{Properties}
-Interaction nets possess the following properties:
+IN possess the following properties:
 \begin{itemize}
 	\item \textbf{Locality}: only active pairs can be rewritten.
-	\item \textbf{Linearity}: each interaction rule can be applied in constant time.
+	\item \textbf{Linearity}: each interaction rule rewrites a constant-size subgraph, independent of
+		the overall size of the net.
 	\item \textbf{Strong Confluence}: given a net $\text{IN}$ that can reduce to $\text{IN}_1$ and $\text{IN}_2$ in one
 		step, then both $\text{IN}_1$ and $\text{IN}_2$ reduce to some net $\text{IN}'$ in one step.
 \end{itemize}

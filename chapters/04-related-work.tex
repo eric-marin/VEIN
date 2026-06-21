@@ -9,10 +9,10 @@ Existing verification techniques can be classified into complete and incomplete 
 Complete verification methods guarantee to either find a counterexample violating the property or
 prove that the property holds. Katz et al.~\cite{katz2017reluplex} presented \textit{Reluplex}, a
 pioneering SMT solver designed specifically for networks with ReLU activation functions. It extends
-the standard simplex method, originally created by Dantzig~\cite{dantzig1947simplex}, to handle ReLU
-constraints directly. Katz et al.~\cite{katz2019marabou} also presented \textit{Marabou}, successor
-of \textit{Reluplex}, a more modular and highly optimized framework that supports a wider range of
-activation functions.
+the standard simplex method, originally created by Dantzig (as described by
+Nash~\cite{dantzig1947simplex}), to handle ReLU constraints directly. Katz et
+al.~\cite{katz2019marabou} also presented \textit{Marabou}, the successor of \textit{Reluplex}, a
+more modular and highly optimized framework that supports a wider range of activation functions.
 
 \paragraph{Incomplete solvers}
 Incomplete verification methods use abstract interpretation to soundly approximate neural networks.
@@ -22,10 +22,19 @@ guaranteed to be stably active or inactive.
 
 \paragraph{Hybrid solvers}
 \textit{$\alpha$-$\beta$-CROWN} is a neural network verifier that combines a series of complete
-verification methods, based on branch-and-bound, and incomplete verification methods, based on
-bound-propagation: \textit{CROWN} (Zhang et al.~\cite{zhang2018efficient}), \textit{auto\_LiRPA}
+verification methods (based on branch-and-bound) and incomplete verification methods (based on
+bound-propagation): \textit{CROWN} (Zhang et al.~\cite{zhang2018efficient}), \textit{auto\_LiRPA}
 (Xu et al.~\cite{xu2020automatic}), \textit{$\alpha$-CROWN} (Xu et al.~\cite{xu2021fast}),
 \textit{$\beta$-CROWN} (Wang et al.~\cite{wang2021beta}), \textit{GenBaB} (Shi et
-al~\cite{shi2024genbab}), \textit{GCP-CROWN} (Zhang et al~\cite{zhang2022general}) and
+al.~\cite{shi2024genbab}), \textit{GCP-CROWN} (Zhang et al.~\cite{zhang2022general}) and
 \textit{BICCOS} (Zhou et al.~\cite{zhou2024scalable}). Thanks to this hybrid approach, 
-\textit{$\alpha$-$\beta$-CROWN} achieved state-of-the-art perfomance and won VNNCOMP 2021-2025.
+\textit{$\alpha$-$\beta$-CROWN} achieved state-of-the-art performance and won VNNCOMP 2021-2025.
+
+\paragraph{Equivalence Checking}
+Closest to the scope of this work, Eleftheriadis et al.~\cite{eleftheriadis2022equivalence} study
+the problem of neural network equivalence checking using SMT solvers, and define the notions of
+strict, epsilon, and argmax equivalence adopted in \textbf{\Cref{sec:benchmarks}}. They approach the
+equivalence problem by directly encoding an SMT formula and relying on internal heuristics of the
+solver to handle the search space. Instead, \textbf{VEIN} introduces an explicit, formally verified
+preprocessing stage that reduces the networks to a normal form before encoding it into an SMT
+formula.

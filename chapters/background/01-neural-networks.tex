@@ -2,8 +2,8 @@
 \label{sec:neural-networks}
 
 A neural network is a computational model inspired by biological neural networks. It consists of
-connected nodes called neuron, introduced in its early form by Rosenblatt~\cite{rosenblatt1958perceptron}.
-\textit{Multi-Layer Perceptrons} is an architecture composed of sequential layers, trained using
+connected nodes called neurons, introduced in its early form by Rosenblatt~\cite{rosenblatt1958perceptron}.
+The \textit{Multi-Layer Perceptrons} is an architecture composed of sequential layers, trained using
 backpropagation as popularized by Rumelhart et al.~\cite{rumelhart1986learning}.
 
 \subsection{Neuron}
@@ -51,7 +51,7 @@ The output $y$ is defined as:
         \draw[->] (act) -- (y);
         
     \end{tikzpicture}
-    \caption{Mathematical model of an artificial neuron.}
+    \caption{Graphical representation of a neuron.}
     \label{fig:single-neuron}
 \end{figure}
 
@@ -101,14 +101,15 @@ the outputs.
         \node[above] at (7, 1.2) {Output Layer};
         
     \end{tikzpicture}
-    \caption{Architecture of a Multi-Layer Perceptron (MLP) with one hidden layer.}
+    \caption{Architecture of an MLP with one hidden layer.}
     \label{fig:mlp}
 \end{figure}
 
-One of the most common activation function is the ReLU, defined as:
+One of the most common activation functions is the ReLU, defined as:
 \begin{equation}
     \text{ReLU}(z) = \max(0, z)
 \end{equation}
+The framework focuses on MLP with ReLU activation functions.
 
 \subsection{Neural Network Verification}
 The verification problem of a neural network $F: \mathbb{R}^n \to \mathbb{R}^m$ with input constraint
