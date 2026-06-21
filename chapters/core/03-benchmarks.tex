@@ -3,18 +3,17 @@
 
 This section contains the benchmark data, illustrated in \textbf{\Cref{tab:benchmarks}}.
 
-VEIN was tested on a laptop Zenbook UX3402ZA with:
+VEIN was tested with the following hardware:
 \begin{itemize}
-	\item \textbf{CPU}: 12th Gen Intel Core i5-1240P
-	\item \textbf{RAM}: 8GiB
-	\item \textbf{SWAP}: 16GiB on NVMe
+	\item \textbf{CPU}: AMD Ryzen 7 5700x3D
+	\item \textbf{RAM}: 16GiB
 \end{itemize}
 using Hyperfine\footnote{\href{https://github.com/sharkdp/hyperfine}{\textbf{Hyperfine Github repository}}.}
 benchmarking tool. Hyperfine runs the test ten times, then reports the mean and standard deviation of
 execution time.
 
 \paragraph{Iris}
-Dataset of iris flowers presented by Fisher et al.~\cite{fisher1936iris}. It consists of three
+Dataset of iris flowers presented by Fisher~\cite{fisher1936iris}. It consists of three
 species of flower (\textit{Iris setosa}, \textit{Iris virginica} and \textit{Iris versicolor}) with fifty samples each. Each
 sample has four features: width and length of sepals and petals.
 \paragraph{Pendulum}
@@ -48,38 +47,38 @@ define three kinds of equivalence:
 	\centering
 	\begin{tabular}[t]{ccccc}
 		\hline
-		Benchmark & Equivalence & Direct [s] & VEIN [s] & Status \\
+		Benchmark & Equivalence & Time & Status \\
 		\hline
-		Iris (Stably Active) & Strict & 0.0 & 0.0 & X \\
-		Iris (Stably Active) & Epsilon & 0.0 & 0.0 & X \\
-		Iris (Stably Active) & Argmax & 0.0 & 0.0 & X \\
-		Iris (Stably Inactive) & Strict & 0.0 & 0.0 & X \\
-		Iris (Stably Inactive) & Epsilon & 0.0 & 0.0 & X \\
-		Iris (Stably Inactive) & Argmax & 0.0 & 0.0 & X \\
-		Iris (To Wide) & Strict & 0.0 & 0.0 & X \\
-		Iris (To Wide) & Epsilon & 0.0 & 0.0 & X \\
-		Iris (To Wide) & Argmax & 0.0 & 0.0 & X \\
-		Iris (To Deep) & Strict & 0.0 & 0.0 & X \\
-		Iris (To Deep) & Epsilon & 0.0 & 0.0 & X \\
-		Iris (To Deep) & Argmax & 0.0 & 0.0 & X \\
-		Pendulum & Strict & 0.0 & 88.427 ± 0.670 & SAT \\
-		Pendulum & Epsilon & 0.0 & 0.0 & X \\
-		Pendulum & Argmax & 0.0 & 0.0 & X \\
-		Double Integrator & Strict & 0.0 & 0.0 & X \\
-		Double Integrator & Epsilon & 0.0 & 0.0 & X \\
-		Double Integrator & Argmax & 0.0 & 0.0 & X \\
-		MNIST (Stably Active) & Strict & 0.0 & 0.0 & X \\
-		MNIST (Stably Active) & Epsilon & 0.0 & 0.0 & X \\
-		MNIST (Stably Active) & Argmax & 0.0 & 0.0 & X \\
-		MNIST (Stably Inactive) & Strict & 0.0 & 0.0 & X \\
-		MNIST (Stably Inactive) & Epsilon & 0.0 & 0.0 & X \\
-		MNIST (Stably Inactive) & Argmax & 0.0 & 0.0 & X \\
-		MNIST (To Wide) & Strict & 0.0 & 0.0 & X \\
-		MNIST (To Wide) & Epsilon & 0.0 & 0.0 & X \\
-		MNIST (To Wide) & Argmax & 0.0 & 0.0 & X \\
-		MNIST (To Deep) & Strict & 0.0 & 0.0 & X \\
-		MNIST (To Deep) & Epsilon & 0.0 & 0.0 & X \\
-		MNIST (To Deep) & Argmax & 0.0 & 0.0 & X \\
+		Iris (Stably Active) & Strict & 521.6ms ± 11.5ms & SAT \\
+		Iris (Stably Active) & Epsilon & 515.9ms ± 4.2ms & UNSAT \\
+		Iris (Stably Active) & Argmax & 519.5ms ± 6.0ms & UNSAT \\
+		Iris (Stably Inactive) & Strict & 581.9ms ± 6.2ms & UNSAT \\
+		Iris (Stably Inactive) & Epsilon & 593.8ms ± 6.9ms & UNSAT \\
+		Iris (Stably Inactive) & Argmax & 886.4ms ± 10.3ms & UNSAT \\
+		Iris (To Wide) & Strict & 595.4ms ± 11.3ms & UNSAT \\
+		Iris (To Wide) & Epsilon & 587.0ms ± 4.9ms & UNSAT \\
+		Iris (To Wide) & Argmax & 783.5ms ± 4.4ms & UNSAT \\
+		Iris (To Deep) & Strict & 581.4ms ± 6.6ms & UNSAT \\
+		Iris (To Deep) & Epsilon & 583.1ms ± 5.7ms & UNSAT \\
+		Iris (To Deep) & Argmax & 716.3ms ± 4.7ms & UNSAT \\
+		Pendulum & Strict & 43.276s ± 0.143s & SAT \\
+		Pendulum & Epsilon & 340.293s ± 2.843s & UNSAT \\
+		Pendulum & Argmax & 61.935s ± 0.148s & SAT \\
+		Double Integrator & Strict & 538.952s ± 7.207s & SAT \\
+		Double Integrator & Epsilon & 137.720s ± 0.419s & SAT \\
+		Double Integrator & Argmax & 618.705s ± 6.821s & SAT \\
+		MNIST (Stably Active) & Strict & 18.947s ± 0.034s & SAT \\
+		MNIST (Stably Active) & Epsilon & 18.980s ± 0.032s & UNSAT \\
+		MNIST (Stably Active) & Argmax & 18.906s ± 0.019s & UNSAT \\
+		MNIST (Stably Inactive) & Strict & 14.699s ± 0.024s & UNSAT \\
+		MNIST (Stably Inactive) & Epsilon & 14.702s ± 0.012s & UNSAT \\
+		MNIST (Stably Inactive) & Argmax & TIMEOUT & UNKNOWN \\
+		MNIST (To Wide) & Strict & 20.990s ± 0.181s & UNSAT \\
+		MNIST (To Wide) & Epsilon & 20.860s ± 0.022s & UNSAT \\
+		MNIST (To Wide) & Argmax & TIMEOUT & UNKNOWN \\
+		MNIST (To Deep) & Strict & 20.901s ± 0.027s & UNSAT \\
+		MNIST (To Deep) & Epsilon & 20.947s ± 0.035s & UNSAT \\
+		MNIST (To Deep) & Argmax & TIMEOUT & UNKNOWN \\
 	\end{tabular}
 	\caption{Benchmark table.}
 	\label{tab:benchmarks}

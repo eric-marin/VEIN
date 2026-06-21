@@ -525,7 +525,11 @@
 \begin{lemma}
 	For the \textit{Linear} and \textit{Dup} agents we have the interaction rule:
 	$$
-	\mathit{Linear}(z, q, r) \bowtie \mathit{Dup}(x, y) \Rightarrow \mathit{Linear}(z_1, q, r) \sim x; \mathit{Linear}(z_2, q, r) \sim y; \mathit{Dup}(z_1, z_2) \sim z \\
+	\begin{aligned}
+		\mathit{Linear}(z, q, r) \bowtie \mathit{Dup}(x, y) \Rightarrow
+		& \mathit{Linear}(z_1, q, r) \sim x; \mathit{Linear}(z_2, q, r) \sim y;	\\
+		& \mathit{Dup}(z_1, z_2) \sim z
+	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
 	$$
@@ -667,8 +671,9 @@
 	For the \textit{TermMul} and \textit{Dup} agents we have the interaction rule:
 	$$
 	\begin{aligned}
-		\mathit{TermMul}(a, b) \bowtie \mathit{Dup}(x, y) \Rightarrow & \mathit{TermMul}(a_1, b_1) \sim x; \mathit{TermMul}(a_2, b_2) \sim y; \\
-		& \mathit{Dup}(a_1, a_2) \sim a; \mathit{Dup}(b_1, b_2) \sim b\\
+		\mathit{TermMul}(a, b) \bowtie \mathit{Dup}(x, y) \Rightarrow
+		& \mathit{TermMul}(a_1, b_1) \sim x; \mathit{TermMul}(a_2, b_2) \sim y; \\
+		& \mathit{Dup}(a_1, a_2) \sim a; \mathit{Dup}(b_1, b_2) \sim b
 	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
@@ -717,7 +722,12 @@
 \begin{lemma}
 	For the \textit{TermReLU} and \textit{Dup} agents we have the interaction rule:
 	$$
-	\mathit{TermReLU}(z) \bowtie \mathit{Dup}(x, y) \Rightarrow \mathit{TermReLU}(z_1) \sim x; \mathit{TermReLU}(z_2) \sim y; \mathit{Dup}(z_1, z_2) \sim z \\
+	\begin{aligned}
+		\mathit{TermReLU}(z) \bowtie \mathit{Dup}(x, y) \Rightarrow
+		& \mathit{TermReLU}(z_1) \sim x; \\
+		&\mathit{TermReLU}(z_2) \sim y; \\
+		& \mathit{Dup}(z_1, z_2) \sim z
+	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
 	$$
@@ -763,7 +773,11 @@
 \begin{lemma}
 	For the \textit{TermConcrete} and \textit{Dup} agents we have the interaction rule:
 	$$
-	\mathit{TermConcrete}(k) \bowtie \mathit{Dup}(x, y) \Rightarrow \mathit{TermConcrete}(k) \sim x; \mathit{TermConcrete}(k) \sim y \\
+	\begin{aligned}
+		\mathit{TermConcrete}(k) \bowtie \mathit{Dup}(x, y) \Rightarrow
+		& \mathit{TermConcrete}(k) \sim x; \\
+		& \mathit{TermConcrete}(k) \sim y
+	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
 	$$
@@ -807,7 +821,11 @@
 \begin{lemma}
 	For the \textit{TermSymbolic} and \textit{Dup} agents we have the interaction rule:
 	$$
-	\mathit{TermSymbolic}(id) \bowtie \mathit{Dup}(x, y) \Rightarrow \mathit{TermSymbolic}(id) \sim x; \mathit{TermSymbolic}(id) \sim y \\
+	\begin{aligned}
+		\mathit{TermSymbolic}(id) \bowtie \mathit{Dup}(x, y) \Rightarrow
+		& \mathit{TermSymbolic}(id) \sim x; \\
+		& \mathit{TermSymbolic}(id) \sim y
+	\end{aligned}
 	$$
 	We need to show that the LHS and RHS are semantically equivalent:
 	$$

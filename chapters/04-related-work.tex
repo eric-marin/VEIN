@@ -1,4 +1,31 @@
 \chapter{Related Work}
 \label{ch:related-work}
 
-% This chapter discusses related literature and positions this work within the field.
+The field of neural network verification is a highly active research area, driven by the need to
+provide formal safety for artificial intelligence applications in safety-critical systems.
+Existing verification techniques can be classified into complete and incomplete methods.
+
+\paragraph{Complete solvers}
+Complete verification methods guarantee to either find a counterexample violating the property or
+prove that the property holds. Katz et al.~\cite{katz2017reluplex} presented \textit{Reluplex}, a
+pioneering SMT solver designed specifically for networks with ReLU activation functions. It extends
+the standard simplex method, originally created by Dantzig~\cite{dantzig1947simplex}, to handle ReLU
+constraints directly. Katz et al.~\cite{katz2019marabou} also presented \textit{Marabou}, successor
+of \textit{Reluplex}, a more modular and highly optimized framework that supports a wider range of
+activation functions.
+
+\paragraph{Incomplete solvers}
+Incomplete verification methods use abstract interpretation to soundly approximate neural networks.
+Wang et al.~\cite{wang2018efficientformalsafetyanalysis} presented \textit{Neurify}, a tool that
+utilizes symbolic interval analysis to compute tight bounds on neurons and prune ReLUs that are
+guaranteed to be stably active or inactive.
+
+\paragraph{Hybrid solvers}
+\textit{$\alpha$-$\beta$-CROWN} is a neural network verifier that combines a series of complete
+verification methods, based on branch-and-bound, and incomplete verification methods, based on
+bound-propagation: \textit{CROWN} (Zhang et al.~\cite{zhang2018efficient}), \textit{auto\_LiRPA}
+(Xu et al.~\cite{xu2020automatic}), \textit{$\alpha$-CROWN} (Xu et al.~\cite{xu2021fast}),
+\textit{$\beta$-CROWN} (Wang et al.~\cite{wang2021beta}), \textit{GenBaB} (Shi et
+al~\cite{shi2024genbab}), \textit{GCP-CROWN} (Zhang et al~\cite{zhang2022general}) and
+\textit{BICCOS} (Zhou et al.~\cite{zhou2024scalable}). Thanks to this hybrid approach, 
+\textit{$\alpha$-$\beta$-CROWN} achieved state-of-the-art perfomance and won VNNCOMP 2021-2025.

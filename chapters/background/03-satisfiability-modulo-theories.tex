@@ -19,6 +19,6 @@ To represent a ReLU activation $y = \max(0, x)$ in LRA, we must introduce a disj
     (x > 0 \land y = x) \lor (x \le 0 \land y = 0)
 \end{equation}
 For a network with $N$ ReLU neurons, there are up to $2^N$ possible activation patterns. Solving the
-verification property requires the SMT solver, such as Z3 presented by Demura et al.~\cite{demoura2008z3},
+verification property requires the SMT solver, such as Z3 presented by De Moura et al.~\cite{demoura2008z3},
 to implicitly explore this branching search space.
 
