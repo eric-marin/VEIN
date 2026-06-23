@@ -5,7 +5,7 @@
 graphical model of computation based on graph rewriting.
 
 \subsection{Basic Concepts}
-An IN is an undirected graph with labelled vertices, called \textit{agents}. Each agent
+An IN is an undirected graph with labeled vertices, called \textit{agents}. Each agent
 is an instance of a \textit{symbol}, which has a principal port and a fixed number of auxiliary ports:
 \begin{figure}[H]
 	\centering
@@ -21,7 +21,7 @@ is an instance of a \textit{symbol}, which has a principal port and a fixed numb
 \end{figure}
 
 Each port can be wired to at most one other port. When two different agents are wired to their
-respective principal ports they are called an \textit{active pair}:
+respective principal ports, they are called an \textit{active pair}:
 
 \begin{figure}[H]
 	\centering
@@ -34,13 +34,13 @@ respective principal ports they are called an \textit{active pair}:
 		\node[left] at (A.above pax 2) {$\mathit{y}$};
 		\node[right] at (S.above pax) {$\mathit{x}$};
 	\end{tikzpicture}
-	\caption{Example of an active pair, where a $\mathit{Add}$ agent and an $\mathit{S}$ agent are connected via their principal ports.}
+	\caption{Example of an active pair, where an $\mathit{Add}$ agent and an $\mathit{S}$ agent are connected via their principal ports.}
 	\label{fig:active-pair}
 \end{figure}
 
 \subsection{Interaction Rules}
 Computation in IN proceeds by rewriting the net using local \emph{interaction rules}. A rule
-is defined only for an active pair and for any pair of symbols there is at most one
+is defined only for an active pair, and for any pair of symbols, there is at most one
 interaction rule.
 
 \begin{figure}[H]
@@ -62,12 +62,12 @@ interaction rule.
 		\node[left] at (A.above pax 2) {$\mathit{y}$};
 		\node[left] at (S.above pal) {$\mathit{z}$};
 	}
-	\caption{Interaction rule for $\mathit{S}$ and $\mathit{Add}$ that emulates Peano addition rule.}
+	\caption{Interaction rule for $\mathit{S}$ and $\mathit{Add}$ that emulates the Peano addition rule.}
 	\label{fig:rule-concrete-zero}
 \end{figure}
 
 \subsection{Properties}
-IN possess the following properties:
+IN possesses the following properties:
 \begin{itemize}
 	\item \textbf{Locality}: only active pairs can be rewritten.
 	\item \textbf{Linearity}: each interaction rule rewrites a constant-size subgraph, independent of

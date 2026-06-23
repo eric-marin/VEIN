@@ -1,7 +1,7 @@
 \subsection{Soundness of Translation}
 \label{sec:soundness-of-translation}
 
-We need to prove that for each ONNX operator a semantically equivalent IN is produced.
+We need to prove that for each ONNX operator, a semantically equivalent IN is produced.
 
 \begin{lemma}
 The ONNX ReLU operator for an input tensor X and output tensor Y is defined as:
@@ -20,7 +20,7 @@ Which is identical to the ONNX definition.
 \end{lemma}
 
 \begin{lemma}
-The ONNX Gemm operator for input tensors A, B, C, input $\alpha$ and $\beta$ and output tensor Y is defined as:
+The ONNX Gemm operator for input tensors A, B, C, input $\alpha$ and $\beta$, and output tensor Y is defined as:
 $$
 Y = \alpha \cdot A \cdot B + \beta \cdot C
 $$

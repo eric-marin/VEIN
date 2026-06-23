@@ -4,8 +4,8 @@
 \begin{property}
 	A valid IN satisfies the following properties:
 	\begin{itemize}
-		\item \textbf{DAG}: the net forms a DAG where the roots are the free wires representing the network
-			outputs.
+		\item \textbf{Acyclic}: the net forms a forest where the roots are the free wires representing
+			the network outputs.
 		\item \textbf{Orientation}: carrier agents always have their principal ports oriented toward the outputs,
 			while operator and intermediate agents always have their principal ports oriented toward the
 			inputs. No interaction rule introduces carriers facing the input nor operators or
@@ -29,7 +29,7 @@
 	We will proceed by induction on the number $n$ of reduction steps:
 	\paragraph{Base case: $n = 0$} By \textbf{\Cref{sec:soundness-of-translation}}, the initial
 	$\text{IN}_0$ is constructed such that its semantics $\llbracket \text{IN}_0 \rrbracket$ exactly
-	match the mathematical definition of the ONNX operators in $\text{NN}$, it follows that:
+	match the mathematical definition of the ONNX operators in $\text{NN}$; it follows that:
 	\begin{equation}
 	\llbracket \text{IN}_{0} \rrbracket = \llbracket \text{NN} \rrbracket
 	\end{equation}
@@ -37,7 +37,7 @@
 	\paragraph{Induction step: $n \to n + 1$} Assume $\llbracket \text{IN}_n \rrbracket = \llbracket \text{NN} \rrbracket$.
 	If $\text{IN}_n$ is in normal form, the proof is complete. Otherwise, there exists an active pair
 	$A \bowtie B$ that reduces $\text{IN}_n$ to $\text{IN}_{n+1}$. By \textbf{\Cref{sec:soundness-of-interaction-rules}},
-	the mathematical definition is preserved after any reduction step, it follows that:
+	the mathematical definition is preserved after any reduction step; it follows that:
 	\begin{equation}
 	\llbracket \text{IN}_{n+1} \rrbracket = \llbracket \text{IN}_{n} \rrbracket
 	\end{equation}
@@ -122,7 +122,7 @@
 			\Phi(\text{IN}_n) = 3^{D-d(a)} > 0 = \Phi(\text{IN}_{n+1})
 			\end{equation}
 	\end{itemize}
-	Since $\Phi$ is a non-negative strictly decreasing function, the reduction
+	Since $\Phi$ is a non-negative, strictly decreasing function, the reduction
 	process must terminate in a finite number of steps $n$.
 
 	Additionally, since each active pair has exactly one applicable rule, the reduction is

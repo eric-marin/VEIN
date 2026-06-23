@@ -2,10 +2,11 @@
 \label{ch:conclusion}
 
 In this thesis, we introduced \textbf{VEIN}, a novel framework for neural network verification with
-a particular focus on network equivalence checking. The key achievements of this work include:
+a particular focus on neural network equivalence checking. The key achievements of this work
+include:
 \begin{itemize}
 	\item The formalization and implementation of an ONNX-to-IN translation pipeline.
-	\item The design of interaction rules implementing symbolic constant folding, constant
+	\item The design of interaction rules implements symbolic constant folding, constant
 		propagation, and identity elimination.
 	\item A soundness proof of the reduction engine, demonstrating that each graph rewriting step
 		preserves the semantics of the original neural network.
@@ -15,25 +16,25 @@ a particular focus on network equivalence checking. The key achievements of this
 
 While the current version of \textbf{VEIN} establishes a solid foundation for IN-based verification, several
 limitations remain to be addressed in future research. The future roadmap focuses on performance
-optimizations, modeling expressiveness and advanced interaction rules.
+optimizations, modeling expressiveness, and advanced interaction rules.
 
 \paragraph{Custom Reduction Engine}
 The current reduction engine relies on a modified version of the INPLA interpreter. While
 practical, it is prone to high memory overhead. A core objective of future work is to replace
 INPLA with a custom reduction engine written in Rust. Implementing the engine in Rust will provide:
-memory safety without garbage collection, high-performance concurrency and flexibility.
+memory safety without garbage collection, high-performance concurrency, and flexibility.
 
 \paragraph{Complex Agent Attributes}
 Currently, interaction net agents in \textbf{VEIN} are limited to simple scalar attributes. This restriction
 prevents the direct translation of complex operations into single agents. Future work will extend
-the framework to support complex attributes, such as tensors, boundary intervals and real numbers.
+the framework to support complex attributes, such as tensors, boundary intervals, and real numbers.
 
 \paragraph{Advanced Interaction Rules and Symbolic ReLU Pruning}
 The interaction rules implemented in \textbf{VEIN} are currently limited to constant folding of linear
 operations. Non-linear activation functions, specifically ReLUs, are passed through without
 modification unless their inputs are concrete constants. To improve simplification efficiency, we
-plan to implement range analysis and interval arithmetic directly within the IN, substantially
-reducing the number of split constraints faced by the SMT solver.
+plan to implement range analysis and interval arithmetic directly within the IN to determine prunable
+ReLUs, substantially reducing the number of split constraints faced by the SMT solver.
 
 \paragraph{Integration with Specialized Solvers}
 The current evaluation of \textbf{VEIN} targets the Z3 solver. However, the intermediate SMT-LIB

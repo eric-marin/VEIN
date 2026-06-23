@@ -3,24 +3,24 @@
 
 % Context
 Artificial Intelligence systems have made significant advancements in the last few years and enabled
-us to enter a new age of computing. Most of the credit goes to deep neural networks, and to their
-exceptional capacity for representing non-linear functions. However, they do not come without
+us to enter a new age of computing. Most of the credit goes to deep neural networks and to their
+exceptional capacity for representing nonlinear functions. However, they do not come without
 drawbacks: neural networks are ``black boxes'' that lack transparency. To take advantage of these
 powerful tools in critical systems such as medicine and aerospace, we need to provide formal
 guarantees to ensure their safety and trustworthiness.
 
 % Problem
-In the field of neural network verification, a verification problem is composed of: a trained neural
+In the field of neural network verification, a verification problem is composed of a trained neural
 network and a set of specifications. Then a verification algorithm checks whether the specifications
 either hold or are violated. The two kinds of properties that can be verified are:
 \begin{itemize}
-	\item \textbf{Single-Network}: we check if a single neural network satisfies a given property.
-	\item \textbf{Multi-Network}: we check if multiple neural networks satisfy a given relation.
+	\item \textbf{Single-Network}: We check if a single neural network satisfies a given property.
+	\item \textbf{Multi-Network}: We check if multiple neural networks satisfy a given relation.
 \end{itemize}
 An example of a Multi-Network property is equivalence between different neural networks; this
 verification is crucial when replacing a neural network with a smaller, equivalent one. Techniques
 based on specialized \textit{Satisfiability Modulo Theories} (SMT) solvers may be used in the verification
-algorithm. However, as networks grow in depth and width, the number of non-linear components, most
+algorithm. However, as networks grow in depth and width, the number of nonlinear components, most
 notably the \textit{Rectified Linear Unit}\footnote{Defined as $f(x)=\max(0, x)$, where $x$ is the input to the
 neuron.} (ReLU) activation function, creates an exponential search space for the solver. Because of
 this issue, running a solver against a raw, unoptimized network is often computationally prohibitive.
@@ -42,15 +42,17 @@ To model such graphs and these rewriting mechanisms, we leverage \textit{Interac
 parallel graph rewriting rules. Additionally, IN are \textit{strongly confluent}, meaning that they
 always reduce to a unique normal form regardless of the order in which simplification rules are
 applied. Thanks to these properties, the simplification of neural network graphs can be parallelized
-while maintaining determinism of the resulting AST. In the context of neural network equivalence,
+while maintaining the determinism of the resulting AST. In the context of neural network equivalence,
 this is useful because comparing two neural networks becomes a comparison of two simplified
 canonical forms of the same intermediate model.
 
-Building on this capability, we developed \textbf{VEIN} (VErification via Interaction Nets), a
-framework for neural network verification focused on equivalence. This tool aims to verify both
-Single-Network and Multi-Network properties. The tool is composed of two primary modules:
+Building on this capability, we developed
+\textbf{VEIN}\footnote{\href{https://github.com/eric-marin/VEIN}{\textbf{VEIN Github repository.}}}
+(VErification via Interaction Nets), a framework for neural network verification focused on
+equivalence. This tool aims to verify both Single-Network and Multi-Network properties. The tool is
+composed of two primary modules:
 \begin{itemize}
-	\item \textbf{Reduction engine}: a modified version of \textit{Interaction Nets as a Programming
+	\item \textbf{Reduction engine}: A modified version of \textit{Interaction Nets as a Programming
 		LAnguage}\footnote{\href{https://github.com/inpla/inpla}{\textbf{INPLA Github repository}}.}
 		(INPLA), a multi-threaded parallel interpreter of IN, to simplify the neural
 		network graph;
@@ -58,20 +60,20 @@ Single-Network and Multi-Network properties. The tool is composed of two primary
 \end{itemize}
 The tool runtime follows three steps:
 \begin{itemize}
-	\item \textbf{Translation}: the system translates a neural network in \textit{Open Neural Network
+	\item \textbf{Translation}: The system translates a neural network in \textit{Open Neural Network
 		Exchange}\footnote{\href{https://onnx.ai/}{\textbf{ONNX Website}}.}
 		(ONNX) file format, an open format built to represent machine learning models, into an IN;
-	\item \textbf{Reduction}: the INPLA engine reduces the IN to its normal form using the graph
+	\item \textbf{Reduction}: The INPLA engine reduces the IN to its normal form using the graph
 		rewriting rules that implement symbolic constant folding and identity elimination;
-	\item \textbf{Evaluation}: then we parse the resulting normal form into Z3 representation and run the
+	\item \textbf{Evaluation}: Then we parse the resulting normal form into Z3 representation and run the
 		solver to evaluate it along with the provided specification.
 \end{itemize}
 
 % Validation
 We prove the soundness of our IN pipeline by induction on the number of interaction steps,
 demonstrating that the ONNX translation and each interaction rule preserve the semantic meaning of
-the original neural network. In addition to this formal analysis, we conducted several benchmarks on
-checking equivalence between a neural network trained on a dataset and a transformation.
+the original neural network. In addition to this formal analysis, we conducted several benchmarks to
+check the equivalence between a neural network trained on a dataset and a transformation.
 
 % Contributions
 The development of the \textbf{VEIN} framework and the design of its underlying simplification layer
@@ -79,14 +81,14 @@ constitute the primary work of this thesis. To address the challenges of verific
 and the need for a formal model of representation (B), this thesis introduces several key
 contributions:
 \begin{itemize}
-	\item \textbf{Interaction Rules (Solves A)}: we designed a set of interaction rules to enable graph
+	\item \textbf{Interaction Rules (Solves A)}: We designed a set of interaction rules to enable graph
 		rewriting for symbolic constant folding while producing an AST ready to be parsed for the SMT
 		solver;
-	\item \textbf{ONNX-Interaction Net Translation (Solves B)}: we developed a translation procedure for ONNX
+	\item \textbf{ONNX-Interaction Net Translation (Solves B)}: We developed a translation procedure for ONNX
 		models to IN;
-	\item \textbf{Soundness Analysis (Validates A/B)}: we provide a formal proof that the IN reduction
+	\item \textbf{Soundness Analysis (Validates A/B)}: We provide a formal proof that the IN reduction
 		preserves the mathematical properties of the neural network;
-	\item \textbf{Experimental Evaluation (Validates A/B Empirically)}: we conducted an extensive benchmarking
+	\item \textbf{Experimental Evaluation (Validates A/B Empirically)}: We conducted an extensive benchmarking
 		on widely known datasets and common \textit{International Verification of Neural Networks
 		Competition}\footnote{The premier international competition dedicated to evaluating and advancing
 		the state-of-the-art in neural network verification, see the

@@ -8,17 +8,17 @@ to hold numerical values at their ports.
 
 Several modifications adapt INPLA to the pipeline of the framework:
 \begin{itemize}
-	\item \textbf{Floating-Point arithmetic}: attributes were limited to integer values. To correctly
+	\item \textbf{Floating-Point arithmetic}: Attributes were limited to integer values. To correctly
 		represent the computation performed by neural networks, the fork replaces the internal numerical
 		representation by floating-point types.
 	\item \textbf{Pipeline integration}: INPLA was designed for interactive use through the command line, so
-		various debugging and informational messages are printed along the actual output. To integrate
-		INPLA in our automated framework, the fork introduces a suppression flag to prevent unnecessary
-		printing from disrupting its execution.
+		various debugging and informational messages are printed along with the actual output. To
+		integrate INPLA in our automated framework, the fork introduces a suppression flag to prevent
+		unnecessary printing from disrupting its execution.
 \end{itemize}
 
 \paragraph{INPLA syntax}
-INPLA evaluates nets which consist of connections between terms. Terms are built on names and agents:
+INPLA evaluates nets composed of connections between terms. Terms are built on names and agents:
 \begin{small}
 \begin{verbatim}
 <term> ::= <name> | <agent>
@@ -28,10 +28,10 @@ INPLA evaluates nets which consist of connections between terms. Terms are built
 \end{verbatim}
 \end{small}
 \begin{itemize}
-	\item \textbf{Name}: it works as a buffer between terms.
-	\item \textbf{Agent}: it works as a constructor and de-constructor (defined functions).
+	\item \textbf{Name}: It works as a buffer between terms.
+	\item \textbf{Agent}: It works as a constructor and a de-constructor.
 \end{itemize}
-A connection is a relation between two terms and the symbol \texttt{\~} expresses this relation.
+A connection is a relation between two terms, and the symbol \texttt{\~} expresses this relation.
 Interaction rules rewrite connections between agents:
 \begin{small}
 \begin{verbatim}
@@ -50,7 +50,7 @@ increment operation ``inc'' such that:
 inc(n) = S(n).
 \end{verbatim}
 \end{small}
-This is written as the following rules:
+This is written according to the following rules:
 \begin{small}
 \begin{verbatim}
 inc(r) >< Z => r ~ S(Z);

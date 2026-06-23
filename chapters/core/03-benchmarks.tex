@@ -9,12 +9,13 @@ This section contains the benchmark data, illustrated in \textbf{\Cref{tab:bench
 	\item \textbf{RAM}: 16GiB
 \end{itemize}
 using the Hyperfine\footnote{\href{https://github.com/sharkdp/hyperfine}{\textbf{Hyperfine Github repository}}.}
-benchmarking tool. Hyperfine runs the test ten times, then reports the mean and standard deviation
-of execution time. For longer runs, only execution is reported. We defined the following benchmarks:
+benchmarking tool. Hyperfine runs the test ten times, then reports the mean and the standard deviation
+of execution time. For longer runs, only one execution is reported. We defined the following
+benchmarks:
 \begin{itemize}
 	\item \textbf{Iris}: Network trained on the Iris flowers dataset presented by Fisher~\cite{fisher1936iris}.
-		It consists of three species of flower (\textit{Iris setosa}, \textit{Iris virginica} and \textit{Iris versicolor}) with
-		fifty samples each. Each sample has four features: width and length of sepals and petals.
+		It consists of three species of flower (\textit{Iris setosa}, \textit{Iris virginica}, and \textit{Iris versicolor}) with
+		fifty samples each. Each sample has four features: the width and length of the sepals and petals.
 	\item \textbf{Pendulum}: A neural safety certificate for stabilizing a pendulum to its upright position
 		under a bound on its angle $\theta$, with state $x=[\theta,\dot\theta]\in\mathbb{R}^2$.
 	\item \textbf{Double Integrator}: A neural safety certificate for stabilizing a second-order linear system
@@ -25,13 +26,13 @@ of execution time. For longer runs, only execution is reported. We defined the f
 \end{itemize}
 
 Pendulum and Double Integrator are taken from \textit{cersyve}, a benchmark presented by Kaulen et
-al.~\cite{kaulen20256thinternationalverificationneural}. We check equivalence between a pre-trained
+al.~\cite{kaulen20256thinternationalverificationneural}. We check the equivalence between a pre-trained
 and a fine-tuned network for each task.
 
 In the Iris and MNIST datasets, we tested equivalence between a neural network and its ad-hoc
 transformation, such as pruning always positive or negative ReLUs, as presented by Kumar et
 al.~\cite{kumar2019equivalentapproximatetransformationsdeep}, or changing the architecture from wide
-to deep and viceversa, as presented by Fan et al.~\cite{JMLR:v24:21-0579}.
+to deep and vice versa, as presented by Fan et al.~\cite{JMLR:v24:21-0579}.
 
 For two neural networks $F: \mathbb{R}^n \to \mathbb{R}^m$ and $F': \mathbb{R}^n \to \mathbb{R}^m$, Eleftheriadis et
 al.~\cite{eleftheriadis2022equivalence} define three kinds of equivalence:
@@ -100,4 +101,4 @@ We make three observations:
 		preprocessing.
 \end{itemize}
 Additionally, we identify two false SAT results (Stably Active transformation). These are caused
-by floating-point error introduced by the INPLA float attributes instead of using real numbers.
+by floating-point errors introduced by the INPLA float attributes instead of using real numbers.

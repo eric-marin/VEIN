@@ -4,7 +4,7 @@
 We need to prove that each interaction rule does not alter the semantics of the IN.
 
 \begin{lemma}
-	For the \textit{Linear} and \textit{Add} agents we have the interaction rule:
+	For the \textit{Linear} and \textit{Add} agents, we have the interaction rule:
 	$$
 	\mathit{Linear}(x, q, r) \bowtie \mathit{Add}(\mathit{out}, b) \Rightarrow \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \sim b \\
 	$$
@@ -26,7 +26,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Linear} and \textit{Mul} agents we have the interaction rule:
+	For the \textit{Linear} and \textit{Mul} agents, we have the interaction rule:
 	$$
 	\mathit{Linear}(x, q, r) \bowtie \mathit{Mul}(\mathit{out}, b) \Rightarrow \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \sim b \\
 	$$
@@ -48,7 +48,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Concrete} and \textit{Add} agents we have the interaction rule:
+	For the \textit{Concrete} and \textit{Add} agents, we have the interaction rule:
 	$$
 	\mathit{Concrete}(k) \bowtie \mathit{Add}(\mathit{out}, b) \Rightarrow
 	\begin{cases}
@@ -84,7 +84,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Concrete} and \textit{Mul} agents we have the interaction rule:
+	For the \textit{Concrete} and \textit{Mul} agents, we have the interaction rule:
 	$$
 	\mathit{Concrete}(k) \bowtie \mathit{Mul}(\mathit{out}, b) \Rightarrow
 	\begin{cases}
@@ -123,7 +123,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Linear} and \textit{AddCheckLinear} agents we have the interaction rule:
+	For the \textit{Linear} and \textit{AddCheckLinear} agents, we have the interaction rule:
 	$$
 	\begin{aligned}
 		& \mathit{Linear}(y, s, t) \bowtie \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \Rightarrow \\
@@ -178,7 +178,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Linear} and \textit{MulCheckLinear} agents we have the interaction rule:
+	For the \textit{Linear} and \textit{MulCheckLinear} agents, we have the interaction rule:
 	$$
 	\begin{aligned}
 		& \mathit{Linear}(y, s, t) \bowtie \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \Rightarrow \\
@@ -229,7 +229,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Concrete} and \textit{AddCheckLinear} agents we have the interaction rule:
+	For the \textit{Concrete} and \textit{AddCheckLinear} agents, we have the interaction rule:
 	$$
 	\mathit{Concrete}(j) \bowtie \mathit{AddCheckLinear}(\mathit{out}, x, q, r) \Rightarrow \mathit{Linear}(x, q, r + j) \sim \mathit{out} \\
 	$$
@@ -251,7 +251,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Concrete} and \textit{MulCheckLinear} agents we have the interaction rule:
+	For the \textit{Concrete} and \textit{MulCheckLinear} agents, we have the interaction rule:
 	$$
 	\mathit{Concrete}(j) \bowtie \mathit{MulCheckLinear}(\mathit{out}, x, q, r) \Rightarrow \mathit{Linear}(x, q \cdot j, r \cdot j) \sim \mathit{out} \\
 	$$
@@ -273,7 +273,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Linear} and \textit{AddCheckConcrete} agents we have the interaction rule:
+	For the \textit{Linear} and \textit{AddCheckConcrete} agents, we have the interaction rule:
 	$$
 	\mathit{Linear}(y, s, t) \bowtie \mathit{AddCheckConcrete}(\mathit{out}, k) \Rightarrow \mathit{Linear}(y, s, t + k) \sim \mathit{out} \\
 	$$
@@ -295,7 +295,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Linear} and \textit{MulCheckConcrete} agents we have the interaction rule:
+	For the \textit{Linear} and \textit{MulCheckConcrete} agents, we have the interaction rule:
 	$$
 	\mathit{Linear}(y, s, t) \bowtie \mathit{MulCheckConcrete}(\mathit{out}, k) \Rightarrow \mathit{Linear}(y, s \cdot k, t \cdot k) \sim \mathit{out} \\
 	$$
@@ -317,7 +317,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Concrete} and \textit{AddCheckConcrete} agents we have the interaction rule:
+	For the \textit{Concrete} and \textit{AddCheckConcrete} agents, we have the interaction rule:
 	$$
 	\begin{aligned}
 		& \mathit{Concrete}(j) \bowtie \mathit{AddCheckConcrete}(\mathit{out}, k) \Rightarrow \\
@@ -355,7 +355,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Concrete} and \textit{MulCheckConcrete} agents we have the interaction rule:
+	For the \textit{Concrete} and \textit{MulCheckConcrete} agents, we have the interaction rule:
 	$$
 	\begin{aligned}
 		& \mathit{Concrete}(j) \bowtie \mathit{MulCheckConcrete}(\mathit{out}, k) \Rightarrow \\
@@ -396,7 +396,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Linear} and \textit{ReLU} agents we have the interaction rule:
+	For the \textit{Linear} and \textit{ReLU} agents, we have the interaction rule:
 	$$
 	\begin{aligned}
 		\mathit{Linear}(x, q, r) \bowtie \mathit{ReLU}(\mathit{out}) \Rightarrow
@@ -424,7 +424,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Concrete} and \textit{ReLU} agents we have the interaction rule:
+	For the \textit{Concrete} and \textit{ReLU} agents, we have the interaction rule:
 	$$
 	\mathit{Concrete}(k) \bowtie \mathit{ReLU}(\mathit{out}) \Rightarrow
 	\begin{cases}
@@ -460,7 +460,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Linear} and \textit{Materialize} agents we have the interaction rule:
+	For the \textit{Linear} and \textit{Materialize} agents, we have the interaction rule:
 	$$
 	\begin{aligned}
 		& \mathit{Linear}(x, q, r) \bowtie \mathit{Materialize}(\mathit{out}) \Rightarrow \\
@@ -510,7 +510,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Concrete} and \textit{Materialize} agents we have the interaction rule:
+	For the \textit{Concrete} and \textit{Materialize} agents, we have the interaction rule:
 	$$
 	\mathit{Concrete}(k) \bowtie \mathit{Materialize}(\mathit{out}) \Rightarrow \mathit{TermConcrete}(k) \sim \mathit{out} \\
 	$$
@@ -532,7 +532,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Linear} and \textit{Dup} agents we have the interaction rule:
+	For the \textit{Linear} and \textit{Dup} agents, we have the interaction rule:
 	$$
 	\begin{aligned}
 		& \mathit{Linear}(z, q, r) \bowtie \mathit{Dup}(x, y) \Rightarrow \\
@@ -561,7 +561,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Linear} and \textit{Eraser} agents we have the interaction rule:
+	For the \textit{Linear} and \textit{Eraser} agents, we have the interaction rule:
 	$$
 	\mathit{Linear}(x, q, r) \bowtie \mathit{Eraser} \Rightarrow \mathit{Eraser} \sim x \\
 	$$
@@ -583,7 +583,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Concrete} and \textit{Dup} agents we have the interaction rule:
+	For the \textit{Concrete} and \textit{Dup} agents, we have the interaction rule:
 	$$
 	\mathit{Concrete}(k) \bowtie \mathit{Dup}(x, y) \Rightarrow \mathit{Concrete}(k) \sim x; \mathit{Concrete}(k) \sim y \\
 	$$
@@ -606,7 +606,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{Concrete} and \textit{Eraser} agents we have the interaction rule:
+	For the \textit{Concrete} and \textit{Eraser} agents, we have the interaction rule:
 	$$
 	\mathit{Concrete}(k) \bowtie \mathit{Eraser} \Rightarrow  \\
 	$$
@@ -623,11 +623,11 @@ We need to prove that each interaction rule does not alter the semantics of the 
 		\end{aligned}
 	\end{aligned}
 	$$
-	Since $k \in \mathbb{R}$ is not violated by RHS, the rule is sound.
+	Since $k \in \mathbb{R}$ is not violated by the RHS, the rule is sound.
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{TermAdd} and \textit{Dup} agents we have the interaction rule:
+	For the \textit{TermAdd} and \textit{Dup} agents, we have the interaction rule:
 	$$
 	\begin{aligned}
 		& \mathit{TermAdd}(a, b) \bowtie \mathit{Dup}(x, y) \Rightarrow \\
@@ -658,7 +658,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{TermAdd} and \textit{Eraser} agents we have the interaction rule:
+	For the \textit{TermAdd} and \textit{Eraser} agents, we have the interaction rule:
 	$$
 	\mathit{TermAdd}(a, b) \bowtie \mathit{Eraser} \Rightarrow \mathit{Eraser} \sim a; \mathit{Eraser} \sim b \\
 	$$
@@ -681,7 +681,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{TermMul} and \textit{Dup} agents we have the interaction rule:
+	For the \textit{TermMul} and \textit{Dup} agents, we have the interaction rule:
 	$$
 	\begin{aligned}
 		& \mathit{TermMul}(a, b) \bowtie \mathit{Dup}(x, y) \Rightarrow \\
@@ -712,7 +712,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{TermMul} and \textit{Eraser} agents we have the interaction rule:
+	For the \textit{TermMul} and \textit{Eraser} agents, we have the interaction rule:
 	$$
 	\mathit{TermMul}(a, b) \bowtie \mathit{Eraser} \Rightarrow \mathit{Eraser} \sim a; \mathit{Eraser} \sim b \\
 	$$
@@ -735,7 +735,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{TermReLU} and \textit{Dup} agents we have the interaction rule:
+	For the \textit{TermReLU} and \textit{Dup} agents, we have the interaction rule:
 	$$
 	\begin{aligned}
 		& \mathit{TermReLU}(z) \bowtie \mathit{Dup}(x, y) \Rightarrow \\
@@ -764,7 +764,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{TermReLU} and \textit{Eraser} agents we have the interaction rule:
+	For the \textit{TermReLU} and \textit{Eraser} agents, we have the interaction rule:
 	$$
 	\mathit{TermReLU}(x) \bowtie \mathit{Eraser} \Rightarrow \mathit{Eraser} \sim x \\
 	$$
@@ -786,7 +786,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{TermConcrete} and \textit{Dup} agents we have the interaction rule:
+	For the \textit{TermConcrete} and \textit{Dup} agents, we have the interaction rule:
 	$$
 	\begin{aligned}
 		& \mathit{TermConcrete}(k) \bowtie \mathit{Dup}(x, y) \Rightarrow \\
@@ -813,7 +813,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{TermConcrete} and \textit{Eraser} agents we have the interaction rule:
+	For the \textit{TermConcrete} and \textit{Eraser} agents, we have the interaction rule:
 	$$
 	\mathit{TermConcrete}(k) \bowtie \mathit{Eraser} \Rightarrow  \\
 	$$
@@ -830,11 +830,11 @@ We need to prove that each interaction rule does not alter the semantics of the 
 		\end{aligned}
 	\end{aligned}
 	$$
-	Since $k \in \mathbb{R}$ is not violated by RHS, the rule is sound.
+	Since $k \in \mathbb{R}$ is not violated by the RHS, the rule is sound.
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{TermSymbolic} and \textit{Dup} agents we have the interaction rule:
+	For the \textit{TermSymbolic} and \textit{Dup} agents, we have the interaction rule:
 	$$
 	\begin{aligned}
 		& \mathit{TermSymbolic}(id) \bowtie \mathit{Dup}(x, y) \Rightarrow \\
@@ -861,7 +861,7 @@ We need to prove that each interaction rule does not alter the semantics of the 
 \end{lemma}
 
 \begin{lemma}
-	For the \textit{TermSymbolic} and \textit{Eraser} agents we have the interaction rule:
+	For the \textit{TermSymbolic} and \textit{Eraser} agents, we have the interaction rule:
 	$$
 	\mathit{TermSymbolic}(id) \bowtie \mathit{Eraser} \Rightarrow  \\
 	$$
@@ -878,5 +878,5 @@ We need to prove that each interaction rule does not alter the semantics of the 
 		\end{aligned}
 	\end{aligned}
 	$$
-	Since $x_{id} \in \mathbb{R}$ is not violated by RHS, the rule is sound.
+	Since $x_{id} \in \mathbb{R}$ is not violated by the RHS, the rule is sound.
 \end{lemma}
